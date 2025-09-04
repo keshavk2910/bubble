@@ -1,5 +1,18 @@
 import Image from 'next/image';
-import { Image1, Image2, Image3, Image4 } from '../components/Images/Homepage';
+import {
+  Image1,
+  Image2,
+  Image3,
+  Image4,
+  Icon1,
+  Icon2,
+  Icon3,
+  Icon4,
+  HowIcon1,
+  HowIcon2,
+  HowIcon3,
+  BlackQuote,
+} from '../components/Images/Homepage';
 export default function Home() {
   return (
     <div className='w-full bg-white overflow-hidden'>
@@ -8,7 +21,7 @@ export default function Home() {
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-12 items-center'>
           {/* Left Content */}
           <div className='space-y-8'>
-            <h1 className='text-gray-900 text-5xl font-bold font-sans leading-[59px]'>
+            <h1 className='text-gray-900 text-6xl font-bold font-sans leading-[59px]'>
               Buy or Sell Trucks, Gear, or Your Whole Cleaning Biz
             </h1>
             <p className='text-gray-600 text-lg font-normal font-sans leading-7'>
@@ -96,7 +109,7 @@ export default function Home() {
       </section>
 
       {/* Browse Categories */}
-      <section className='max-w-7xl mx-auto px-6 py-16'>
+      <section className='max-w-7xl mx-auto  py-16'>
         <div className='text-center mb-12'>
           <h2 className='text-gray-900 text-3xl font-medium font-sans leading-9'>
             Browse Categories
@@ -105,73 +118,92 @@ export default function Home() {
 
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
           {/* Trucks & Vehicles */}
-          <div className='border border-gray-200 rounded-lg p-6'>
-            <div className='w-14 h-14 bg-green-600/10 rounded-full flex items-center justify-center mb-4'>
-              <svg className='w-6 h-5' fill='currentColor' viewBox='0 0 20 20'>
-                <path d='M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z' />
-                <path d='M3 4a1 1 0 00-1 1v10a1 1 0 002 0v-2h14v2a1 1 0 002 0V5a1 1 0 00-1-1H3z' />
-              </svg>
+          <div className='border border-gray-200 rounded-lg p-6 flex items-center gap-4'>
+            <div className=''>
+              <Image
+                src={Icon1.src}
+                alt='Trucks & Vehicles'
+                width={100}
+                height={100}
+              />
             </div>
-            <h3 className='text-black text-lg font-normal font-sans leading-7 mb-2'>
-              Trucks & Vehicles
-            </h3>
-            <p className='text-gray-600 text-sm font-normal font-sans leading-tight'>
-              Find specialized vehicles for your business
-            </p>
+            <div className=''>
+              <h3 className='text-black text-xl font-normal font-sans leading-7'>
+                Trucks & Vehicles
+              </h3>
+              <p className='text-gray-600 text-sm font-normal font-sans mt-1'>
+                Find specialized vehicles for your business
+              </p>
+            </div>
           </div>
 
           {/* Equipment & Tools */}
-          <div className='border border-gray-200 rounded-lg p-6'>
-            <div className='w-14 h-14 bg-green-600/10 rounded-full flex items-center justify-center mb-4'>
-              <svg className='w-6 h-6' fill='currentColor' viewBox='0 0 20 20'>
-                <path d='M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z' />
-              </svg>
+          <div className='border border-gray-200 rounded-lg p-6 flex items-center gap-4'>
+            <div className=''>
+              <Image
+                src={Icon2.src}
+                alt='Equipment & Tools'
+                width={100}
+                height={100}
+              />
             </div>
-            <h3 className='text-black text-lg font-normal font-sans leading-7 mb-2'>
-              Equipment & Tools
-            </h3>
-            <p className='text-gray-600 text-sm font-normal font-sans leading-tight'>
-              Professional-grade cleaning equipment
-            </p>
+            <div className=''>
+              <h3 className='text-black text-xl font-normal font-sans leading-7'>
+                Equipment & Tools
+              </h3>
+              <p className='text-gray-600 text-sm font-normal font-sans mt-1'>
+                Professional-grade cleaning equipment
+              </p>
+            </div>
           </div>
 
           {/* Complete Businesses */}
-          <div className='border border-gray-200 rounded-lg p-6'>
-            <div className='w-14 h-14 bg-green-600/10 rounded-full flex items-center justify-center mb-4'>
-              <svg className='w-6 h-5' fill='currentColor' viewBox='0 0 20 20'>
-                <path d='M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v2H4V6zm0 4h12v6H4v-6z' />
-              </svg>
+          <div className='border border-gray-200 rounded-lg p-6 flex items-center gap-4 '>
+            <div className=''>
+              <Image
+                src={Icon3.src}
+                alt='Complete Businesses'
+                width={100}
+                height={100}
+              />
             </div>
-            <h3 className='text-black text-lg font-normal font-sans leading-7 mb-2'>
-              Complete Businesses
-            </h3>
-            <p className='text-gray-600 text-sm font-normal font-sans leading-tight'>
-              Turnkey operations ready to go
-            </p>
+            <div className=''>
+              <h3 className='text-black text-xl font-normal font-sans leading-7'>
+                Complete Businesses
+              </h3>
+              <p className='text-gray-600 text-sm font-normal font-sans mt-1'>
+                Turnkey operations ready to go
+              </p>
+            </div>
           </div>
 
           {/* Parts & Accessories */}
-          <div className='border border-gray-200 rounded-lg p-6'>
-            <div className='w-14 h-14 bg-green-600/10 rounded-full flex items-center justify-center mb-4'>
-              <svg className='w-6 h-5' fill='currentColor' viewBox='0 0 20 20'>
-                <path d='M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z' />
-              </svg>
+          <div className='border border-gray-200 rounded-lg p-6 flex items-center gap-4'>
+            <div className=''>
+              <Image
+                src={Icon4.src}
+                alt='Parts & Accessories'
+                width={100}
+                height={100}
+              />
             </div>
-            <h3 className='text-black text-lg font-normal font-sans leading-7 mb-2'>
-              Parts & Accessories
-            </h3>
-            <p className='text-gray-600 text-sm font-normal font-sans leading-tight'>
-              Replacement parts and upgrades
-            </p>
+            <div className=''>
+              <h3 className='text-black text-xl font-normal font-sans leading-7'>
+                Parts & Accessories
+              </h3>
+              <p className='text-gray-600 text-sm font-normal font-sans mt-1'>
+                Replacement parts and upgrades
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section className='bg-gray-900 py-24'>
+      <section className='bg-gray-900 py-16'>
         <div className='max-w-7xl mx-auto px-6'>
           <div className='text-center mb-16'>
-            <h2 className='text-white text-3xl font-medium font-sans leading-9'>
+            <h2 className='text-white text-4xl font-medium font-sans leading-9'>
               How It Works
             </h2>
           </div>
@@ -180,17 +212,12 @@ export default function Home() {
             {/* Step 1 */}
             <div className='text-center'>
               <div className='w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6'>
-                <svg
-                  className='w-7 h-7'
-                  fill='currentColor'
-                  viewBox='0 0 20 20'
-                >
-                  <path
-                    fillRule='evenodd'
-                    d='M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z'
-                    clipRule='evenodd'
-                  />
-                </svg>
+                <Image
+                  src={HowIcon1.src}
+                  alt='How It Works'
+                  width={100}
+                  height={100}
+                />
               </div>
               <h3 className='text-white text-lg font-normal font-sans leading-7 mb-4'>
                 Browse Listings
@@ -204,17 +231,12 @@ export default function Home() {
             {/* Step 2 */}
             <div className='text-center'>
               <div className='w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6'>
-                <svg
-                  className='w-7 h-7'
-                  fill='currentColor'
-                  viewBox='0 0 20 20'
-                >
-                  <path
-                    fillRule='evenodd'
-                    d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z'
-                    clipRule='evenodd'
-                  />
-                </svg>
+                <Image
+                  src={HowIcon2.src}
+                  alt='How It Works'
+                  width={100}
+                  height={100}
+                />
               </div>
               <h3 className='text-white text-lg font-medium font-sans leading-7 mb-4'>
                 Create Free Account
@@ -228,13 +250,12 @@ export default function Home() {
             {/* Step 3 */}
             <div className='text-center'>
               <div className='w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6'>
-                <svg
-                  className='w-7 h-6'
-                  fill='currentColor'
-                  viewBox='0 0 20 20'
-                >
-                  <path d='M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z' />
-                </svg>
+                <Image
+                  src={HowIcon3.src}
+                  alt='How It Works'
+                  width={100}
+                  height={100}
+                />
               </div>
               <h3 className='text-white text-lg font-normal font-sans leading-7 mb-4'>
                 Post or Contact Seller
@@ -408,7 +429,7 @@ export default function Home() {
       <section className='py-24'>
         <div className='max-w-7xl mx-auto px-6'>
           <div className='text-center mb-16'>
-            <h2 className='text-gray-900 text-3xl font-normal font-sans leading-9'>
+            <h2 className='text-gray-900 text-4xl font-normal font-sans leading-9'>
               What Our Users Say
             </h2>
           </div>
@@ -417,20 +438,16 @@ export default function Home() {
             {/* Testimonial 1 */}
             <div className='bg-green-600/10 rounded-xl p-8'>
               <div className='flex items-start gap-6'>
-                <div className='w-20 h-20 bg-gray-300 rounded-full flex-shrink-0'></div>
+                <div className='w-20 h-20 '>
+                  <Image
+                    src={BlackQuote.src}
+                    alt='Black Quote'
+                    width={100}
+                    height={100}
+                  />
+                </div>
                 <div>
                   <div className='mb-6'>
-                    <svg
-                      className='w-9 h-9 mb-4'
-                      fill='currentColor'
-                      viewBox='0 0 20 20'
-                    >
-                      <path
-                        fillRule='evenodd'
-                        d='M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z'
-                        clipRule='evenodd'
-                      />
-                    </svg>
                     <p className='text-black text-lg font-normal font-sans leading-7 mb-4'>
                       Found my dream setup in 2 days. The marketplace made it
                       easy to find exactly what I was looking for at a fair
@@ -452,20 +469,16 @@ export default function Home() {
             {/* Testimonial 2 */}
             <div className='bg-green-600/10 rounded-xl p-8'>
               <div className='flex items-start gap-6'>
-                <div className='w-20 h-20 bg-gray-300 rounded-full flex-shrink-0'></div>
+                <div className='w-20 h-20 '>
+                  <Image
+                    src={BlackQuote.src}
+                    alt='Black Quote'
+                    width={100}
+                    height={100}
+                  />
+                </div>
                 <div>
                   <div className='mb-6'>
-                    <svg
-                      className='w-9 h-9 mb-4'
-                      fill='currentColor'
-                      viewBox='0 0 20 20'
-                    >
-                      <path
-                        fillRule='evenodd'
-                        d='M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z'
-                        clipRule='evenodd'
-                      />
-                    </svg>
                     <p className='text-black text-lg font-normal font-sans leading-7 mb-4'>
                       Sold my whole business in under a week. I was surprised by
                       how quickly I found a serious buyer through the platform.
@@ -492,7 +505,7 @@ export default function Home() {
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-12 items-center'>
             {/* Left Content */}
             <div className='space-y-6'>
-              <h2 className='text-gray-900 text-3xl font-normal font-sans leading-9'>
+              <h2 className='text-gray-900 text-4xl font-normal font-sans leading-9'>
                 Ready to grow your business?
               </h2>
               <p className='text-gray-600 text-lg font-normal font-sans leading-7'>

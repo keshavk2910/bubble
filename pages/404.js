@@ -42,12 +42,12 @@ export default function Custom404() {
 
           {/* Main Heading */}
           <h1 className="text-gray-700 text-4xl font-normal font-sans leading-10 mb-6">
-            404 - We've Cleaned Up This Page
+            404 - We&apos;ve Cleaned Up This Page
           </h1>
 
           {/* Subheading */}
           <p className="text-gray-700 text-xl font-normal font-sans leading-7 mb-12 max-w-2xl mx-auto">
-            Sorry, the page you're looking for has been moved or no longer exists
+            Sorry, the page you&apos;re looking for has been moved or no longer exists
           </p>
         </div>
 

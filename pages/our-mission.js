@@ -224,7 +224,7 @@ export default function OurMission() {
             </h2>
             <div className="w-[672px] mx-auto">
               <p className="text-white text-lg font-normal font-sans leading-7">
-                Whether you're looking to expand your business, sell equipment, or connect with industry peers, we've got you covered.
+                Whether you&apos;re looking to expand your business, sell equipment, or connect with industry peers, we&apos;ve got you covered.
               </p>
             </div>
           </div>

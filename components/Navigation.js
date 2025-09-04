@@ -1,8 +1,26 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Logo from './Images/logo.svg';
+import Image from 'next/image';
 
 export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const router = useRouter();
+
+  // Centralized className for all desktop nav links
+  const desktopLinkBaseClass =
+    'text-base font-normal font-sans px-2 py-2 rounded-lg transition-colors cursor-pointer';
+
+  // Helper to determine if a link is active
+  const isActive = (href) => {
+    // For anchor links or "#" just return false (never active)
+    if (href === '#') return false;
+    // For root path, match exactly
+    if (href === '/') return router.pathname === '/';
+    // For other paths, match if router.pathname starts with href
+    return router.pathname.startsWith(href);
+  };
 
   return (
     <header className='w-full border-b border-stone-200'>
@@ -10,58 +28,67 @@ export default function Navigation() {
         <div className='flex items-center justify-between'>
           {/* Logo */}
           <Link href='/' className='flex items-center gap-3'>
-            <div className='w-9 h-8 bg-gradient-to-br from-green-600 to-green-600 rounded-full relative'>
-              <div className='absolute top-1 left-1 w-5 h-0.5 bg-white'></div>
+            <div className=''>
+              <Image src={Logo.src} alt='Logo' width={280} height={180} />
             </div>
-            <h1 className='text-gray-900 text-2xl font-bold font-sans leading-snug'>
-              Bin Cleaning Classifieds
-            </h1>
           </Link>
+          <div className='flex gap-4'>
+            {/* Navigation - Desktop */}
+            <nav className='hidden md:flex items-center gap-8'>
+              <Link
+                href='/browse-listings'
+                className={`${desktopLinkBaseClass} ${
+                  isActive('/browse-listings')
+                    ? 'text-green-600'
+                    : 'text-black hover:text-green-600'
+                }`}
+              >
+                Browse Listings
+              </Link>
+              <Link
+                href='/our-mission'
+                className={`${desktopLinkBaseClass} ${
+                  isActive('/our-mission')
+                    ? 'text-green-600'
+                    : 'text-black hover:text-green-600'
+                }`}
+              >
+                Our Mission
+              </Link>
+              <Link
+                href='/faq'
+                className={`${desktopLinkBaseClass} ${
+                  isActive('/faq')
+                    ? 'text-green-600'
+                    : 'text-black hover:text-green-600'
+                }`}
+              >
+                FAQ
+              </Link>
+              <Link
+                href='#'
+                className={`${desktopLinkBaseClass} text-black hover:text-green-600`}
+              >
+                Contact
+              </Link>
+              <Link
+                href='#'
+                className={`${desktopLinkBaseClass} text-black hover:text-green-600`}
+              >
+                Post a Listing
+              </Link>
+            </nav>
 
-          {/* Navigation - Desktop */}
-          <nav className='hidden md:flex items-center gap-8'>
-            <Link
-              href='/browse-listings'
-              className='text-green-600 text-base font-normal font-sans px-2 py-2 rounded-lg'
-            >
-              Browse Listings
-            </Link>
-            <Link
-              href='/our-mission'
-              className='text-black text-base font-normal font-sans px-2 py-2 rounded-lg hover:text-green-600 transition-colors'
-            >
-              Our Mission
-            </Link>
-            <Link
-              href='/faq'
-              className='text-black text-base font-normal font-sans px-2 py-2 rounded-lg hover:text-green-600 transition-colors'
-            >
-              FAQ
-            </Link>
-            <Link
-              href='#'
-              className='text-black text-base font-normal font-sans px-2 py-2 rounded-lg hover:text-green-600 transition-colors'
-            >
-              Contact
-            </Link>
-            <Link
-              href='#'
-              className='text-black text-base font-normal font-sans px-2 py-2 rounded-lg hover:text-green-600 transition-colors'
-            >
-              Post a Listing
-            </Link>
-          </nav>
-
-          {/* Auth Buttons - Desktop */}
-          <div className='hidden md:flex items-center gap-3'>
-            <button className='bg-white text-black text-base font-normal font-sans px-6 py-2 rounded-md border border-gray-200 hover:border-gray-300 transition-colors'>
-              Sign in
-            </button>
-            <button className='bg-green-600 text-white text-base font-normal font-sans px-6 py-2 rounded-md hover:bg-green-700 transition-colors'>
-              Register
-            </button>
+            {/* Auth Buttons - Desktop */}
+            <div className='hidden md:flex items-center gap-3'>
+              <button className='bg-white text-black text-base font-normal font-sans px-6 py-2 rounded-md border border-gray-200 hover:border-gray-300 transition-colors'>
+                Sign in
+              </button>
+              <button className='bg-green-600 text-white text-base font-normal font-sans px-6 py-2 rounded-md hover:bg-green-700 transition-colors'>
+                Register
+              </button>
+            </div>
           </div>
-
           {/* Mobile Menu Button */}
           <button
             className='md:hidden flex items-center justify-center w-10 h-10 rounded-lg border border-gray-200'
@@ -98,19 +125,25 @@ export default function Navigation() {
             <nav className='flex flex-col gap-4'>
               <Link
                 href='/browse-listings'
-                className='text-green-600 text-base font-normal font-sans px-2 py-2'
+                className={`text-base font-normal font-sans px-2 py-2 ${
+                  isActive('/browse-listings') ? 'text-green-600' : 'text-black'
+                }`}
               >
                 Browse Listings
               </Link>
               <Link
-                href='#'
-                className='text-black text-base font-normal font-sans px-2 py-2'
+                href='/our-mission'
+                className={`text-base font-normal font-sans px-2 py-2 ${
+                  isActive('/our-mission') ? 'text-green-600' : 'text-black'
+                }`}
               >
                 Our Mission
               </Link>
               <Link
                 href='/faq'
-                className='text-black text-base font-normal font-sans px-2 py-2'
+                className={`text-base font-normal font-sans px-2 py-2 ${
+                  isActive('/faq') ? 'text-green-600' : 'text-black'
+                }`}
               >
                 FAQ
               </Link>

@@ -124,7 +124,7 @@ export default function BrowseListings() {
         <p className="text-gray-700 text-base font-normal font-sans leading-normal">
           Showing {filteredListings.length} result{filteredListings.length !== 1 ? 's' : ''}
           {filters.search && (
-            <span> for "{filters.search}"</span>
+            <span> for &ldquo;{filters.search}&rdquo;</span>
           )}
         </p>
       </div>

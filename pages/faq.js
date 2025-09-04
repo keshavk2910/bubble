@@ -19,7 +19,7 @@ export default function FAQ() {
         {
           id: 'create-account',
           question: 'How do I create an account?',
-          answer: 'Creating an account is quick and easy! Simply click the "Register" button in the top right corner and fill out the required information. You\'ll need to provide your email, create a password, and verify your email address to get started.'
+          answer: 'Creating an account is quick and easy! Simply click the "Register" button in the top right corner and fill out the required information. You&apos;ll need to provide your email, create a password, and verify your email address to get started.'
         },
         {
           id: 'free-to-join',
@@ -50,7 +50,7 @@ export default function FAQ() {
         {
           id: 'forgot-password',
           question: 'What happens if I forget my password?',
-          answer: 'No worries! Click the "Forgot Password" link on the sign-in page, enter your email address, and we\'ll send you a secure link to reset your password. Make sure to check your spam folder if you don\'t see the email.'
+          answer: 'No worries! Click the "Forgot Password" link on the sign-in page, enter your email address, and we&apos;ll send you a secure link to reset your password. Make sure to check your spam folder if you don&apos;t see the email.'
         }
       ]
     },
@@ -136,7 +136,7 @@ export default function FAQ() {
             Frequently Asked Questions
           </h1>
           <p className="text-stone-300 text-lg font-normal font-sans leading-7">
-            Got questions? We've got clear, no-fluff answers.
+            Got questions? We&apos;ve got clear, no-fluff answers.
           </p>
         </div>
       </section>
