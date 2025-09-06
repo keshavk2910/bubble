@@ -95,6 +95,22 @@ export default async function handler(req, res) {
       });
     }
 
+    // Check if phone verification is required
+    if (!profile.phone_verified) {
+      return res.status(202).json({
+        success: false,
+        error: 'Phone verification required',
+        details: 'Please verify your phone number before accessing your account',
+        requires_phone_verification: true,
+        user_profile: profile,
+        temp_session: {
+          access_token: authData.session?.access_token,
+          refresh_token: authData.session?.refresh_token,
+          expires_at: authData.session?.expires_at
+        }
+      });
+    }
+
     return res.status(200).json({
       success: true,
       message: 'Sign in successful',

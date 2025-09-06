@@ -5,28 +5,20 @@ export default async function handler(req, res) {
     const { method } = req;
 
     if (method === 'POST') {
-      // Send OTP to phone number
-      const { phone, userId } = req.body;
+      // Send OTP for registration phone verification
+      const { userId, phone } = req.body;
 
-      if (!phone || !userId) {
+      if (!userId || !phone) {
         return res.status(400).json({
           error: 'Missing required fields',
-          details: 'Phone number and user ID are required'
+          details: 'User ID and phone number are required'
         });
       }
 
-      // Validate phone number format
-      const phoneRegex = /^\+?[\d\s\-\(\)]{10,}$/;
-      if (!phoneRegex.test(phone)) {
-        return res.status(400).json({
-          error: 'Invalid phone number format'
-        });
-      }
-
-      // Verify user owns this profile
+      // Verify user exists and is not yet phone verified
       const { data: profile, error: profileError } = await supabaseAdmin
         .from('user_profiles')
-        .select('id, phone')
+        .select('id, phone, phone_verified')
         .eq('id', userId)
         .single();
 
@@ -36,7 +28,7 @@ export default async function handler(req, res) {
         });
       }
 
-      // Generate and store OTP in database (same system as email)
+      // Generate and store OTP in database
       const { data: otpData, error: otpError } = await supabaseAdmin
         .rpc('generate_verification_code', {
           p_user_id: userId,
@@ -45,7 +37,7 @@ export default async function handler(req, res) {
         });
 
       if (otpError) {
-        console.error('Phone OTP generation error:', otpError);
+        console.error('Registration phone OTP generation error:', otpError);
         return res.status(500).json({
           error: 'Failed to generate verification code',
           details: otpError.message
@@ -54,14 +46,7 @@ export default async function handler(req, res) {
 
       const otp = otpData;
       
-      console.log(`SMS to ${phone}: Your verification code is ${otp}`);
-      
-      // In production, integrate with Twilio/AWS SNS:
-      // await twilio.messages.create({
-      //   body: `Your verification code is: ${otp}`,
-      //   from: '+1234567890',
-      //   to: phone
-      // });
+      console.log(`Registration SMS to ${phone}: Your verification code is ${otp}`);
 
       return res.status(200).json({
         success: true,
@@ -75,7 +60,7 @@ export default async function handler(req, res) {
       });
 
     } else if (method === 'PUT') {
-      // Verify OTP and update phone verification status
+      // Verify OTP for registration
       const { userId, otp, phone } = req.body;
 
       if (!userId || !otp || !phone) {
@@ -102,7 +87,7 @@ export default async function handler(req, res) {
         });
 
       if (verifyError) {
-        console.error('Phone OTP verification error:', verifyError);
+        console.error('Registration phone OTP verification error:', verifyError);
         return res.status(500).json({
           error: 'Verification failed',
           details: 'Could not verify code'
@@ -126,7 +111,7 @@ export default async function handler(req, res) {
         .eq('id', userId);
 
       if (updateError) {
-        console.error('Phone verification update error:', updateError);
+        console.error('Registration phone verification update error:', updateError);
         return res.status(500).json({
           error: 'Verification failed',
           details: 'Could not update phone verification status'
@@ -143,7 +128,7 @@ export default async function handler(req, res) {
     }
 
   } catch (error) {
-    console.error('Phone verification error:', error);
+    console.error('Registration phone verification error:', error);
     return res.status(500).json({
       error: 'Internal server error',
       details: 'An unexpected error occurred during phone verification'

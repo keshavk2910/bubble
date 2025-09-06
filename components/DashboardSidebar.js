@@ -22,7 +22,7 @@ export default function DashboardSidebar() {
     },
     {
       name: 'Listings',
-      href: '/dashboard/listings',
+      href: '/dashboard/user?highlight=listings',
       icon: FileText,
       current: false,
     },

@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Smartphone, X } from 'lucide-react';
 
-export default function SmsVerificationModal({
+export default function SmsVerificationModalRegistration({
   isOpen,
   onClose,
   phoneNumber,
+  userId,
   onVerified,
 }) {
   const [verificationCode, setVerificationCode] = useState([
@@ -33,32 +34,20 @@ export default function SmsVerificationModal({
 
   // Auto-send OTP when modal opens
   useEffect(() => {
-    if (isOpen && phoneNumber) {
+    if (isOpen && phoneNumber && userId) {
       handleSendOTP();
     }
-  }, [isOpen, phoneNumber]);
+  }, [isOpen, phoneNumber, userId]);
 
   const handleSendOTP = async () => {
     try {
-      const session = localStorage.getItem('supabase_session') || localStorage.getItem('temp_session');
-      const profile = localStorage.getItem('temp_unverified_profile') || localStorage.getItem('user_profile');
-      
-      if (!session || !profile) {
-        return;
-      }
-
-      const sessionData = JSON.parse(session);
-      const profileData = JSON.parse(profile);
-      const token = sessionData.access_token;
-
-      const response = await fetch('/api/verify-phone', {
+      const response = await fetch('/api/verify-phone-registration', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: profileData.id,
+          userId: userId,
           phone: phoneNumber
         }),
       });
@@ -71,7 +60,7 @@ export default function SmsVerificationModal({
         }
       }
     } catch (error) {
-      console.error('Send OTP error:', error);
+      console.error('Send registration OTP error:', error);
     }
   };
 
@@ -103,28 +92,14 @@ export default function SmsVerificationModal({
     setIsVerifying(true);
 
     try {
-      // For registration flow, we don't have a session yet - use server-side verification
-      const profile = localStorage.getItem('temp_unverified_profile');
-      
-      if (!profile) {
-        alert('Registration session expired. Please register again.');
-        return;
-      }
-
-      const profileData = JSON.parse(profile);
-
-      // During registration, we don't have a token yet, so we'll verify directly
-      // For post-registration verification, we'll use a different approach
-
-      // Call verify-phone API
-      const response = await fetch('/api/verify-phone', {
+      // Call registration phone verification API
+      const response = await fetch('/api/verify-phone-registration', {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: profileData.id,
+          userId: userId,
           otp: code,
           phone: phoneNumber
         }),
@@ -141,7 +116,7 @@ export default function SmsVerificationModal({
         inputRefs.current[0]?.focus();
       }
     } catch (error) {
-      console.error('Phone verification error:', error);
+      console.error('Registration phone verification error:', error);
       alert('Verification failed. Please try again.');
     } finally {
       setIsVerifying(false);
@@ -174,11 +149,11 @@ export default function SmsVerificationModal({
         </button>
 
         {/* Phone Icon */}
-        <div className='flex justify-center mt-6 mb-6'>
-          <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center'>
-            <div className='relative'>
+        <div className='flex justify-center pt-8'>
+          <div className='w-16 h-16 bg-green-100 rounded-full flex items-center justify-center'>
+            <div className='w-12 h-12 bg-green-600 rounded-full flex items-center justify-center'>
               <div className='w-8 h-8 flex items-center justify-center'>
-                <Smartphone className='w-6 h-6 text-gray-600' />
+                <Smartphone className='w-6 h-6 text-white' />
               </div>
             </div>
           </div>
@@ -187,7 +162,7 @@ export default function SmsVerificationModal({
         {/* Title */}
         <div className='text-center px-6 mb-4'>
           <h2 className='text-gray-700 text-2xl font-normal font-sans leading-loose'>
-            One More Step
+            Phone Verification
           </h2>
         </div>
 
@@ -250,7 +225,7 @@ export default function SmsVerificationModal({
                 Verifying...
               </>
             ) : (
-              'Verify'
+              'Verify Phone Number'
             )}
           </button>
         </div>

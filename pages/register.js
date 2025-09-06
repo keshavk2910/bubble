@@ -13,7 +13,7 @@ import {
   AlertCircle,
   ChevronDown,
 } from 'lucide-react';
-import SmsVerificationModal from '../components/SmsVerificationModal';
+import SmsVerificationModalRegistration from '../components/SmsVerificationModalRegistration';
 import RegistrationSuccessModal from '../components/RegistrationSuccessModal';
 import Logo from '../components/Images/logo.svg';
 import Image from 'next/image';
@@ -44,6 +44,7 @@ export default function Register() {
   const [passwordStrength, setPasswordStrength] = useState('');
   const [showSmsModal, setShowSmsModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [registeredUserId, setRegisteredUserId] = useState(null);
 
   const calculatePasswordStrength = (password) => {
     if (!password) return '';
@@ -191,7 +192,8 @@ export default function Register() {
         return;
       }
 
-      // Registration successful - show phone verification modal first
+      // Registration successful - store user ID and show phone verification modal
+      setRegisteredUserId(data.user.id);
       setShowSmsModal(true);
     } catch (error) {
       console.error('Registration error:', error);
@@ -205,6 +207,7 @@ export default function Register() {
 
   const handleSmsVerified = async () => {
     console.log('SMS verification successful!');
+    
     setShowSmsModal(false);
     
     // Now auto sign-in the user after phone verification
@@ -615,10 +618,11 @@ export default function Register() {
       </div>
 
       {/* SMS Verification Modal */}
-      <SmsVerificationModal
+      <SmsVerificationModalRegistration
         isOpen={showSmsModal}
         onClose={handleCloseModal}
         phoneNumber={formData.phone}
+        userId={registeredUserId}
         onVerified={handleSmsVerified}
       />
 

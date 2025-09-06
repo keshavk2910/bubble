@@ -17,7 +17,10 @@ async function handler(req, res) {
         email: req.user.email,
         emailConfirmed: req.user.email_confirmed_at ? true : false
       },
-      profile: req.profile,
+      profile: {
+        ...req.profile,
+        email_verified: req.profile.email_verified || false
+      },
       stats: {
         total_listings: 0,
         active_listings: 0,

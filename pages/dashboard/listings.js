@@ -11,20 +11,18 @@ import {
   Tag,
   User,
   LogOut,
+  Home,
   Edit,
   Trash2,
-  Eye,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Home
+  Eye
 } from 'lucide-react';
-
 import ListingsTable from '../../components/ListingsTable';
-import UsersTable from '../../components/UsersTable';
 
-export default function AdminDashboard() {
+export default function AdminListings() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [listings, setListings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Mock admin user
   const adminUser = {
@@ -35,7 +33,7 @@ export default function AdminDashboard() {
   };
 
   // Mock listings data
-  const listings = [
+  const allListings = [
     {
       id: 'L-1001',
       title: 'Residential Driveway Cleaning',
@@ -102,60 +100,45 @@ export default function AdminDashboard() {
     }
   ];
 
-  // Mock users data
-  const users = [
-    {
-      username: 'johnsmith',
-      email: 'john.smith@example.com',
-      registrationDate: '2023-05-15',
-      status: 'Active',
-      listings: 8
-    },
-    {
-      username: 'sarahjohnson',
-      email: 'sarah.johnson@example.com',
-      registrationDate: '2023-06-22',
-      status: 'Active',
-      listings: 5
-    },
-    {
-      username: 'mikewilliams',
-      email: 'mike.williams@example.com',
-      registrationDate: '2023-07-10',
-      status: 'Inactive',
-      listings: 0
-    },
-    {
-      username: 'emilydavis',
-      email: 'emily.davis@example.com',
-      registrationDate: '2023-08-05',
-      status: 'Active',
-      listings: 12
-    },
-    {
-      username: 'robertbrown',
-      email: 'robert.brown@example.com',
-      registrationDate: '2023-09-18',
-      status: 'New',
-      listings: 1
-    }
+  useEffect(() => {
+    // Simulate loading
+    setIsLoading(true);
+    setTimeout(() => {
+      setListings(allListings);
+      setIsLoading(false);
+    }, 1000);
+  }, []);
+
+  const filterButtons = [
+    { key: 'All', label: 'All', count: allListings.length },
+    { key: 'Active', label: 'Active', count: allListings.filter(l => l.status === 'Active').length },
+    { key: 'Pending', label: 'Pending', count: allListings.filter(l => l.status === 'Pending').length },
+    { key: 'Sponsored', label: 'Sponsored', count: allListings.filter(l => l.status === 'Sponsored').length },
+    { key: 'Bubble Binz', label: 'Bubble Binz', count: allListings.filter(l => l.status === 'Bubble Binz').length }
   ];
 
-  const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case 'active': return 'bg-green-100 text-green-700';
-      case 'pending': return 'bg-yellow-100 text-yellow-700';
-      case 'sponsored': return 'bg-blue-100 text-blue-700';
-      case 'bubble binz': return 'bg-purple-100 text-purple-700';
-      case 'inactive': return 'bg-red-100 text-red-700';
-      case 'new': return 'bg-blue-100 text-blue-700';
-      default: return 'bg-gray-100 text-gray-700';
-    }
+  const filteredListings = statusFilter === 'All' 
+    ? allListings 
+    : allListings.filter(listing => listing.status === statusFilter);
+
+  const handleEdit = (listing) => {
+    console.log('Edit listing:', listing);
+  };
+
+  const handleDelete = (listing) => {
+    console.log('Delete listing:', listing);
+  };
+
+  const handleView = (listing) => {
+    console.log('View listing:', listing);
   };
 
   const handleExport = () => {
-    console.log('Exporting data...');
-    // Handle export functionality
+    console.log('Exporting listings...');
+  };
+
+  const handleBulkAction = (action, selectedIds) => {
+    console.log(`Bulk ${action} for listings:`, selectedIds);
   };
 
   return (
@@ -178,19 +161,16 @@ export default function AdminDashboard() {
         <nav className="flex-1 px-4 py-6 space-y-2">
           <a
             href="/dashboard/admin"
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors bg-green-700 text-white"
+            className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white"
           >
             <Home className="w-5 h-5" />
             <span className="font-sans">Dashboard</span>
           </a>
 
-          <a
-            href="/dashboard/listings"
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white"
-          >
+          <div className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left bg-green-700 text-white">
             <FileText className="w-5 h-5" />
             <span className="font-sans">Listings</span>
-          </a>
+          </div>
 
           <a
             href="/dashboard/users"
@@ -250,7 +230,7 @@ export default function AdminDashboard() {
         <header className="sticky top-0 bg-white border-b border-gray-200 px-6 py-5 z-30">
           <div className="flex items-center justify-between">
             <h1 className="text-gray-700 text-2xl font-normal font-sans leading-loose">
-              Admin Control Center
+              Listings Center
             </h1>
             
             <div className="flex items-center gap-4">
@@ -289,42 +269,75 @@ export default function AdminDashboard() {
         {/* Main Content */}
         <main className="p-6">
           <div className="max-w-7xl mx-auto">
-            {/* Content Area */}
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-              {/* Main Tables Section */}
-              <div className="xl:col-span-3 space-y-6">
-                {/* Listings Management */}
+              {/* Listings Section */}
+              <div className="xl:col-span-3">
                 <div className="bg-white rounded-lg border border-gray-200">
-                  <div className="px-6 py-4 border-b border-gray-200">
-                    <h2 className="text-gray-900 text-lg font-semibold font-sans">
-                      Listings Management
-                    </h2>
-                  </div>
-                  <ListingsTable 
-                    listings={listings}
-                    onEdit={(listing) => console.log('Edit:', listing)}
-                    onDelete={(listing) => console.log('Delete:', listing)}
-                    onView={(listing) => console.log('View:', listing)}
-                  />
-                </div>
+                  {/* Listings Header with Filters */}
+                  <div className="px-6 py-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-gray-700 text-lg font-normal font-sans leading-7">
+                        Listings
+                      </h2>
+                      
+                      {/* Bulk Actions */}
+                      <div className="flex items-center gap-3">
+                        <button className="flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors">
+                          <input type="checkbox" className="rounded border-gray-300" />
+                          <span>Select All</span>
+                        </button>
+                        <button className="flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors">
+                          <Edit className="w-4 h-4" />
+                          <span>Edit</span>
+                        </button>
+                        <button className="flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                          <span>Remove</span>
+                        </button>
+                        <button className="flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors">
+                          <Eye className="w-4 h-4" />
+                          <span>Feature</span>
+                        </button>
+                        <button className="flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors">
+                          <Tag className="w-4 h-4" />
+                          <span>Tag</span>
+                        </button>
+                      </div>
+                    </div>
 
-                {/* Users Management */}
-                <div className="bg-white rounded-lg border border-gray-200">
-                  <div className="px-6 py-4 border-b border-gray-200">
-                    <h2 className="text-gray-900 text-lg font-semibold font-sans">
-                      Users Management
-                    </h2>
+                    {/* Status Filter Buttons */}
+                    <div className="flex items-center gap-2 mb-6">
+                      <span className="text-gray-500 text-sm font-normal font-sans leading-tight mr-2">
+                        Filter by:
+                      </span>
+                      {filterButtons.map((filter) => (
+                        <button
+                          key={filter.key}
+                          onClick={() => setStatusFilter(filter.key)}
+                          className={`px-3 py-1 rounded text-sm font-normal font-sans leading-tight transition-colors ${
+                            statusFilter === filter.key
+                              ? 'bg-green-600 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {filter.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <UsersTable 
-                    users={users}
-                    onEdit={(user) => console.log('Edit user:', user)}
-                    onDelete={(user) => console.log('Delete user:', user)}
-                    onView={(user) => console.log('View user:', user)}
+
+                  {/* Listings Table */}
+                  <ListingsTable 
+                    listings={filteredListings}
+                    isLoading={isLoading}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onView={handleView}
                   />
                 </div>
               </div>
 
-              {/* Right Sidebar - Analytics */}
+              {/* Right Sidebar - Analytics (Same as admin dashboard) */}
               <div className="space-y-6">
                 {/* User Insights */}
                 <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -357,7 +370,6 @@ export default function AdminDashboard() {
                     New Registrations
                   </h3>
                   
-                  {/* Mock Chart */}
                   <div className="h-32 bg-gradient-to-t from-green-100 to-green-50 rounded-lg flex items-end justify-center p-4">
                     <div className="text-center">
                       <div className="w-full h-20 bg-green-200 rounded-t-lg mb-2 relative overflow-hidden">
@@ -374,7 +386,6 @@ export default function AdminDashboard() {
                     User Activity
                   </h3>
                   
-                  {/* Mock Activity Chart */}
                   <div className="h-24 bg-gray-50 rounded-lg flex items-end justify-between p-2">
                     {[40, 65, 45, 70, 55, 80, 35].map((height, index) => (
                       <div 
@@ -401,7 +412,6 @@ export default function AdminDashboard() {
                     User Types
                   </h3>
                   
-                  {/* Mock Pie Chart */}
                   <div className="relative w-24 h-24 mx-auto mb-4">
                     <div className="w-24 h-24 rounded-full bg-green-500 relative overflow-hidden">
                       <div className="absolute top-0 left-1/2 w-12 h-12 bg-blue-500 rounded-bl-full"></div>

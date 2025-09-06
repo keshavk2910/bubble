@@ -65,6 +65,15 @@ export default function SignIn() {
       const data = await response.json();
 
       if (!response.ok) {
+        // Handle phone verification requirement
+        if (data.requires_phone_verification) {
+          // Store temporary profile and session for verification page
+          localStorage.setItem('temp_unverified_profile', JSON.stringify(data.user_profile));
+          localStorage.setItem('temp_session', JSON.stringify(data.temp_session));
+          router.push('/verify-phone-required');
+          return;
+        }
+        
         setErrors({ submit: data.details || data.error || 'Sign in failed' });
         return;
       }
