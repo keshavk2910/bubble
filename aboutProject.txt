@@ -1,0 +1,37 @@
+We are making this app as classified posting platform where sellers can post there listings after they login and buyers can login and chat with sellers, save listings they like so a wishlist type system 
+
+Signup form
+Full Name
+Email
+Password
+Country
+Zip Code
+Phone
+Phone Verified (through OTP SMS)
+
+signin 
+Email
+Password
+We can use supabase auth for these with roles Admin, User
+Users will have there dashboard and admin will ofcourse have Admin dashboard
+
+Users will have listings related to them you can check /Users/keshavkewlani/Downloads/bubble/pages/post-new-listing.js page for better understanding of needed fields for database
+
+Users will have Personal Info settings page in there dashboard where they can set there Display Name, Real Name, Phone, Email, Address so we need all these fields too I think in a users table connected to auth
+
+All the images uploaded on platform will be saved in supabase storage so we will have url built from frontend once upload is doen through api
+
+Admin dashboard
+Admin can see all listings with there status
+Status types
+Active
+Pending
+Sponsored
+Bubble Binz
+InActive
+
+Admin can also see all users on platform and block unblock them edit them
+
+We should have registration date of users saved as well somewhere including timestamp
+
+Users will have types as well Service Providers and Customers so once someone posts any listing we will make them Service providers otherwise they stay Customers

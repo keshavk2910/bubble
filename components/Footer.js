@@ -56,12 +56,12 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a
-                  href='#'
+                <Link
+                  href='/contact'
                   className='text-white text-base font-normal font-sans leading-normal hover:underline transition-all'
                 >
                   Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

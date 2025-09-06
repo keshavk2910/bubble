@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Logo from './Images/logo.svg';
@@ -6,6 +6,8 @@ import Image from 'next/image';
 
 export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [session, setSession] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const router = useRouter();
 
   // Centralized className for all desktop nav links
@@ -21,6 +23,36 @@ export default function Navigation() {
     // For other paths, match if router.pathname starts with href
     return router.pathname.startsWith(href);
   };
+
+  // On mount, check for session and user role
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const sessionStr = localStorage.getItem('supabase_session');
+      setSession(sessionStr);
+
+      // Try to get user role from session (if stored)
+      // If not, fallback to 'user'
+      let role = null;
+      try {
+        if (sessionStr) {
+          const sessionObj = JSON.parse(sessionStr);
+          // Try to get role from session.user.user_metadata.role or session.user.role
+          if (sessionObj?.user?.user_metadata?.role) {
+            role = sessionObj.user.user_metadata.role;
+          } else if (sessionObj?.user?.role) {
+            role = sessionObj.user.role;
+          }
+        }
+      } catch (e) {
+        // ignore parse errors
+      }
+      setUserRole(role || 'user');
+    }
+  }, []);
+
+  // Dashboard link based on userRole
+  const dashboardHref =
+    userRole === 'admin' ? '/dashboard/admin' : '/dashboard/user';
 
   return (
     <header className='w-full border-b border-stone-200'>
@@ -66,14 +98,22 @@ export default function Navigation() {
                 FAQ
               </Link>
               <Link
-                href='#'
-                className={`${desktopLinkBaseClass} text-black hover:text-green-600`}
+                href='/contact'
+                className={`${desktopLinkBaseClass} ${
+                  isActive('/contact')
+                    ? 'text-green-600'
+                    : 'text-black hover:text-green-600'
+                }`}
               >
                 Contact
               </Link>
               <Link
-                href='#'
-                className={`${desktopLinkBaseClass} text-black hover:text-green-600`}
+                href='/dashboard/post-new-listing'
+                className={`${desktopLinkBaseClass} ${
+                  isActive('/dashboard/post-new-listing')
+                    ? 'text-green-600'
+                    : 'text-black hover:text-green-600'
+                }`}
               >
                 Post a Listing
               </Link>
@@ -81,12 +121,26 @@ export default function Navigation() {
 
             {/* Auth Buttons - Desktop */}
             <div className='hidden md:flex items-center gap-3'>
-              <button className='bg-white text-black text-base font-normal font-sans px-6 py-2 rounded-md border border-gray-200 hover:border-gray-300 transition-colors'>
-                Sign in
-              </button>
-              <button className='bg-green-600 text-white text-base font-normal font-sans px-6 py-2 rounded-md hover:bg-green-700 transition-colors'>
-                Register
-              </button>
+              {!session ? (
+                <>
+                  <Link href='/sign-in'>
+                    <button className='bg-white text-black text-base font-normal font-sans px-6 py-2 rounded-md border border-gray-200 hover:border-gray-300 transition-colors'>
+                      Sign in
+                    </button>
+                  </Link>
+                  <Link href='/register'>
+                    <button className='bg-green-600 text-white text-base font-normal font-sans px-6 py-2 rounded-md hover:bg-green-700 transition-colors'>
+                      Register
+                    </button>
+                  </Link>
+                </>
+              ) : (
+                <Link href={dashboardHref}>
+                  <button className='bg-green-600 text-white text-base font-normal font-sans px-6 py-2 rounded-md hover:bg-green-700 transition-colors'>
+                    Dashboard
+                  </button>
+                </Link>
+              )}
             </div>
           </div>
           {/* Mobile Menu Button */}
@@ -148,25 +202,45 @@ export default function Navigation() {
                 FAQ
               </Link>
               <Link
-                href='#'
-                className='text-black text-base font-normal font-sans px-2 py-2'
+                href='/contact'
+                className={`text-base font-normal font-sans px-2 py-2 ${
+                  isActive('/contact') ? 'text-green-600' : 'text-black'
+                }`}
               >
                 Contact
               </Link>
               <Link
-                href='#'
-                className='text-black text-base font-normal font-sans px-2 py-2'
+                href='/dashboard/post-new-listing'
+                className={`text-base font-normal font-sans px-2 py-2 ${
+                  isActive('/dashboard/post-new-listing')
+                    ? 'text-green-600'
+                    : 'text-black'
+                }`}
               >
                 Post a Listing
               </Link>
             </nav>
             <div className='flex flex-col gap-3 mt-4'>
-              <button className='bg-white text-black text-base font-normal font-sans px-6 py-2 rounded-md border border-gray-200'>
-                Sign in
-              </button>
-              <button className='bg-green-600 text-white text-base font-normal font-sans px-6 py-2 rounded-md'>
-                Register
-              </button>
+              {!session ? (
+                <>
+                  <Link href='/sign-in'>
+                    <button className='bg-white text-black text-base font-normal font-sans px-6 py-2 rounded-md border border-gray-200 w-full'>
+                      Sign in
+                    </button>
+                  </Link>
+                  <Link href='/register'>
+                    <button className='bg-green-600 text-white text-base font-normal font-sans px-6 py-2 rounded-md'>
+                      Register
+                    </button>
+                  </Link>
+                </>
+              ) : (
+                <Link href={dashboardHref}>
+                  <button className='bg-green-600 text-white text-base font-normal font-sans px-6 py-2 rounded-md w-full'>
+                    Dashboard
+                  </button>
+                </Link>
+              )}
             </div>
           </div>
         )}
