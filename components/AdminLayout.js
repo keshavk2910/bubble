@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { Search, Bell, Download } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
@@ -14,10 +15,51 @@ export default function AdminLayout({
   searchTerm = '',
   onSearchChange,
   onExport,
-  showAnalytics = true,
-  analytics = {},
-  isLoading = false
+  showAnalytics = true
 }) {
+  const [analytics, setAnalytics] = useState({});
+  const [adminStats, setAdminStats] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load analytics data independently
+  useEffect(() => {
+    const loadAnalytics = async () => {
+      try {
+        const session = localStorage.getItem('supabase_session');
+        if (!session) return;
+
+        const sessionData = JSON.parse(session);
+        const token = sessionData.access_token;
+
+        // Load analytics and stats in parallel
+        const [analyticsResponse, statsResponse] = await Promise.all([
+          fetch('/api/admin/analytics', {
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+          }),
+          fetch('/api/stats', {
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+          })
+        ]);
+
+        if (analyticsResponse.ok) {
+          const analyticsData = await analyticsResponse.json();
+          setAnalytics(analyticsData.analytics);
+        }
+
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          setAdminStats(statsData.stats);
+        }
+
+      } catch (error) {
+        console.error('Analytics loading error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAnalytics();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 flex">

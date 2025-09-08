@@ -158,7 +158,7 @@ export default function EmailVerificationModal({ isOpen, onClose, email, onVerif
               <button
                 onClick={handleSendOTP}
                 disabled={isSending}
-                className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-300 flex items-center justify-center gap-2"
+                className="flex-1 bg-green-600 text-white px-4 py-3 rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-300 flex items-center justify-center gap-2"
               >
                 {isSending ? (
                   <>
@@ -189,29 +189,53 @@ export default function EmailVerificationModal({ isOpen, onClose, email, onVerif
 
               {/* Demo OTP Display */}
               {sentOTP && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-blue-500" />
-                    <span className="text-blue-700 text-sm font-normal font-sans">
-                      Demo Code: {sentOTP}
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-green-700 text-sm font-medium">
+                      Dev Mode - Your code:
+                    </span>
+                    <span className="text-green-900 text-lg font-mono font-bold tracking-wider">
+                      {sentOTP}
                     </span>
                   </div>
                 </div>
               )}
 
               <div className="mb-4">
-                <label htmlFor="otp" className="block text-gray-700 text-sm font-medium font-sans mb-2">
-                  Verification Code
-                </label>
-                <input
-                  type="text"
-                  id="otp"
-                  value={otpCode}
-                  onChange={(e) => handleOtpChange(e.target.value)}
-                  placeholder="000000"
-                  className="w-full text-center text-2xl font-mono tracking-widest bg-white border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
-                  maxLength={6}
-                />
+                <div className="flex justify-center gap-3">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <input
+                      key={index}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]"
+                      value={otpCode[index] || ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '');
+                        if (value.length <= 1) {
+                          const newCode = otpCode.split('');
+                          newCode[index] = value;
+                          setOtpCode(newCode.join(''));
+                          
+                          // Auto-focus next input
+                          if (value && index < 5) {
+                            const nextInput = document.querySelector(`input[data-index="${index + 1}"]`);
+                            nextInput?.focus();
+                          }
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
+                          const prevInput = document.querySelector(`input[data-index="${index - 1}"]`);
+                          prevInput?.focus();
+                        }
+                      }}
+                      data-index={index}
+                      className="w-12 h-12 rounded-xl border border-gray-300 text-center text-gray-700 text-xl font-normal font-sans leading-7 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600"
+                      maxLength={1}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
