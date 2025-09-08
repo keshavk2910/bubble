@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -22,6 +23,7 @@ import {
   XCircle,
   Clock,
   Home,
+  Star,
 } from 'lucide-react';
 
 import ListingsTable from '../../components/ListingsTable';
@@ -38,6 +40,7 @@ export default function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [userProfile, setUserProfile] = useState(null);
   const [showDeleted, setShowDeleted] = useState(false);
+  const [showFeatured, setShowFeatured] = useState(false);
 
   // Load admin data
   useEffect(() => {
@@ -227,6 +230,34 @@ export default function AdminDashboard() {
     handleStatusChange(listing.id, 'active');
   };
 
+  const handleToggleFeatured = async (listing) => {
+    try {
+      const session = localStorage.getItem('supabase_session');
+      const sessionData = JSON.parse(session);
+      const token = sessionData.access_token;
+
+      const response = await fetch(`/api/admin/listings/${listing.id}/featured`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ featured: !listing.featured }),
+      });
+
+      if (response.ok) {
+        // Update local state
+        setListings(prev => prev.map(l => 
+          l.id === listing.id 
+            ? { ...l, featured: !l.featured }
+            : l
+        ));
+      }
+    } catch (error) {
+      console.error('Toggle featured error:', error);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
       case 'active':
@@ -251,469 +282,514 @@ export default function AdminDashboard() {
     // Handle export functionality
   };
 
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/logout', { method: 'POST' });
+      localStorage.removeItem('supabase_session');
+      localStorage.removeItem('user_profile');
+      router.push('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
   return (
-    <div className='min-h-screen bg-gray-50 flex'>
-      {/* Admin Sidebar */}
-      <div className='fixed left-0 top-0 w-60 h-screen bg-green-600 flex flex-col z-40'>
-        {/* Logo */}
-        <div className='px-6 py-6 border-b border-green-500'>
-          <div className='flex items-center gap-3'>
-            <div className='w-8 h-8 bg-white rounded-full flex items-center justify-center'>
-              <span className='text-green-600 text-sm font-bold'>B</span>
+    <>
+      <Head>
+        <title>Admin Dashboard - Bin Cleaning Classifieds</title>
+        <meta
+          name='description'
+          content='Admin control center for managing listings, users, and marketplace analytics.'
+        />
+      </Head>
+      <div className='min-h-screen bg-gray-50 flex'>
+        {/* Admin Sidebar */}
+        <div className='fixed left-0 top-0 w-60 h-screen bg-green-600 flex flex-col z-40'>
+          {/* Logo */}
+          <div className='px-6 py-6 border-b border-green-500'>
+            <div className='flex items-center gap-3'>
+              <div className='w-8 h-8 bg-white rounded-full flex items-center justify-center'>
+                <span className='text-green-600 text-sm font-bold'>B</span>
+              </div>
+              <h1 className='text-white text-lg font-bold font-sans'>
+                Bubblebinz
+              </h1>
             </div>
-            <h1 className='text-white text-lg font-bold font-sans'>
-              Bubblebinz
-            </h1>
+          </div>
+
+          {/* Navigation */}
+          <nav className='flex-1 px-4 py-6 space-y-2'>
+            <div className='flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left bg-green-700 text-white'>
+              <Home className='w-5 h-5' />
+              <span className='font-sans'>Dashboard</span>
+            </div>
+
+            <Link
+              href='/dashboard/listings'
+              className='flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white'
+            >
+              <FileText className='w-5 h-5' />
+              <span className='font-sans'>Listings</span>
+            </Link>
+
+            <Link
+              href='/dashboard/users'
+              className='flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white'
+            >
+              <Users className='w-5 h-5' />
+              <span className='font-sans'>Users</span>
+            </Link>
+
+            <Link
+              href='/dashboard/tags'
+              className='flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white'
+            >
+              <Tag className='w-5 h-5' />
+              <span className='font-sans'>Tags</span>
+            </Link>
+
+            <Link
+              href='/dashboard/analytics'
+              className='flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white'
+            >
+              <BarChart3 className='w-5 h-5' />
+              <span className='font-sans'>Analytics</span>
+            </Link>
+
+            <Link
+              href='/dashboard/settings'
+              className='flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white'
+            >
+              <Settings className='w-5 h-5' />
+              <span className='font-sans'>Settings</span>
+            </Link>
+          </nav>
+
+          {/* Admin User Info */}
+          <div className='px-4 py-6 border-t border-green-500'>
+            <div className='flex items-center gap-3 mb-4'>
+              <div className='w-8 h-8 bg-green-700 rounded-full flex items-center justify-center overflow-hidden'>
+                {sessionAvatar ? (
+                  <Image
+                    src={sessionAvatar}
+                    alt='Admin avatar'
+                    width={32}
+                    height={32}
+                    className='w-full h-full object-cover'
+                  />
+                ) : (
+                  <span className='text-white text-xs font-bold'>
+                    {sessionUser?.full_name
+                      ?.split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .toUpperCase() || 'AD'}
+                  </span>
+                )}
+              </div>
+              <div className='flex-1 min-w-0'>
+                <p className='text-white text-sm font-medium truncate'>
+                  {userProfile?.display_name ||
+                    userProfile?.full_name ||
+                    'Admin User'}
+                </p>
+                <p className='text-green-200 text-xs truncate'>Administrator</p>
+              </div>
+            </div>
+
+            <button 
+              onClick={handleLogout}
+              className='flex items-center gap-3 w-full px-4 py-3 text-green-100 hover:bg-green-700 hover:text-white rounded-lg transition-colors text-left'
+            >
+              <LogOut className='w-4 h-4' />
+              <span className='text-sm font-sans'>Log out</span>
+            </button>
           </div>
         </div>
-
-        {/* Navigation */}
-        <nav className='flex-1 px-4 py-6 space-y-2'>
-          <div className='flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left bg-green-700 text-white'>
-            <Home className='w-5 h-5' />
-            <span className='font-sans'>Dashboard</span>
-          </div>
-
-          <Link
-            href='/dashboard/listings'
-            className='flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white'
-          >
-            <FileText className='w-5 h-5' />
-            <span className='font-sans'>Listings</span>
-          </Link>
-
-          <Link
-            href='/dashboard/users'
-            className='flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white'
-          >
-            <Users className='w-5 h-5' />
-            <span className='font-sans'>Users</span>
-          </Link>
-
-          <Link
-            href='/dashboard/tags'
-            className='flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white'
-          >
-            <Tag className='w-5 h-5' />
-            <span className='font-sans'>Tags</span>
-          </Link>
-
-          <Link
-            href='/dashboard/analytics'
-            className='flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white'
-          >
-            <BarChart3 className='w-5 h-5' />
-            <span className='font-sans'>Analytics</span>
-          </Link>
-
-          <Link
-            href='/dashboard/settings'
-            className='flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white'
-          >
-            <Settings className='w-5 h-5' />
-            <span className='font-sans'>Settings</span>
-          </Link>
-        </nav>
-
-        {/* Admin User Info */}
-        <div className='px-4 py-6 border-t border-green-500'>
-          <div className='flex items-center gap-3 mb-4'>
-            <div className='w-8 h-8 bg-green-700 rounded-full flex items-center justify-center overflow-hidden'>
-              {sessionAvatar ? (
-                <Image
-                  src={sessionAvatar}
-                  alt="Admin avatar"
-                  width={32}
-                  height={32}
-                  className='w-full h-full object-cover'
-                />
-              ) : (
-                <span className='text-white text-xs font-bold'>
-                  {sessionUser?.full_name
-                    ?.split(' ')
-                    .map((n) => n[0])
-                    .join('')
-                    .toUpperCase() || 'AD'}
-                </span>
-              )}
-            </div>
-            <div className='flex-1 min-w-0'>
-              <p className='text-white text-sm font-medium truncate'>
-                {userProfile?.display_name ||
-                  userProfile?.full_name ||
-                  'Admin User'}
-              </p>
-              <p className='text-green-200 text-xs truncate'>Administrator</p>
-            </div>
-          </div>
-
-          <button className='flex items-center gap-3 w-full px-4 py-3 text-green-100 hover:bg-green-700 hover:text-white rounded-lg transition-colors text-left'>
-            <LogOut className='w-4 h-4' />
-            <span className='text-sm font-sans'>Log out</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className='flex-1 ml-60'>
-        {/* Header */}
-        <header className='sticky top-0 bg-white border-b border-gray-200 px-6 py-5 z-30'>
-          <div className='flex items-center justify-between'>
-            <h1 className='text-gray-700 text-2xl font-normal font-sans leading-loose'>
-              Admin Control Center
-            </h1>
-
-            <div className='flex items-center gap-4'>
-              {/* Search */}
-              <div className='relative'>
-                <Search className='w-4 h-4 text-gray-400 absolute left-3 top-3' />
-                <input
-                  type='text'
-                  placeholder='Search...'
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className='w-80 pl-10 pr-4 py-2 bg-white rounded-md border border-gray-300 text-gray-400 text-base font-normal font-sans focus:outline-none focus:ring-2 focus:ring-green-600'
-                />
-              </div>
-
-              {/* Notifications */}
-              <div className='relative'>
-                <button className='p-2 text-gray-600 hover:text-gray-800'>
-                  <Bell className='w-5 h-5' />
-                  <span className='absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full'></span>
-                </button>
-              </div>
-
-              {/* Export Button */}
-              <button
-                onClick={handleExport}
-                className='bg-green-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-green-700 transition-colors'
-              >
-                <Download className='w-4 h-4' />
-                <span className='text-base font-normal font-sans'>Export</span>
-              </button>
-            </div>
-          </div>
-        </header>
 
         {/* Main Content */}
-        <main className='p-6'>
-          <div className='max-w-7xl mx-auto'>
-            {/* Content Area */}
-            <div className='grid grid-cols-1 xl:grid-cols-4 gap-6'>
-              {/* Main Tables Section */}
-              <div className='xl:col-span-3 space-y-6'>
-                {/* Listings Management */}
-                <div className='bg-white rounded-lg border border-gray-200'>
-                  <div className='px-6 py-4 border-b border-gray-200'>
-                    <div className='flex items-center justify-between'>
-                      <h2 className='text-gray-900 text-lg font-semibold font-sans'>
-                        Listings Management
-                      </h2>
-                      <button
-                        onClick={() => setShowDeleted(!showDeleted)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          showDeleted
-                            ? 'bg-red-100 text-red-700 border border-red-200'
-                            : 'bg-gray-100 text-gray-700 border border-gray-200'
-                        }`}
-                      >
-                        <Trash2 className='w-4 h-4' />
-                        {showDeleted ? 'Show All Listings' : 'Trash'}
-                      </button>
-                    </div>
-                  </div>
-                  <ListingsTable
-                    listings={
-                      showDeleted
-                        ? listings.filter((l) => l.status === 'deleted')
-                        : listings.filter((l) => l.status !== 'deleted')
-                    }
-                    isLoading={isLoading}
-                    onEdit={handleEditListing}
-                    onDelete={handleDeleteListing}
-                    onView={handleViewListing}
-                    onStatusChange={handleStatusChange}
-                    onApprove={handleApprove}
-                    onReject={handleReject}
-                    onRecover={handleRecoverListing}
+        <div className='flex-1 ml-60'>
+          {/* Header */}
+          <header className='sticky top-0 bg-white border-b border-gray-200 px-6 py-5 z-30'>
+            <div className='flex items-center justify-between'>
+              <h1 className='text-gray-700 text-2xl font-normal font-sans leading-loose'>
+                Admin Control Center
+              </h1>
+
+              <div className='flex items-center gap-4'>
+                {/* Search */}
+                <div className='relative'>
+                  <Search className='w-4 h-4 text-gray-400 absolute left-3 top-3' />
+                  <input
+                    type='text'
+                    placeholder='Search...'
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className='w-80 pl-10 pr-4 py-2 bg-white rounded-md border border-gray-300 text-gray-400 text-base font-normal font-sans focus:outline-none focus:ring-2 focus:ring-green-600'
                   />
                 </div>
 
-                {/* Users Management */}
-                <div className='bg-white rounded-lg border border-gray-200'>
-                  <div className='px-6 py-4 border-b border-gray-200'>
-                    <h2 className='text-gray-900 text-lg font-semibold font-sans'>
-                      Users Management
-                    </h2>
-                  </div>
-                  <UsersTable
-                    users={users}
-                    isLoading={isLoading}
-                    onEdit={(user) => console.log('Edit user:', user)}
-                    onDelete={(user) => console.log('Delete user:', user)}
-                    onView={(user) => console.log('View user:', user)}
-                  />
+                {/* Notifications */}
+                <div className='relative'>
+                  <button className='p-2 text-gray-600 hover:text-gray-800'>
+                    <Bell className='w-5 h-5' />
+                    <span className='absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full'></span>
+                  </button>
                 </div>
+
+                {/* Export Button */}
+                <button
+                  onClick={handleExport}
+                  className='bg-green-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-green-700 transition-colors'
+                >
+                  <Download className='w-4 h-4' />
+                  <span className='text-base font-normal font-sans'>
+                    Export
+                  </span>
+                </button>
               </div>
+            </div>
+          </header>
 
-              {/* Right Sidebar - Analytics */}
-              <div className='space-y-6'>
-                {/* User Insights */}
-                <div className='bg-white rounded-lg border border-gray-200 p-6'>
-                  <h3 className='text-gray-900 text-lg font-semibold font-sans mb-4'>
-                    User Insights
-                  </h3>
-
-                  <div className='space-y-4'>
-                    <div className='flex justify-between items-center'>
-                      <span className='text-gray-600 text-sm'>Total Users</span>
-                      <span className='text-gray-900 text-2xl font-bold'>
-                        {isLoading ? '...' : adminStats.totalUsers || 0}
-                      </span>
-                    </div>
-
-                    <div className='flex justify-between items-center'>
-                      <div>
-                        <div className='text-gray-600 text-sm'>
-                          Service Providers
-                        </div>
-                        <div className='text-gray-600 text-sm'>
-                          New This Month
-                        </div>
-                      </div>
-                      <div className='text-right'>
-                        <div className='text-gray-900 text-lg font-semibold'>
-                          {isLoading
-                            ? '...'
-                            : analytics.userInsights?.serviceProviders || 0}
-                        </div>
-                        <div className='text-gray-900 text-lg font-semibold'>
-                          {isLoading
-                            ? '...'
-                            : analytics.userInsights?.newUsersThisMonth || 0}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* New Registrations Chart */}
-                <div className='bg-white rounded-lg border border-gray-200 p-6'>
-                  <h3 className='text-gray-900 text-lg font-semibold font-sans mb-4'>
-                    New Registrations
-                  </h3>
-
-                  {/* Real Monthly Data */}
-                  <div className='space-y-2'>
-                    {isLoading ? (
-                      <div className='text-center py-8'>
-                        <div className='w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin mx-auto'></div>
-                      </div>
-                    ) : analytics.monthlyRegistrations ? (
-                      analytics.monthlyRegistrations
-                        .slice(-6)
-                        .map((month, index) => (
-                          <div
-                            key={index}
-                            className='flex items-center justify-between'
+          {/* Main Content */}
+          <main className='p-6'>
+            <div className='max-w-7xl mx-auto'>
+              {/* Content Area */}
+              <div className='grid grid-cols-1 xl:grid-cols-4 gap-6'>
+                {/* Main Tables Section */}
+                <div className='xl:col-span-3 space-y-6'>
+                  {/* Listings Management */}
+                  <div className='bg-white rounded-lg border border-gray-200'>
+                    <div className='px-6 py-4 border-b border-gray-200'>
+                      <div className='flex items-center justify-between'>
+                        <h2 className='text-gray-900 text-lg font-semibold font-sans'>
+                          Listings Management
+                        </h2>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => setShowFeatured(!showFeatured)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              showFeatured
+                                ? 'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                                : 'bg-gray-100 text-gray-700 border border-gray-200'
+                            }`}
                           >
-                            <span className='text-gray-600 text-xs'>
-                              {month.month}
-                            </span>
-                            <div className='flex items-center gap-2'>
-                              <div
-                                className='bg-green-500 rounded h-2'
-                                style={{
-                                  width: `${Math.max(
-                                    month.registrations * 10,
-                                    10
-                                  )}px`,
-                                  maxWidth: '80px',
-                                }}
-                              ></div>
-                              <span className='text-gray-900 text-sm font-medium w-8 text-right'>
-                                {month.registrations}
-                              </span>
-                            </div>
-                          </div>
-                        ))
-                    ) : (
-                      <div className='text-center py-4 text-gray-500 text-sm'>
-                        No registration data available
+                            <Star className={`w-4 h-4 ${showFeatured ? 'fill-current' : ''}`} />
+                            {showFeatured ? 'Show All Listings' : 'Featured'}
+                          </button>
+                          <button
+                            onClick={() => setShowDeleted(!showDeleted)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              showDeleted
+                                ? 'bg-red-100 text-red-700 border border-red-200'
+                                : 'bg-gray-100 text-gray-700 border border-gray-200'
+                            }`}
+                          >
+                            <Trash2 className='w-4 h-4' />
+                            {showDeleted ? 'Show All Listings' : 'Trash'}
+                          </button>
+                        </div>
                       </div>
-                    )}
+                    </div>
+                    <ListingsTable
+                      listings={
+                        showDeleted
+                          ? listings.filter((l) => l.status === 'deleted')
+                          : showFeatured
+                          ? listings.filter((l) => l.featured === true && l.status !== 'deleted')
+                          : listings.filter((l) => l.status !== 'deleted')
+                      }
+                      isLoading={isLoading}
+                      onEdit={handleEditListing}
+                      onDelete={handleDeleteListing}
+                      onView={handleViewListing}
+                      onStatusChange={handleStatusChange}
+                      onApprove={handleApprove}
+                      onReject={handleReject}
+                      onRecover={handleRecoverListing}
+                      onToggleFeatured={handleToggleFeatured}
+                    />
+                  </div>
+
+                  {/* Users Management */}
+                  <div className='bg-white rounded-lg border border-gray-200'>
+                    <div className='px-6 py-4 border-b border-gray-200'>
+                      <h2 className='text-gray-900 text-lg font-semibold font-sans'>
+                        Users Management
+                      </h2>
+                    </div>
+                    <UsersTable
+                      users={users}
+                      isLoading={isLoading}
+                      onEdit={(user) => console.log('Edit user:', user)}
+                      onDelete={(user) => console.log('Delete user:', user)}
+                      onView={(user) => console.log('View user:', user)}
+                    />
                   </div>
                 </div>
 
-                {/* User Activity */}
-                <div className='bg-white rounded-lg border border-gray-200 p-6'>
-                  <h3 className='text-gray-900 text-lg font-semibold font-sans mb-4'>
-                    User Activity (This Month)
-                  </h3>
+                {/* Right Sidebar - Analytics */}
+                <div className='space-y-6'>
+                  {/* User Insights */}
+                  <div className='bg-white rounded-lg border border-gray-200 p-6'>
+                    <h3 className='text-gray-900 text-lg font-semibold font-sans mb-4'>
+                      User Insights
+                    </h3>
 
-                  <div className='space-y-3'>
-                    <div className='flex justify-between items-center'>
-                      <span className='text-gray-600 text-sm'>
-                        New Listings
-                      </span>
-                      <span className='text-gray-900 text-lg font-semibold'>
-                        {isLoading
-                          ? '...'
-                          : analytics.userActivity?.newListingsPosted || 0}
-                      </span>
-                    </div>
-                    <div className='flex justify-between items-center'>
-                      <span className='text-gray-600 text-sm'>
-                        Active Sellers
-                      </span>
-                      <span className='text-gray-900 text-lg font-semibold'>
-                        {isLoading
-                          ? '...'
-                          : analytics.userActivity?.uniqueListingUsers || 0}
-                      </span>
-                    </div>
-                    <div className='flex justify-between items-center'>
-                      <span className='text-gray-600 text-sm'>
-                        Messages Sent
-                      </span>
-                      <span className='text-gray-900 text-lg font-semibold'>
-                        {isLoading
-                          ? '...'
-                          : analytics.userActivity?.totalMessages || 0}
-                      </span>
-                    </div>
-                    <div className='flex justify-between items-center'>
-                      <span className='text-gray-600 text-sm'>
-                        Active Messagers
-                      </span>
-                      <span className='text-gray-900 text-lg font-semibold'>
-                        {isLoading
-                          ? '...'
-                          : analytics.userActivity?.uniqueMessageUsers || 0}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* User Types Distribution */}
-                <div className='bg-white rounded-lg border border-gray-200 p-6'>
-                  <h3 className='text-gray-900 text-lg font-semibold font-sans mb-4'>
-                    User Types
-                  </h3>
-
-                  <div className='space-y-3'>
-                    <div className='flex items-center justify-between'>
-                      <div className='flex items-center gap-2'>
-                        <div className='w-3 h-3 bg-green-500 rounded-full'></div>
-                        <span className='text-gray-700 text-sm'>
-                          Service Providers
+                    <div className='space-y-4'>
+                      <div className='flex justify-between items-center'>
+                        <span className='text-gray-600 text-sm'>
+                          Total Users
+                        </span>
+                        <span className='text-gray-900 text-2xl font-bold'>
+                          {isLoading ? '...' : adminStats.totalUsers || 0}
                         </span>
                       </div>
-                      <span className='text-gray-900 text-sm font-semibold'>
-                        {isLoading
-                          ? '...'
-                          : analytics.userTypeDistribution?.service_provider ||
-                            0}
-                      </span>
-                    </div>
-                    <div className='flex items-center justify-between'>
-                      <div className='flex items-center gap-2'>
-                        <div className='w-3 h-3 bg-blue-500 rounded-full'></div>
-                        <span className='text-gray-700 text-sm'>Customers</span>
-                      </div>
-                      <span className='text-gray-900 text-sm font-semibold'>
-                        {isLoading
-                          ? '...'
-                          : analytics.userTypeDistribution?.customer || 0}
-                      </span>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Geographic Distribution */}
-                <div className='bg-white rounded-lg border border-gray-200 p-6'>
-                  <h3 className='text-gray-900 text-lg font-semibold font-sans mb-4'>
-                    Geographic Distribution
-                  </h3>
-
-                  <div className='space-y-2'>
-                    {isLoading ? (
-                      <div className='text-center py-4'>
-                        <div className='w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin mx-auto'></div>
-                      </div>
-                    ) : analytics.geographicDistribution ? (
-                      analytics.geographicDistribution
-                        .slice(0, 5)
-                        .map((location, index) => (
-                          <div
-                            key={index}
-                            className='flex items-center justify-between'
-                          >
-                            <span className='text-gray-700 text-sm'>
-                              {location.country}
-                            </span>
-                            <div className='flex items-center gap-2'>
-                              <div
-                                className='bg-blue-500 rounded h-2'
-                                style={{
-                                  width: `${Math.max(
-                                    location.users * 5,
-                                    10
-                                  )}px`,
-                                  maxWidth: '60px',
-                                }}
-                              ></div>
-                              <span className='text-gray-900 text-sm font-medium w-8 text-right'>
-                                {location.users}
-                              </span>
-                            </div>
+                      <div className='flex justify-between items-center'>
+                        <div>
+                          <div className='text-gray-600 text-sm'>
+                            Service Providers
                           </div>
-                        ))
-                    ) : (
-                      <div className='text-center py-4 text-gray-500 text-sm'>
-                        No geographic data available
+                          <div className='text-gray-600 text-sm'>
+                            New This Month
+                          </div>
+                        </div>
+                        <div className='text-right'>
+                          <div className='text-gray-900 text-lg font-semibold'>
+                            {isLoading
+                              ? '...'
+                              : analytics.userInsights?.serviceProviders || 0}
+                          </div>
+                          <div className='text-gray-900 text-lg font-semibold'>
+                            {isLoading
+                              ? '...'
+                              : analytics.userInsights?.newUsersThisMonth || 0}
+                          </div>
+                        </div>
                       </div>
-                    )}
+                    </div>
                   </div>
-                </div>
 
-                {/* Geographic Distribution */}
-                <div className='bg-white rounded-lg border border-gray-200 p-6'>
-                  <h3 className='text-gray-900 text-lg font-semibold font-sans mb-4'>
-                    Geographic Distribution
-                  </h3>
+                  {/* New Registrations Chart */}
+                  <div className='bg-white rounded-lg border border-gray-200 p-6'>
+                    <h3 className='text-gray-900 text-lg font-semibold font-sans mb-4'>
+                      New Registrations
+                    </h3>
 
-                  <div className='space-y-3'>
-                    {[
-                      { country: 'United States', percentage: 45 },
-                      { country: 'Canada', percentage: 25 },
-                      { country: 'United Kingdom', percentage: 15 },
-                      { country: 'Australia', percentage: 10 },
-                      { country: 'Other', percentage: 5 },
-                    ].map((item, index) => (
-                      <div
-                        key={index}
-                        className='flex items-center justify-between'
-                      >
+                    {/* Real Monthly Data */}
+                    <div className='space-y-2'>
+                      {isLoading ? (
+                        <div className='text-center py-8'>
+                          <div className='w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin mx-auto'></div>
+                        </div>
+                      ) : analytics.monthlyRegistrations ? (
+                        analytics.monthlyRegistrations
+                          .slice(-6)
+                          .map((month, index) => (
+                            <div
+                              key={index}
+                              className='flex items-center justify-between'
+                            >
+                              <span className='text-gray-600 text-xs'>
+                                {month.month}
+                              </span>
+                              <div className='flex items-center gap-2'>
+                                <div
+                                  className='bg-green-500 rounded h-2'
+                                  style={{
+                                    width: `${Math.max(
+                                      month.registrations * 10,
+                                      10
+                                    )}px`,
+                                    maxWidth: '80px',
+                                  }}
+                                ></div>
+                                <span className='text-gray-900 text-sm font-medium w-8 text-right'>
+                                  {month.registrations}
+                                </span>
+                              </div>
+                            </div>
+                          ))
+                      ) : (
+                        <div className='text-center py-4 text-gray-500 text-sm'>
+                          No registration data available
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* User Activity */}
+                  <div className='bg-white rounded-lg border border-gray-200 p-6'>
+                    <h3 className='text-gray-900 text-lg font-semibold font-sans mb-4'>
+                      User Activity (This Month)
+                    </h3>
+
+                    <div className='space-y-3'>
+                      <div className='flex justify-between items-center'>
+                        <span className='text-gray-600 text-sm'>
+                          New Listings
+                        </span>
+                        <span className='text-gray-900 text-lg font-semibold'>
+                          {isLoading
+                            ? '...'
+                            : analytics.userActivity?.newListingsPosted || 0}
+                        </span>
+                      </div>
+                      <div className='flex justify-between items-center'>
+                        <span className='text-gray-600 text-sm'>
+                          Active Sellers
+                        </span>
+                        <span className='text-gray-900 text-lg font-semibold'>
+                          {isLoading
+                            ? '...'
+                            : analytics.userActivity?.uniqueListingUsers || 0}
+                        </span>
+                      </div>
+                      <div className='flex justify-between items-center'>
+                        <span className='text-gray-600 text-sm'>
+                          Messages Sent
+                        </span>
+                        <span className='text-gray-900 text-lg font-semibold'>
+                          {isLoading
+                            ? '...'
+                            : analytics.userActivity?.totalMessages || 0}
+                        </span>
+                      </div>
+                      <div className='flex justify-between items-center'>
+                        <span className='text-gray-600 text-sm'>
+                          Active Messagers
+                        </span>
+                        <span className='text-gray-900 text-lg font-semibold'>
+                          {isLoading
+                            ? '...'
+                            : analytics.userActivity?.uniqueMessageUsers || 0}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* User Types Distribution */}
+                  <div className='bg-white rounded-lg border border-gray-200 p-6'>
+                    <h3 className='text-gray-900 text-lg font-semibold font-sans mb-4'>
+                      User Types
+                    </h3>
+
+                    <div className='space-y-3'>
+                      <div className='flex items-center justify-between'>
                         <div className='flex items-center gap-2'>
-                          <div className='w-2 h-2 bg-green-500 rounded-full'></div>
-                          <span className='text-gray-700 text-xs font-normal font-sans'>
-                            {item.country}
+                          <div className='w-3 h-3 bg-green-500 rounded-full'></div>
+                          <span className='text-gray-700 text-sm'>
+                            Service Providers
                           </span>
                         </div>
-                        <span className='text-gray-600 text-xs font-normal font-sans'>
-                          {item.percentage}%
+                        <span className='text-gray-900 text-sm font-semibold'>
+                          {isLoading
+                            ? '...'
+                            : analytics.userTypeDistribution
+                                ?.service_provider || 0}
                         </span>
                       </div>
-                    ))}
+                      <div className='flex items-center justify-between'>
+                        <div className='flex items-center gap-2'>
+                          <div className='w-3 h-3 bg-blue-500 rounded-full'></div>
+                          <span className='text-gray-700 text-sm'>
+                            Customers
+                          </span>
+                        </div>
+                        <span className='text-gray-900 text-sm font-semibold'>
+                          {isLoading
+                            ? '...'
+                            : analytics.userTypeDistribution?.customer || 0}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Geographic Distribution */}
+                  <div className='bg-white rounded-lg border border-gray-200 p-6'>
+                    <h3 className='text-gray-900 text-lg font-semibold font-sans mb-4'>
+                      Geographic Distribution
+                    </h3>
+
+                    <div className='space-y-2'>
+                      {isLoading ? (
+                        <div className='text-center py-4'>
+                          <div className='w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin mx-auto'></div>
+                        </div>
+                      ) : analytics.geographicDistribution ? (
+                        analytics.geographicDistribution
+                          .slice(0, 5)
+                          .map((location, index) => (
+                            <div
+                              key={index}
+                              className='flex items-center justify-between'
+                            >
+                              <span className='text-gray-700 text-sm'>
+                                {location.country}
+                              </span>
+                              <div className='flex items-center gap-2'>
+                                <div
+                                  className='bg-blue-500 rounded h-2'
+                                  style={{
+                                    width: `${Math.max(
+                                      location.users * 5,
+                                      10
+                                    )}px`,
+                                    maxWidth: '60px',
+                                  }}
+                                ></div>
+                                <span className='text-gray-900 text-sm font-medium w-8 text-right'>
+                                  {location.users}
+                                </span>
+                              </div>
+                            </div>
+                          ))
+                      ) : (
+                        <div className='text-center py-4 text-gray-500 text-sm'>
+                          No geographic data available
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Geographic Distribution */}
+                  <div className='bg-white rounded-lg border border-gray-200 p-6'>
+                    <h3 className='text-gray-900 text-lg font-semibold font-sans mb-4'>
+                      Geographic Distribution
+                    </h3>
+
+                    <div className='space-y-3'>
+                      {[
+                        { country: 'United States', percentage: 45 },
+                        { country: 'Canada', percentage: 25 },
+                        { country: 'United Kingdom', percentage: 15 },
+                        { country: 'Australia', percentage: 10 },
+                        { country: 'Other', percentage: 5 },
+                      ].map((item, index) => (
+                        <div
+                          key={index}
+                          className='flex items-center justify-between'
+                        >
+                          <div className='flex items-center gap-2'>
+                            <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                            <span className='text-gray-700 text-xs font-normal font-sans'>
+                              {item.country}
+                            </span>
+                          </div>
+                          <span className='text-gray-600 text-xs font-normal font-sans'>
+                            {item.percentage}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

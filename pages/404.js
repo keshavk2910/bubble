@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
+import Head from 'next/head';
 export default function Custom404() {
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
@@ -17,6 +18,10 @@ export default function Custom404() {
 
   return (
     <Layout>
+      <Head>
+        <title>404 - Bin Cleaning Classifieds</title>
+        <meta name='description' content='Page not found' />
+      </Head>
       <div className='min-h-screen bg-white'>
         <div className='max-w-4xl mx-auto px-6 py-16'>
           {/* Hero Section with Icon */}

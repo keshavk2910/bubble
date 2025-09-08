@@ -30,6 +30,7 @@ export default function ListingForm({
     videoUrl: initialData?.video_url || '',
     price: initialData?.price?.toString() || '',
     zipCode: initialData?.zip_code || '',
+    city: initialData?.city || '',
     termsAccepted: !isEdit, // For edit, terms are already accepted
   });
 
@@ -330,6 +331,7 @@ export default function ListingForm({
         price: formData.price,
         year: formData.year,
         videoUrl: formData.videoUrl,
+        city: formData.city,
         zipCode: formData.zipCode,
         ...(isEdit ? {} : { images: uploadedImages }),
       };
@@ -525,28 +527,41 @@ export default function ListingForm({
                   </div>
                 </div>
               </div>
-
               <div>
-                <div>
-                  <label
-                    htmlFor='zipCode'
-                    className='block text-gray-700 text-base font-normal font-sans leading-normal '
-                  >
-                    ZIP Code*
-                  </label>
-                  <input
-                    type='text'
-                    id='zipCode'
-                    value={formData.zipCode}
-                    onChange={(e) =>
-                      handleInputChange('zipCode', e.target.value)
-                    }
-                    placeholder='Enter ZIP code'
-                    className='w-full bg-white rounded-xl border border-gray-200 px-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
-                    pattern='[0-9]{5}(-[0-9]{4})?'
-                    required
-                  />
-                </div>
+                <label
+                  htmlFor='City'
+                  className='block text-gray-700 text-base font-normal font-sans leading-normal '
+                >
+                  City
+                </label>
+                <input
+                  type='text'
+                  id='city'
+                  value={formData.city}
+                  onChange={(e) => handleInputChange('city', e.target.value)}
+                  placeholder='Enter City'
+                  className='w-full bg-white rounded-xl border border-gray-200 px-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
+                  pattern='[a-zA-Z]+'
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor='zipCode'
+                  className='block text-gray-700 text-base font-normal font-sans leading-normal '
+                >
+                  ZIP Code
+                </label>
+                <input
+                  type='text'
+                  id='zipCode'
+                  value={formData.zipCode}
+                  onChange={(e) => handleInputChange('zipCode', e.target.value)}
+                  placeholder='Enter ZIP code'
+                  className='w-full bg-white rounded-xl border border-gray-200 px-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
+                  pattern='[0-9]{5}(-[0-9]{4})?'
+                  required
+                />
               </div>
             </div>
 

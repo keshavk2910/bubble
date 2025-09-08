@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import Head from 'next/head';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 import {
   Eye,
@@ -19,6 +21,7 @@ import Logo from '../components/Images/logo.svg';
 import Image from 'next/image';
 
 export default function Register() {
+  const router = useRouter();
   const countries = [
     { value: '', label: 'Select your country', flag: '🌍' },
     { value: 'US', label: 'United States', flag: '🇺🇸' },
@@ -45,6 +48,40 @@ export default function Register() {
   const [showSmsModal, setShowSmsModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [registeredUserId, setRegisteredUserId] = useState(null);
+
+  // Check if user is already signed in
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      try {
+        const session = localStorage.getItem('supabase_session');
+        if (session) {
+          const sessionData = JSON.parse(session);
+          const token = sessionData.access_token;
+
+          // Verify session is still valid
+          const response = await fetch('/api/me', {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (response.ok) {
+            // User is authenticated, redirect to dashboard
+            router.push('/dashboard');
+          } else {
+            // Session invalid, clear it
+            localStorage.removeItem('supabase_session');
+            localStorage.removeItem('user_profile');
+          }
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      }
+    };
+
+    checkAuthentication();
+  }, [router]);
 
   const calculatePasswordStrength = (password) => {
     if (!password) return '';
@@ -207,9 +244,9 @@ export default function Register() {
 
   const handleSmsVerified = async () => {
     console.log('SMS verification successful!');
-    
+
     setShowSmsModal(false);
-    
+
     // Now auto sign-in the user after phone verification
     await autoSignInUser(formData.email, formData.password);
   };
@@ -249,7 +286,6 @@ export default function Register() {
 
       // Show success modal, then redirect to dashboard
       setShowSuccessModal(true);
-
     } catch (error) {
       console.error('Auto sign-in error:', error);
       // If auto sign-in fails, just show success modal
@@ -262,376 +298,389 @@ export default function Register() {
   };
 
   return (
-    <div className='min-h-screen bg-gray-50 flex items-center justify-center py-12 px-6'>
-      <div className='w-full max-w-md'>
-        {/* Registration Card */}
-        <div className='bg-white rounded-xl border border-gray-200 p-8'>
-          {/* Header */}
-          <div className='mb-8 flex justify-center'>
-            <Link href='/'>
-              <Image src={Logo.src} alt='Logo' width={300} height={300} />
-            </Link>
-          </div>
-          <div className='text-center mb-8'>
-            <h2 className='text-gray-700 text-4xl font-normal font-sans leading-9 mb-4'>
-              Join the Marketplace —<br /> It&apos;s Free
-            </h2>
-            <p className='text-gray-500 text-base font-normal font-sans leading-normal'>
-              Create an account to start selling or buying
-            </p>
-          </div>
-
-          {/* Registration Form */}
-          <form onSubmit={handleSubmit} className='space-y-6'>
-            {/* Full Name */}
-            <div>
-              <label
-                htmlFor='fullName'
-                className='block text-gray-700 text-sm font-normal font-sans leading-tight mb-2'
-              >
-                Full Name
-              </label>
-              <div className='relative'>
-                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                  <User className='w-4 h-4 text-gray-400' />
-                </div>
-                <input
-                  type='text'
-                  id='fullName'
-                  value={formData.fullName}
-                  onChange={(e) =>
-                    handleInputChange('fullName', e.target.value)
-                  }
-                  placeholder='Enter your full name'
-                  className='w-full bg-white rounded-xl border border-gray-200 pl-10 pr-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 placeholder:text-gray-400'
-                  required
-                />
-              </div>
-              {errors.fullName && (
-                <div className='flex items-center gap-2 mt-2'>
-                  <AlertCircle className='w-4 h-4 text-red-500' />
-                  <span className='text-red-500 text-sm font-normal font-sans'>
-                    {errors.fullName}
-                  </span>
-                </div>
-              )}
+    <>
+      <Head>
+        <title>Register - Bin Cleaning Classifieds</title>
+        <meta
+          name='description'
+          content='Create a free account to start buying and selling on our marketplace.'
+        />
+      </Head>
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center py-12 px-6'>
+        <div className='w-full max-w-md'>
+          {/* Registration Card */}
+          <div className='bg-white rounded-xl border border-gray-200 p-8'>
+            {/* Header */}
+            <div className='mb-8 flex justify-center'>
+              <Link href='/'>
+                <Image src={Logo.src} alt='Logo' width={300} height={300} />
+              </Link>
+            </div>
+            <div className='text-center mb-8'>
+              <h2 className='text-gray-700 text-4xl font-normal font-sans leading-9 mb-4'>
+                Join the Marketplace —<br /> It&apos;s Free
+              </h2>
+              <p className='text-gray-500 text-base font-normal font-sans leading-normal'>
+                Create an account to start selling or buying
+              </p>
             </div>
 
-            {/* Email */}
-            <div>
-              <label
-                htmlFor='email'
-                className='block text-gray-700 text-sm font-normal font-sans leading-tight mb-2'
-              >
-                Email
-              </label>
-              <div className='relative'>
-                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                  <Mail className='w-4 h-4 text-gray-400' />
-                </div>
-                <input
-                  type='email'
-                  id='email'
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder='name@example.com'
-                  className='w-full bg-white rounded-xl border border-gray-200 pl-10 pr-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 placeholder:text-gray-400'
-                  required
-                />
-              </div>
-              {errors.email && (
-                <div className='flex items-center gap-2 mt-2'>
-                  <AlertCircle className='w-4 h-4 text-red-500' />
-                  <span className='text-red-500 text-sm font-normal font-sans'>
-                    {errors.email}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Password */}
-            <div>
-              <label
-                htmlFor='password'
-                className='block text-gray-700 text-sm font-normal font-sans leading-tight mb-2'
-              >
-                Password
-              </label>
-              <div className='relative'>
-                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                  <Lock className='w-4 h-4 text-gray-400' />
-                </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  id='password'
-                  value={formData.password}
-                  onChange={(e) =>
-                    handleInputChange('password', e.target.value)
-                  }
-                  placeholder='••••••••'
-                  className='w-full bg-white rounded-xl border border-gray-200 pl-10 pr-12 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 placeholder:text-gray-400'
-                  required
-                />
-                <button
-                  type='button'
-                  onClick={() => setShowPassword(!showPassword)}
-                  className='absolute inset-y-0 right-0 pr-3 flex items-center'
+            {/* Registration Form */}
+            <form onSubmit={handleSubmit} className='space-y-6'>
+              {/* Full Name */}
+              <div>
+                <label
+                  htmlFor='fullName'
+                  className='block text-gray-700 text-sm font-normal font-sans leading-tight mb-2'
                 >
-                  {showPassword ? (
-                    <EyeOff className='w-4 h-4 text-gray-400 hover:text-gray-600' />
-                  ) : (
-                    <Eye className='w-4 h-4 text-gray-400 hover:text-gray-600' />
-                  )}
-                </button>
+                  Full Name
+                </label>
+                <div className='relative'>
+                  <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                    <User className='w-4 h-4 text-gray-400' />
+                  </div>
+                  <input
+                    type='text'
+                    id='fullName'
+                    value={formData.fullName}
+                    onChange={(e) =>
+                      handleInputChange('fullName', e.target.value)
+                    }
+                    placeholder='Enter your full name'
+                    className='w-full bg-white rounded-xl border border-gray-200 pl-10 pr-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 placeholder:text-gray-400'
+                    required
+                  />
+                </div>
+                {errors.fullName && (
+                  <div className='flex items-center gap-2 mt-2'>
+                    <AlertCircle className='w-4 h-4 text-red-500' />
+                    <span className='text-red-500 text-sm font-normal font-sans'>
+                      {errors.fullName}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* Password Strength Indicator */}
-              {formData.password && (
-                <div className='mt-3'>
-                  <div className='w-full h-1 bg-gray-200 rounded-full overflow-hidden'>
-                    <div
-                      className={`h-full rounded-full transition-all duration-300 ${getStrengthColor()} ${getStrengthWidth()}`}
-                    ></div>
+              {/* Email */}
+              <div>
+                <label
+                  htmlFor='email'
+                  className='block text-gray-700 text-sm font-normal font-sans leading-tight mb-2'
+                >
+                  Email
+                </label>
+                <div className='relative'>
+                  <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                    <Mail className='w-4 h-4 text-gray-400' />
                   </div>
+                  <input
+                    type='email'
+                    id='email'
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    placeholder='name@example.com'
+                    className='w-full bg-white rounded-xl border border-gray-200 pl-10 pr-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 placeholder:text-gray-400'
+                    required
+                  />
+                </div>
+                {errors.email && (
                   <div className='flex items-center gap-2 mt-2'>
-                    <Check className={`w-3 h-3 ${getStrengthTextColor()}`} />
-                    <span
-                      className={`text-xs font-normal font-sans leading-none ${getStrengthTextColor()}`}
-                    >
-                      {getStrengthText()}
+                    <AlertCircle className='w-4 h-4 text-red-500' />
+                    <span className='text-red-500 text-sm font-normal font-sans'>
+                      {errors.email}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Password */}
+              <div>
+                <label
+                  htmlFor='password'
+                  className='block text-gray-700 text-sm font-normal font-sans leading-tight mb-2'
+                >
+                  Password
+                </label>
+                <div className='relative'>
+                  <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                    <Lock className='w-4 h-4 text-gray-400' />
+                  </div>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    id='password'
+                    value={formData.password}
+                    onChange={(e) =>
+                      handleInputChange('password', e.target.value)
+                    }
+                    placeholder='••••••••'
+                    className='w-full bg-white rounded-xl border border-gray-200 pl-10 pr-12 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 placeholder:text-gray-400'
+                    required
+                  />
+                  <button
+                    type='button'
+                    onClick={() => setShowPassword(!showPassword)}
+                    className='absolute inset-y-0 right-0 pr-3 flex items-center'
+                  >
+                    {showPassword ? (
+                      <EyeOff className='w-4 h-4 text-gray-400 hover:text-gray-600' />
+                    ) : (
+                      <Eye className='w-4 h-4 text-gray-400 hover:text-gray-600' />
+                    )}
+                  </button>
+                </div>
+
+                {/* Password Strength Indicator */}
+                {formData.password && (
+                  <div className='mt-3'>
+                    <div className='w-full h-1 bg-gray-200 rounded-full overflow-hidden'>
+                      <div
+                        className={`h-full rounded-full transition-all duration-300 ${getStrengthColor()} ${getStrengthWidth()}`}
+                      ></div>
+                    </div>
+                    <div className='flex items-center gap-2 mt-2'>
+                      <Check className={`w-3 h-3 ${getStrengthTextColor()}`} />
+                      <span
+                        className={`text-xs font-normal font-sans leading-none ${getStrengthTextColor()}`}
+                      >
+                        {getStrengthText()}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Country */}
+              <div>
+                <label
+                  htmlFor='country'
+                  className='block text-gray-700 text-sm font-normal font-sans leading-tight mb-2'
+                >
+                  Country
+                </label>
+                <div className='relative'>
+                  <select
+                    id='country'
+                    value={formData.country}
+                    onChange={(e) =>
+                      handleInputChange('country', e.target.value)
+                    }
+                    className={`w-full bg-white rounded-xl border appearance-none pl-4 pr-10 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 ${
+                      errors.country ? 'border-red-500' : 'border-gray-200'
+                    }`}
+                    required
+                  >
+                    {countries.map((country) => (
+                      <option
+                        key={country.value}
+                        value={country.value}
+                        disabled={!country.value}
+                      >
+                        {country.flag} {country.label}
+                      </option>
+                    ))}
+                  </select>
+                  <div className='absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none'>
+                    <ChevronDown className='w-4 h-4 text-gray-400' />
+                  </div>
+                </div>
+                {errors.country && (
+                  <div className='flex items-center gap-2 mt-2'>
+                    <AlertCircle className='w-4 h-4 text-red-500' />
+                    <span className='text-red-500 text-sm font-normal font-sans'>
+                      {errors.country}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* ZIP Code */}
+              <div>
+                <label
+                  htmlFor='zipCode'
+                  className='block text-gray-700 text-sm font-normal font-sans leading-tight mb-2'
+                >
+                  ZIP Code
+                </label>
+                <div className='relative'>
+                  <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                    <MapPin className='w-4 h-4 text-gray-400' />
+                  </div>
+                  <input
+                    type='text'
+                    id='zipCode'
+                    value={formData.zipCode}
+                    onChange={(e) =>
+                      handleInputChange('zipCode', e.target.value)
+                    }
+                    placeholder='Enter your ZIP code'
+                    className={`w-full bg-white rounded-xl border pl-10 pr-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 placeholder:text-gray-400 ${
+                      errors.zipCode ? 'border-red-500' : 'border-gray-200'
+                    }`}
+                    pattern='[0-9]{5}(-[0-9]{4})?'
+                    required
+                  />
+                </div>
+                {errors.zipCode && (
+                  <div className='flex items-center gap-2 mt-2'>
+                    <AlertCircle className='w-4 h-4 text-red-500' />
+                    <span className='text-red-500 text-sm font-normal font-sans'>
+                      {errors.zipCode}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label
+                  htmlFor='phone'
+                  className='block text-gray-700 text-sm font-normal font-sans leading-tight mb-2'
+                >
+                  Phone
+                </label>
+                <div className='relative'>
+                  <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                    <Phone className='w-4 h-4 text-gray-400' />
+                  </div>
+                  <input
+                    type='tel'
+                    id='phone'
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    placeholder='(123) 456-7890'
+                    className='w-full bg-white rounded-xl border border-gray-200 pl-10 pr-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 placeholder:text-gray-400'
+                    required
+                  />
+                </div>
+                {errors.phone && (
+                  <div className='flex items-center gap-2 mt-2'>
+                    <AlertCircle className='w-4 h-4 text-red-500' />
+                    <span className='text-red-500 text-sm font-normal font-sans'>
+                      {errors.phone}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Submit Error Message */}
+              {errors.submit && (
+                <div className='bg-red-50 border border-red-200 rounded-xl p-4'>
+                  <div className='flex items-center gap-2'>
+                    <AlertCircle className='w-5 h-5 text-red-500' />
+                    <span className='text-red-700 text-sm font-normal font-sans'>
+                      {errors.submit}
                     </span>
                   </div>
                 </div>
               )}
-            </div>
 
-            {/* Country */}
-            <div>
-              <label
-                htmlFor='country'
-                className='block text-gray-700 text-sm font-normal font-sans leading-tight mb-2'
-              >
-                Country
-              </label>
-              <div className='relative'>
-                <select
-                  id='country'
-                  value={formData.country}
-                  onChange={(e) => handleInputChange('country', e.target.value)}
-                  className={`w-full bg-white rounded-xl border appearance-none pl-4 pr-10 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 ${
-                    errors.country ? 'border-red-500' : 'border-gray-200'
-                  }`}
-                  required
-                >
-                  {countries.map((country) => (
-                    <option
-                      key={country.value}
-                      value={country.value}
-                      disabled={!country.value}
+              {/* Terms Checkbox */}
+              <div className='flex items-start gap-3'>
+                <div className='relative mt-1'>
+                  <input
+                    type='checkbox'
+                    id='terms'
+                    checked={formData.termsAccepted}
+                    onChange={(e) =>
+                      handleInputChange('termsAccepted', e.target.checked)
+                    }
+                    className='sr-only'
+                    required
+                  />
+                  <label
+                    htmlFor='terms'
+                    className='flex items-center cursor-pointer'
+                  >
+                    <div
+                      className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${
+                        formData.termsAccepted
+                          ? 'bg-green-600 border-green-600'
+                          : 'border-gray-300 bg-white hover:border-gray-400'
+                      }`}
                     >
-                      {country.flag} {country.label}
-                    </option>
-                  ))}
-                </select>
-                <div className='absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none'>
-                  <ChevronDown className='w-4 h-4 text-gray-400' />
+                      {formData.termsAccepted && (
+                        <Check className='w-3 h-3 text-white' />
+                      )}
+                    </div>
+                  </label>
                 </div>
-              </div>
-              {errors.country && (
-                <div className='flex items-center gap-2 mt-2'>
-                  <AlertCircle className='w-4 h-4 text-red-500' />
-                  <span className='text-red-500 text-sm font-normal font-sans'>
-                    {errors.country}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* ZIP Code */}
-            <div>
-              <label
-                htmlFor='zipCode'
-                className='block text-gray-700 text-sm font-normal font-sans leading-tight mb-2'
-              >
-                ZIP Code
-              </label>
-              <div className='relative'>
-                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                  <MapPin className='w-4 h-4 text-gray-400' />
-                </div>
-                <input
-                  type='text'
-                  id='zipCode'
-                  value={formData.zipCode}
-                  onChange={(e) => handleInputChange('zipCode', e.target.value)}
-                  placeholder='Enter your ZIP code'
-                  className={`w-full bg-white rounded-xl border pl-10 pr-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 placeholder:text-gray-400 ${
-                    errors.zipCode ? 'border-red-500' : 'border-gray-200'
-                  }`}
-                  pattern='[0-9]{5}(-[0-9]{4})?'
-                  required
-                />
-              </div>
-              {errors.zipCode && (
-                <div className='flex items-center gap-2 mt-2'>
-                  <AlertCircle className='w-4 h-4 text-red-500' />
-                  <span className='text-red-500 text-sm font-normal font-sans'>
-                    {errors.zipCode}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label
-                htmlFor='phone'
-                className='block text-gray-700 text-sm font-normal font-sans leading-tight mb-2'
-              >
-                Phone
-              </label>
-              <div className='relative'>
-                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                  <Phone className='w-4 h-4 text-gray-400' />
-                </div>
-                <input
-                  type='tel'
-                  id='phone'
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
-                  placeholder='(123) 456-7890'
-                  className='w-full bg-white rounded-xl border border-gray-200 pl-10 pr-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 placeholder:text-gray-400'
-                  required
-                />
-              </div>
-              {errors.phone && (
-                <div className='flex items-center gap-2 mt-2'>
-                  <AlertCircle className='w-4 h-4 text-red-500' />
-                  <span className='text-red-500 text-sm font-normal font-sans'>
-                    {errors.phone}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Submit Error Message */}
-            {errors.submit && (
-              <div className='bg-red-50 border border-red-200 rounded-xl p-4'>
-                <div className='flex items-center gap-2'>
-                  <AlertCircle className='w-5 h-5 text-red-500' />
-                  <span className='text-red-700 text-sm font-normal font-sans'>
-                    {errors.submit}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Terms Checkbox */}
-            <div className='flex items-start gap-3'>
-              <div className='relative mt-1'>
-                <input
-                  type='checkbox'
-                  id='terms'
-                  checked={formData.termsAccepted}
-                  onChange={(e) =>
-                    handleInputChange('termsAccepted', e.target.checked)
-                  }
-                  className='sr-only'
-                  required
-                />
                 <label
                   htmlFor='terms'
-                  className='flex items-center cursor-pointer'
+                  className='text-gray-700 text-sm font-normal font-sans leading-tight cursor-pointer'
                 >
-                  <div
-                    className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${
-                      formData.termsAccepted
-                        ? 'bg-green-600 border-green-600'
-                        : 'border-gray-300 bg-white hover:border-gray-400'
-                    }`}
+                  I agree to the{' '}
+                  <Link
+                    href='/terms-and-privacy'
+                    className='text-green-600 underline hover:text-green-700'
                   >
-                    {formData.termsAccepted && (
-                      <Check className='w-3 h-3 text-white' />
-                    )}
-                  </div>
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link
+                    href='/terms-and-privacy'
+                    className='text-green-600 underline hover:text-green-700'
+                  >
+                    Privacy Policy
+                  </Link>
                 </label>
+                {errors.terms && (
+                  <div className='flex items-center gap-2 mt-2'>
+                    <AlertCircle className='w-4 h-4 text-red-500' />
+                    <span className='text-red-500 text-sm font-normal font-sans'>
+                      {errors.terms}
+                    </span>
+                  </div>
+                )}
               </div>
-              <label
-                htmlFor='terms'
-                className='text-gray-700 text-sm font-normal font-sans leading-tight cursor-pointer'
+
+              {/* Submit Button */}
+              <button
+                type='submit'
+                disabled={!formData.termsAccepted || isSubmitting}
+                className='w-full bg-green-600 text-white text-base font-normal font-sans leading-normal py-3 rounded-xl hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center'
               >
-                I agree to the{' '}
+                {isSubmitting ? (
+                  <>
+                    <div className='w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2'></div>
+                    Creating Account...
+                  </>
+                ) : (
+                  'Create Account'
+                )}
+              </button>
+
+              {/* Sign In Link */}
+              <div className='text-center pt-4'>
+                <span className='text-black text-sm font-normal font-sans leading-tight'>
+                  Already have an account?{' '}
+                </span>
                 <Link
-                  href='/terms-and-privacy'
-                  className='text-green-600 underline hover:text-green-700'
+                  href='/sign-in'
+                  className='text-green-600 text-sm font-normal font-sans leading-tight hover:text-green-700 transition-colors'
                 >
-                  Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link
-                  href='/terms-and-privacy'
-                  className='text-green-600 underline hover:text-green-700'
-                >
-                  Privacy Policy
+                  Sign in
                 </Link>
-              </label>
-              {errors.terms && (
-                <div className='flex items-center gap-2 mt-2'>
-                  <AlertCircle className='w-4 h-4 text-red-500' />
-                  <span className='text-red-500 text-sm font-normal font-sans'>
-                    {errors.terms}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type='submit'
-              disabled={!formData.termsAccepted || isSubmitting}
-              className='w-full bg-green-600 text-white text-base font-normal font-sans leading-normal py-3 rounded-xl hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center'
-            >
-              {isSubmitting ? (
-                <>
-                  <div className='w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2'></div>
-                  Creating Account...
-                </>
-              ) : (
-                'Create Account'
-              )}
-            </button>
-
-            {/* Sign In Link */}
-            <div className='text-center pt-4'>
-              <span className='text-black text-sm font-normal font-sans leading-tight'>
-                Already have an account?{' '}
-              </span>
-              <Link
-                href='/sign-in'
-                className='text-green-600 text-sm font-normal font-sans leading-tight hover:text-green-700 transition-colors'
-              >
-                Sign in
-              </Link>
-            </div>
-          </form>
+              </div>
+            </form>
+          </div>
         </div>
+
+        {/* SMS Verification Modal */}
+        <SmsVerificationModalRegistration
+          isOpen={showSmsModal}
+          onClose={handleCloseModal}
+          phoneNumber={formData.phone}
+          userId={registeredUserId}
+          onVerified={handleSmsVerified}
+        />
+
+        {/* Registration Success Modal */}
+        <RegistrationSuccessModal
+          isOpen={showSuccessModal}
+          onClose={handleSuccessModalClose}
+          onGoToDashboard={handleGoToDashboard}
+        />
       </div>
-
-      {/* SMS Verification Modal */}
-      <SmsVerificationModalRegistration
-        isOpen={showSmsModal}
-        onClose={handleCloseModal}
-        phoneNumber={formData.phone}
-        userId={registeredUserId}
-        onVerified={handleSmsVerified}
-      />
-
-      {/* Registration Success Modal */}
-      <RegistrationSuccessModal
-        isOpen={showSuccessModal}
-        onClose={handleSuccessModalClose}
-        onGoToDashboard={handleGoToDashboard}
-      />
-    </div>
+    </>
   );
 }

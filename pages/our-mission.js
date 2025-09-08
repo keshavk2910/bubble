@@ -1,8 +1,16 @@
 import Image from 'next/image';
 import Layout from '@/components/Layout';
+import Head from 'next/head';
 export default function OurMission() {
   return (
     <Layout>
+      <Head>
+        <title>Our Mission - Bin Cleaning Classifieds</title>
+        <meta
+          name='description'
+          content='Our mission is to create the most straightforward marketplace for bin cleaning professionals to buy, sell, and grow their businesses.'
+        />
+      </Head>
       <div className='w-full bg-white overflow-hidden'>
         {/* Hero Section */}
         <section className='relative w-full h-96 bg-white shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] overflow-hidden'>

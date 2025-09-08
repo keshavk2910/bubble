@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -27,6 +28,7 @@ export default function AdminListings() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [listings, setListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showFeatured, setShowFeatured] = useState(false);
 
   // Admin user data with session
   const adminUser = {
@@ -135,6 +137,34 @@ export default function AdminListings() {
 
   const handleView = (listing) => {
     console.log('View listing:', listing);
+  };
+
+  const handleToggleFeatured = async (listing) => {
+    try {
+      const session = localStorage.getItem('supabase_session');
+      const sessionData = JSON.parse(session);
+      const token = sessionData.access_token;
+
+      const response = await fetch(`/api/admin/listings/${listing.id}/featured`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ featured: !listing.featured }),
+      });
+
+      if (response.ok) {
+        // Update local state
+        setListings(prev => prev.map(l => 
+          l.id === listing.id 
+            ? { ...l, featured: !l.featured }
+            : l
+        ));
+      }
+    } catch (error) {
+      console.error('Toggle featured error:', error);
+    }
   };
 
   const handleExport = () => {
@@ -280,9 +310,24 @@ export default function AdminListings() {
                   {/* Listings Header with Filters */}
                   <div className="px-6 py-6">
                     <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-gray-700 text-lg font-normal font-sans leading-7">
-                        Listings
-                      </h2>
+                      <div className="flex items-center gap-4">
+                        <h2 className="text-gray-700 text-lg font-normal font-sans leading-7">
+                          Listings
+                        </h2>
+                        
+                        {/* Featured Filter Button */}
+                        <button
+                          onClick={() => setShowFeatured(!showFeatured)}
+                          className={`flex items-center gap-2 px-3 py-2 rounded text-sm font-normal font-sans transition-colors ${
+                            showFeatured
+                              ? 'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          <Star className={`w-4 h-4 ${showFeatured ? 'fill-current' : ''}`} />
+                          {showFeatured ? 'All Listings' : 'Featured Only'}
+                        </button>
+                      </div>
                       
                       {/* Bulk Actions */}
                       <div className="flex items-center gap-3">
@@ -299,7 +344,7 @@ export default function AdminListings() {
                           <span>Remove</span>
                         </button>
                         <button className="flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors">
-                          <Eye className="w-4 h-4" />
+                          <Star className="w-4 h-4" />
                           <span>Feature</span>
                         </button>
                         <button className="flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors">
@@ -332,11 +377,12 @@ export default function AdminListings() {
 
                   {/* Listings Table */}
                   <ListingsTable 
-                    listings={filteredListings}
+                    listings={showFeatured ? filteredListings.filter(l => l.featured) : filteredListings}
                     isLoading={isLoading}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onView={handleView}
+                    onToggleFeatured={handleToggleFeatured}
                   />
                 </div>
               </div>

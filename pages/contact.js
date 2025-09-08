@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import { useState } from 'react';
 import Link from 'next/link';
 import {
@@ -93,28 +94,37 @@ export default function Contact() {
 
   if (isSubmitted) {
     return (
-      <Layout>
-        <div className='max-w-4xl mx-auto px-6 py-16 text-center'>
-          <div className='bg-green-50 border border-green-200 rounded-xl p-12'>
-            <div className='w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6'>
-              <CheckCircle className='w-8 h-8 text-white' />
+      <>
+        <Head>
+          <title>Contact Us - Bin Cleaning Classifieds</title>
+          <meta
+            name='description'
+            content="Get in touch with our team. We're here to help with any questions about our marketplace."
+          />
+        </Head>
+        <Layout>
+          <div className='max-w-4xl mx-auto px-6 py-16 text-center'>
+            <div className='bg-green-50 border border-green-200 rounded-xl p-12'>
+              <div className='w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6'>
+                <CheckCircle className='w-8 h-8 text-white' />
+              </div>
+              <h1 className='text-gray-900 text-3xl font-bold font-sans mb-4'>
+                Message Sent Successfully!
+              </h1>
+              <p className='text-gray-600 text-lg font-normal font-sans leading-7 mb-8'>
+                Thank you for contacting us. We&apos;ll get back to you within
+                24 hours.
+              </p>
+              <button
+                onClick={() => setIsSubmitted(false)}
+                className='bg-green-600 text-white text-base font-normal font-sans px-6 py-3 rounded-md hover:bg-green-700 transition-colors'
+              >
+                Send Another Message
+              </button>
             </div>
-            <h1 className='text-gray-900 text-3xl font-bold font-sans mb-4'>
-              Message Sent Successfully!
-            </h1>
-            <p className='text-gray-600 text-lg font-normal font-sans leading-7 mb-8'>
-              Thank you for contacting us. We&apos;ll get back to you within 24
-              hours.
-            </p>
-            <button
-              onClick={() => setIsSubmitted(false)}
-              className='bg-green-600 text-white text-base font-normal font-sans px-6 py-3 rounded-md hover:bg-green-700 transition-colors'
-            >
-              Send Another Message
-            </button>
           </div>
-        </div>
-      </Layout>
+        </Layout>
+      </>
     );
   }
 

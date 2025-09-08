@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Layout from '@/components/Layout';
-
+import Head from 'next/head';
 export default function FAQ() {
   const [openSections, setOpenSections] = useState({});
 
@@ -137,6 +137,13 @@ export default function FAQ() {
 
   return (
     <Layout>
+      <Head>
+        <title>FAQ - Bin Cleaning Classifieds</title>
+        <meta
+          name='description'
+          content='Frequently asked questions about Bin Cleaning Classifieds'
+        />
+      </Head>
       <div className='bg-white'>
         {/* Dark Hero Section */}
         <section

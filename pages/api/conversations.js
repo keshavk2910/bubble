@@ -63,6 +63,12 @@ async function handler(req, res) {
             ? conversation.seller
             : conversation.buyer;
 
+        // Skip if otherUser is null (data integrity issue)
+        if (!otherUser) {
+          console.warn('Skipping conversation with missing user data:', conversation.id);
+          return null;
+        }
+
         // Get unread message count for this conversation
         const { count: unreadCount } = await supabaseAdmin
           .from('messages')
@@ -112,9 +118,12 @@ async function handler(req, res) {
       })
     );
 
+    // Filter out null conversations (where user data was missing)
+    const validConversations = formattedConversations.filter(conv => conv !== null);
+
     return res.status(200).json({
       success: true,
-      conversations: formattedConversations,
+      conversations: validConversations,
     });
   } catch (error) {
     console.error('Get conversations error:', error);

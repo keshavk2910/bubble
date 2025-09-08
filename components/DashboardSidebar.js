@@ -9,6 +9,8 @@ import {
   LogOut,
   Plus,
 } from 'lucide-react';
+import logoIcon from './Images/logoIcon.png';
+import Image from 'next/image';
 
 export default function DashboardSidebar() {
   const router = useRouter();
@@ -41,7 +43,7 @@ export default function DashboardSidebar() {
     },
     {
       name: 'Help Center',
-      href: '/dashboard/help',
+      href: '/faq',
       icon: HelpCircle,
       current: false,
     },
@@ -66,16 +68,21 @@ export default function DashboardSidebar() {
     <div className='fixed left-0 top-0 w-60 h-screen bg-white border-r border-gray-200 flex flex-col z-40'>
       {/* Dashboard Header */}
       <div className='px-6 py-6 border-b border-gray-200'>
-        <div className='flex items-center gap-3'>
-          <div className='w-8 h-8 bg-green-600 rounded-md flex items-center justify-center'>
-            <span className='text-white text-base font-normal font-sans leading-normal'>
-              D
-            </span>
+        <Link href='/'>
+          <div className='flex items-center gap-3 '>
+            <Image
+              src={logoIcon.src}
+              alt='Logo'
+              width={32}
+              height={32}
+              className=''
+            />
+
+            <h1 className='text-gray-700 text-lg font-normal font-sans leading-7'>
+              Dashboard
+            </h1>
           </div>
-          <h1 className='text-gray-700 text-lg font-normal font-sans leading-7'>
-            Dashboard
-          </h1>
-        </div>
+        </Link>
       </div>
 
       {/* Navigation Menu */}

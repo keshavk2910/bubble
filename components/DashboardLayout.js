@@ -4,6 +4,7 @@ import { Bell, MoreHorizontal, LogOut, User, Settings } from 'lucide-react';
 import DashboardSidebar from './DashboardSidebar';
 import Link from 'next/link';
 import { useOptionalUserSession } from '../lib/useUserSession';
+import NotificationBell from './NotificationBell';
 
 export default function DashboardLayout({
   children,
@@ -72,10 +73,8 @@ export default function DashboardLayout({
 
               <div className='flex items-center gap-4'>
                 {/* Notifications */}
-                <button className='relative p-2 text-gray-400 hover:text-gray-600 transition-colors'>
-                  <Bell className='w-6 h-6' />
-                  <span className='absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full'></span>
-                </button>
+
+                <NotificationBell />
 
                 {/* User Menu */}
                 <div

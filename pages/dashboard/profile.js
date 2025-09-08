@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { X, Bell, MoreHorizontal } from 'lucide-react';
@@ -128,7 +129,12 @@ export default function DashboardProfile() {
   }
 
   return (
-    <div className='min-h-screen bg-gray-50'>
+    <>
+      <Head>
+        <title>Profile Settings - Bin Cleaning Classifieds</title>
+        <meta name="description" content="Update your personal information and profile settings." />
+      </Head>
+      <div className='min-h-screen bg-gray-50'>
       {/* Custom Header for Profile Page */}
       {/* <header className="fixed top-0 left-60 right-0 bg-white border-b border-gray-200 px-6 py-4 z-30">
         <div className="flex items-center justify-end">
@@ -329,5 +335,6 @@ export default function DashboardProfile() {
         </div>
       </DashboardLayout>
     </div>
+    </>
   );
 }

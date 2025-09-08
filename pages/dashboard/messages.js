@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import EmojiPicker from 'emoji-picker-react';
 import DashboardSidebar from '../../components/DashboardSidebar';
-
+import Head from 'next/head';
 export default function Messages() {
   const router = useRouter();
   const { user: sessionUser, avatar: sessionAvatar } = useOptionalUserSession();
@@ -40,7 +40,7 @@ export default function Messages() {
   const realtimeChannelRef = useRef(null);
   const selectedConversationRef = useRef(null);
   const userProfileRef = useRef(null);
-
+  console.log('sessionUser', sessionUser);
   // Scroll to bottom of messages
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -387,7 +387,9 @@ export default function Messages() {
       if (!response.ok) {
         const errorData = await response.json();
         console.error('❌ Send message API error:', errorData);
-        throw new Error(`Failed to send message: ${errorData.details || errorData.error}`);
+        throw new Error(
+          `Failed to send message: ${errorData.details || errorData.error}`
+        );
       }
 
       const data = await response.json();
@@ -577,6 +579,10 @@ export default function Messages() {
   }
   return (
     <div className='min-h-screen bg-gray-50 flex'>
+      <Head>
+        <title>Messages - Bin Cleaning Classifieds</title>
+        <meta name='description' content='Connect with buyers and sellers' />
+      </Head>
       <DashboardSidebar />
 
       {/* Main Content Area - offset by sidebar width */}
@@ -816,7 +822,7 @@ export default function Messages() {
                             sessionAvatar ? (
                               <Image
                                 src={sessionAvatar}
-                                alt="Your avatar"
+                                alt='Your avatar'
                                 width={32}
                                 height={32}
                                 className='w-full h-full object-cover'
@@ -824,18 +830,16 @@ export default function Messages() {
                             ) : (
                               <User className='w-5 h-5 text-gray-600' />
                             )
+                          ) : selectedConversation.otherUser.avatar ? (
+                            <Image
+                              src={selectedConversation.otherUser.avatar}
+                              alt={selectedConversation.otherUser.name}
+                              width={32}
+                              height={32}
+                              className='w-full h-full object-cover'
+                            />
                           ) : (
-                            selectedConversation.otherUser.avatar ? (
-                              <Image
-                                src={selectedConversation.otherUser.avatar}
-                                alt={selectedConversation.otherUser.name}
-                                width={32}
-                                height={32}
-                                className='w-full h-full object-cover'
-                              />
-                            ) : (
-                              <User className='w-5 h-5 text-gray-600' />
-                            )
+                            <User className='w-5 h-5 text-gray-600' />
                           )}
                         </div>
 
