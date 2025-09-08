@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import { useState } from 'react';
 import Image from 'next/image';
-
+import Layout from '@/components/Layout';
 export default function TermsAndPrivacy() {
   const [activeTab, setActiveTab] = useState('terms');
 
@@ -22,7 +22,7 @@ export default function TermsAndPrivacy() {
   };
 
   return (
-    <>
+    <Layout>
       <Head>
         <title>
           Terms of Service & Privacy Policy - Bin Cleaning Classifieds
@@ -617,6 +617,6 @@ export default function TermsAndPrivacy() {
           </div>
         </main>
       </div>
-    </>
+    </Layout>
   );
 }

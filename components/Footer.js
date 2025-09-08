@@ -32,28 +32,28 @@ export default function Footer() {
             </h4>
             <ul className='space-y-4'>
               <li>
-                <a
-                  href='#'
+                <Link
+                  href='/browse-listings'
                   className='text-white text-base font-normal font-sans leading-normal hover:underline transition-all'
                 >
                   Browse Listings
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href='#'
+                <Link
+                  href='/dashboard/post-new-listing'
                   className='text-white text-base font-normal font-sans leading-normal hover:underline transition-all'
                 >
                   Post a Listing
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href='#'
+                <Link
+                  href='/our-mission'
                   className='text-white text-base font-normal font-sans leading-normal hover:underline transition-all'
                 >
                   About Us
-                </a>
+                </Link>
               </li>
               <li>
                 <Link
@@ -73,12 +73,12 @@ export default function Footer() {
             </h4>
             <ul className='space-y-4'>
               <li>
-                <a
-                  href='#'
+                <Link
+                  href='/faq'
                   className='text-white text-base font-normal font-sans leading-normal hover:underline transition-all'
                 >
                   FAQ
-                </a>
+                </Link>
               </li>
               <li>
                 <Link
@@ -97,12 +97,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <a
-                  href='#'
+                <Link
+                  href='/faq'
                   className='text-white text-base font-normal font-sans leading-normal hover:underline transition-all'
                 >
                   Help Center
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

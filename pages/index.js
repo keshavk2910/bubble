@@ -69,12 +69,12 @@ export default function Home() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    
+
     // Build search URL with parameters
     const params = new URLSearchParams();
     if (searchTerm.trim()) params.append('search', searchTerm.trim());
     if (selectedCategory !== 'all') params.append('category', selectedCategory);
-    
+
     // Redirect to browse-listings with search parameters
     window.location.href = `/browse-listings?${params.toString()}`;
   };
@@ -184,19 +184,19 @@ export default function Home() {
                     />
                   </div>
                   <div className='flex gap-4'>
-                    <select 
+                    <select
                       value={selectedCategory}
                       onChange={(e) => setSelectedCategory(e.target.value)}
                       className='bg-white border border-gray-200 rounded-md px-4 py-3 text-black text-base font-normal font-sans focus:outline-none focus:ring-2 focus:ring-green-600'
                     >
-                      <option value="all">All Categories</option>
-                      <option value="equipment">Equipment</option>
-                      <option value="business">Business</option>
-                      <option value="truck">Truck</option>
-                      <option value="parts">Parts</option>
+                      <option value='all'>All Categories</option>
+                      <option value='equipment'>Equipment</option>
+                      <option value='business'>Business</option>
+                      <option value='truck'>Truck</option>
+                      <option value='parts'>Parts</option>
                     </select>
-                    <button 
-                      type="submit"
+                    <button
+                      type='submit'
                       className='bg-green-600 text-white text-base font-normal font-sans px-6 py-3 rounded-md hover:bg-green-700 transition-colors'
                     >
                       Search
@@ -545,23 +545,25 @@ export default function Home() {
                     and entire businesses on our marketplace.
                   </p>
                   <div className='space-y-4'>
-                    <button className='bg-green-600 text-white text-base font-normal font-sans px-8 py-3 rounded-md flex items-center gap-2'>
-                      Post a Listing
-                      <svg
-                        className='w-4 h-4'
-                        fill='none'
-                        stroke='currentColor'
-                        viewBox='0 0 24 24'
-                      >
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth={2}
-                          d='M17 8l4 4m0 0l-4 4m4-4H3'
-                        />
-                      </svg>
-                    </button>
-                    <p className='text-gray-600 text-sm font-normal font-sans leading-tight'>
+                    <Link href={'/dashboard/post-new-listing'}>
+                      <button className='bg-green-600 text-white text-base font-normal font-sans px-8 py-3 rounded-md flex items-center gap-2'>
+                        Post a Listing
+                        <svg
+                          className='w-4 h-4'
+                          fill='none'
+                          stroke='currentColor'
+                          viewBox='0 0 24 24'
+                        >
+                          <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            strokeWidth={2}
+                            d='M17 8l4 4m0 0l-4 4m4-4H3'
+                          />
+                        </svg>
+                      </button>
+                    </Link>
+                    <p className='text-gray-600 text-sm font-normal font-sans leading-tight mt-1'>
                       Free to post, only pay when you sell
                     </p>
                   </div>

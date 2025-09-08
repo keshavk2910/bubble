@@ -298,7 +298,7 @@ export default function FAQ() {
                 Browse Listings
               </Link>
               <Link
-                href='/post-listing'
+                href='/dashboard/post-new-listing'
                 className='bg-white hover:bg-gray-100 text-gray-900 text-base font-normal font-sans px-8 py-3 rounded-lg transition-colors'
               >
                 Post a Listing

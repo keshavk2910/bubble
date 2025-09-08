@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Layout from '@/components/Layout';
 import Head from 'next/head';
+import Link from 'next/link';
 export default function OurMission() {
   return (
     <Layout>
@@ -252,19 +253,25 @@ export default function OurMission() {
 
             <div className='flex justify-center gap-4'>
               <div className='w-40 h-12'>
-                <button className='w-full h-12 bg-green-600 rounded-xl text-white text-base font-normal font-sans hover:bg-green-700 transition-colors'>
-                  Post a Listing
-                </button>
+                <Link href='/dashboard/post-new-listing'>
+                  <button className='w-full h-12 bg-green-600 rounded-xl text-white text-base font-normal font-sans hover:bg-green-700 transition-colors'>
+                    Post a Listing
+                  </button>
+                </Link>
               </div>
               <div className='w-48 h-12'>
-                <button className='w-full h-12 bg-white rounded-xl border border-gray-900 text-gray-900 text-base font-normal font-sans hover:bg-gray-50 transition-colors'>
-                  Browse Listings
-                </button>
+                <Link href='/browse-listings'>
+                  <button className='w-full h-12 bg-white rounded-xl border border-gray-900 text-gray-900 text-base font-normal font-sans hover:bg-gray-50 transition-colors'>
+                    Browse Listings
+                  </button>
+                </Link>
               </div>
               <div className='w-36 h-12'>
-                <button className='w-full h-12 bg-gray-100/5 rounded-xl border border-white text-white text-base font-normal font-sans hover:bg-white hover:text-gray-900 transition-colors'>
-                  Learn More
-                </button>
+                <Link href='/our-mission'>
+                  <button className='w-full h-12 bg-gray-100/5 rounded-xl border border-white text-white text-base font-normal font-sans hover:bg-white hover:text-gray-900 transition-colors'>
+                    Learn More
+                  </button>
+                </Link>
               </div>
             </div>
           </div>
