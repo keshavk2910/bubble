@@ -136,7 +136,7 @@ const sendMessage = async (req, res) => {
       });
     }
 
-    // If there's an attachment, link it to the message
+    // If there&apos;s an attachment, link it to the message
     let attachmentData = null;
     if (attachmentId) {
       console.log('🔗 Linking attachment to message:', attachmentId);

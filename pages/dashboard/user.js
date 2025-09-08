@@ -124,7 +124,7 @@ export default function UserDashboard() {
         }
       } catch (error) {
         console.error('Stats loading error:', error);
-        // Don't fail the dashboard if stats can't load
+        // Don't fail the dashboard if stats can&apos;t load
       } finally {
         setStatsLoading(false);
       }
@@ -783,7 +783,7 @@ export default function UserDashboard() {
                 No listings saved yet
               </h3>
               <p className='text-gray-500 text-base font-normal font-sans mb-4'>
-                Start browsing to save listings you're interested in.
+                Start browsing to save listings you&apos;re interested in.
               </p>
               <button
                 onClick={() => router.push('/browse-listings')}
@@ -835,8 +835,8 @@ export default function UserDashboard() {
                 Delete Listing
               </h3>
               <p className='text-gray-600 text-base font-normal font-sans mb-4'>
-                Are you sure you want to delete "{deleteConfirm.listing?.title}
-                "?
+                Are you sure you want to delete &quot;{deleteConfirm.listing?.title}
+                &quot;?
               </p>
               <p className='text-gray-500 text-sm font-normal font-sans'>
                 This will hide the listing from buyers. You can contact admin to

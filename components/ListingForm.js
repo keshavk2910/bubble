@@ -731,10 +731,11 @@ export default function ListingForm({
                                   className='w-full h-full object-cover pointer-events-none'
                                 />
                               ) : (
-                                <img
+                                <Image
                                   src={image.url}
                                   alt='New upload'
-                                  className='w-full h-full object-cover pointer-events-none'
+                                  fill
+                                  className='object-cover pointer-events-none'
                                 />
                               )}
 

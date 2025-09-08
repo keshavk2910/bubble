@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   Mail,
   Phone,
@@ -417,12 +418,12 @@ export default function Contact() {
             <p className='text-gray-600 text-base font-normal font-sans mb-4'>
               Still have questions?
             </p>
-            <a
+            <Link
               href='/faq'
               className='text-green-600 text-base font-medium font-sans hover:text-green-700 transition-colors'
             >
               Visit our complete FAQ section →
-            </a>
+            </Link>
           </div>
         </div>
       </div>

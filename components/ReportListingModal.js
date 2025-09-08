@@ -213,7 +213,7 @@ export default function ReportListingModal({ isOpen, onClose, listingTitle, list
                   id="customReason"
                   value={customReason}
                   onChange={(e) => setCustomReason(e.target.value)}
-                  placeholder="Please provide specific details about why you're reporting this listing..."
+                  placeholder="Please provide specific details about why you&apos;re reporting this listing..."
                   rows={4}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-700 text-sm font-normal font-sans focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
                   required

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { Bell, MoreHorizontal, LogOut, User, Settings } from 'lucide-react';
 import DashboardSidebar from './DashboardSidebar';
 import Link from 'next/link';
@@ -78,9 +79,11 @@ export default function DashboardLayout({
                   ref={dropdownRef}
                 >
                   <div className='w-10 h-10 bg-gray-100 rounded-full overflow-hidden'>
-                    <img
+                    <Image
                       src={user.avatar}
                       alt='User avatar'
+                      width={40}
+                      height={40}
                       className='w-full h-full object-cover'
                     />
                   </div>

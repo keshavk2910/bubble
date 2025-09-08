@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { 
   Search,
@@ -151,7 +152,7 @@ export default function AdminUsers() {
     };
 
     loadAdminData();
-  }, [router]);
+  }, [router, allUsers]);
 
   const filterButtons = [
     { key: 'All', label: 'All', count: allUsers.length },
@@ -213,50 +214,50 @@ export default function AdminUsers() {
 
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-2">
-          <a
+          <Link
             href="/dashboard/admin"
             className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white"
           >
             <Home className="w-5 h-5" />
             <span className="font-sans">Dashboard</span>
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/dashboard/listings"
             className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white"
           >
             <FileText className="w-5 h-5" />
             <span className="font-sans">Listings</span>
-          </a>
+          </Link>
 
           <div className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left bg-green-700 text-white">
             <Users className="w-5 h-5" />
             <span className="font-sans">Users</span>
           </div>
 
-          <a
+          <Link
             href="/dashboard/tags"
             className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white"
           >
             <Tag className="w-5 h-5" />
             <span className="font-sans">Tags</span>
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/dashboard/analytics"
             className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white"
           >
             <BarChart3 className="w-5 h-5" />
             <span className="font-sans">Analytics</span>
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/dashboard/settings"
             className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors text-green-100 hover:bg-green-700 hover:text-white"
           >
             <Settings className="w-5 h-5" />
             <span className="font-sans">Settings</span>
-          </a>
+          </Link>
         </nav>
 
         {/* Admin User Info */}

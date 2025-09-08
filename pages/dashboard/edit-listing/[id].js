@@ -80,7 +80,7 @@ export default function EditListing() {
     return (
       <DashboardLayout title="Listing Not Found" subtitle="The requested listing could not be found">
         <div className="text-center py-12">
-          <p className="text-gray-600 mb-4">The listing you're looking for doesn't exist or you don't have permission to edit it.</p>
+          <p className="text-gray-600 mb-4">The listing you&apos;re looking for doesn't exist or you don&apos;t have permission to edit it.</p>
           <button
             onClick={() => router.push('/dashboard/user')}
             className="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors"

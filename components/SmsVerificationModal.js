@@ -103,7 +103,7 @@ export default function SmsVerificationModal({
     setIsVerifying(true);
 
     try {
-      // For registration flow, we don't have a session yet - use server-side verification
+      // For registration flow, we don&apos;t have a session yet - use server-side verification
       const profile = localStorage.getItem('temp_unverified_profile');
       
       if (!profile) {
@@ -113,7 +113,7 @@ export default function SmsVerificationModal({
 
       const profileData = JSON.parse(profile);
 
-      // During registration, we don't have a token yet, so we'll verify directly
+      // During registration, we don&apos;t have a token yet, so we'll verify directly
       // For post-registration verification, we'll use a different approach
 
       // Call verify-phone API

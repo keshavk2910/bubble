@@ -188,11 +188,11 @@ export default function Messages() {
 
             const { message, conversationId, senderId } = payload.payload;
 
-            // Only process if it's not from current user
+            // Only process if it&apos;s not from current user
             if (senderId !== userProfileRef.current?.id) {
               console.log('✅ Message is from another user - processing');
 
-              // Add to messages if it's for the selected conversation
+              // Add to messages if it&apos;s for the selected conversation
               if (selectedConversationRef.current?.id === conversationId) {
                 console.log(
                   '✅ Message is for current conversation - adding to UI'
@@ -571,7 +571,6 @@ export default function Messages() {
       </div>
     );
   }
-  console.log(messages);
   return (
     <div className='min-h-screen bg-gray-50 flex'>
       <DashboardSidebar />
@@ -814,7 +813,7 @@ export default function Messages() {
                                       <div
                                         key={`${attachment.id}-${attachIndex}`}
                                       >
-                                        <img
+                                        <Image
                                           src={attachment.file_url}
                                           alt={attachment.file_name}
                                           className='w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity'
@@ -954,7 +953,7 @@ export default function Messages() {
               >
                 <X className='w-5 h-5' />
               </button>
-              <img
+              <Image
                 src={selectedImage}
                 alt='Full size image'
                 className='max-w-full max-h-full object-contain rounded-lg'

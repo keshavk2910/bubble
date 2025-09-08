@@ -284,7 +284,7 @@ export default function ListingsTable({ listings = [], isLoading = false, onEdit
                 Delete Listing
               </h3>
               <p className="text-gray-600 text-base font-normal font-sans mb-2">
-                Are you sure you want to delete "{deleteConfirm.listing?.title}"?
+                Are you sure you want to delete &quot;{deleteConfirm.listing?.title}&quot;?
               </p>
               <p className="text-gray-500 text-sm font-normal font-sans">
                 This will hide the listing from users. You can recover it later if needed.
@@ -324,7 +324,7 @@ export default function ListingsTable({ listings = [], isLoading = false, onEdit
                 Recover Listing
               </h3>
               <p className="text-gray-600 text-base font-normal font-sans mb-2">
-                Are you sure you want to recover "{recoverConfirm.listing?.title}"?
+                Are you sure you want to recover &quot;{recoverConfirm.listing?.title}&quot;?
               </p>
               <p className="text-orange-600 text-sm font-medium font-sans">
                 This will make the listing visible on the website again.
