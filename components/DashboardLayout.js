@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Bell, MoreHorizontal, LogOut, User, Settings } from 'lucide-react';
 import DashboardSidebar from './DashboardSidebar';
 import Link from 'next/link';
+import { useOptionalUserSession } from '../lib/useUserSession';
 
 export default function DashboardLayout({
   children,
@@ -12,12 +13,15 @@ export default function DashboardLayout({
 }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const dropdownRef = useRef(null);
+  const { user, avatar, isAuthenticated } = useOptionalUserSession();
 
-  // Mock user for header
-  const user = {
-    name: 'John Smith',
-    avatar: '/api/placeholder/40/40',
+  // User data with fallback for header
+  const userData = {
+    name: user?.display_name || user?.full_name || 'User',
+    email: user?.email || 'user@example.com',
+    avatar: avatar || '/api/placeholder/40/40',
   };
+  console.log(user);
 
   const handleLogout = async () => {
     try {
@@ -79,13 +83,17 @@ export default function DashboardLayout({
                   ref={dropdownRef}
                 >
                   <div className='w-10 h-10 bg-gray-100 rounded-full overflow-hidden'>
-                    <Image
-                      src={user.avatar}
-                      alt='User avatar'
-                      width={40}
-                      height={40}
-                      className='w-full h-full object-cover'
-                    />
+                    {userData.avatar !== '/api/placeholder/40/40' ? (
+                      <Image
+                        src={userData.avatar}
+                        alt='User avatar'
+                        width={40}
+                        height={40}
+                        className='w-full h-full object-cover'
+                      />
+                    ) : (
+                      <User className='w-6 h-6 text-gray-600' />
+                    )}
                   </div>
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
@@ -99,10 +107,10 @@ export default function DashboardLayout({
                     <div className='absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50'>
                       <div className='px-4 py-2 border-b border-gray-200'>
                         <p className='text-sm font-medium text-gray-900'>
-                          {user.name}
+                          {userData.name}
                         </p>
                         <p className='text-xs text-gray-500'>
-                          john.smith@email.com
+                          {userData.email}
                         </p>
                       </div>
                       <Link

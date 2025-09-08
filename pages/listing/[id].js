@@ -525,7 +525,19 @@ export default function ListingDetail() {
             {/* Seller Card */}
             <div className='bg-white rounded-xl border border-gray-200 p-6'>
               <div className='flex items-center gap-3 mb-4'>
-                <div className='w-12 h-12 bg-gray-300 rounded-full'></div>
+                <div className='w-12 h-12 bg-gray-300 rounded-full overflow-hidden flex items-center justify-center'>
+                  {listing.user?.avatar_url ? (
+                    <Image
+                      src={listing.user.avatar_url}
+                      alt="Seller avatar"
+                      width={48}
+                      height={48}
+                      className='w-full h-full object-cover'
+                    />
+                  ) : (
+                    <User className='w-6 h-6 text-gray-600' />
+                  )}
+                </div>
                 <div>
                   <h3 className='text-gray-700 text-base font-normal font-sans leading-normal'>
                     {listing.user?.display_name ||

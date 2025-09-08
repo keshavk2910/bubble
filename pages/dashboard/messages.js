@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { supabaseClient } from '../../lib/supabase';
+import { useOptionalUserSession } from '../../lib/useUserSession';
 import {
   MessageCircle,
   Send,
@@ -24,6 +25,7 @@ import DashboardSidebar from '../../components/DashboardSidebar';
 
 export default function Messages() {
   const router = useRouter();
+  const { user: sessionUser, avatar: sessionAvatar } = useOptionalUserSession();
   const [isLoading, setIsLoading] = useState(true);
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
@@ -383,7 +385,9 @@ export default function Messages() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send message');
+        const errorData = await response.json();
+        console.error('❌ Send message API error:', errorData);
+        throw new Error(`Failed to send message: ${errorData.details || errorData.error}`);
       }
 
       const data = await response.json();
@@ -641,9 +645,17 @@ export default function Messages() {
                   >
                     <div className='flex items-start gap-3'>
                       {/* Avatar */}
-                      <div className='w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0'>
+                      <div className='w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden'>
                         {loadingConversationId === conversation.id ? (
                           <div className='w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin'></div>
+                        ) : conversation.otherUser.avatar ? (
+                          <Image
+                            src={conversation.otherUser.avatar}
+                            alt={conversation.otherUser.name}
+                            width={48}
+                            height={48}
+                            className='w-full h-full object-cover'
+                          />
                         ) : (
                           <User className='w-6 h-6 text-gray-600' />
                         )}
@@ -712,8 +724,18 @@ export default function Messages() {
                       </button>
 
                       <div className='flex items-center gap-3'>
-                        <div className='w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center'>
-                          <User className='w-5 h-5 text-gray-600' />
+                        <div className='w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden'>
+                          {selectedConversation.otherUser.avatar ? (
+                            <Image
+                              src={selectedConversation.otherUser.avatar}
+                              alt={selectedConversation.otherUser.name}
+                              width={40}
+                              height={40}
+                              className='w-full h-full object-cover'
+                            />
+                          ) : (
+                            <User className='w-5 h-5 text-gray-600' />
+                          )}
                         </div>
                         <div>
                           <h3 className='text-gray-900 text-base font-semibold font-sans'>
@@ -789,8 +811,32 @@ export default function Messages() {
                         }`}
                       >
                         {/* Profile Photo */}
-                        <div className='w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0'>
-                          <User className='w-5 h-5 text-gray-600' />
+                        <div className='w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden'>
+                          {isOwn ? (
+                            sessionAvatar ? (
+                              <Image
+                                src={sessionAvatar}
+                                alt="Your avatar"
+                                width={32}
+                                height={32}
+                                className='w-full h-full object-cover'
+                              />
+                            ) : (
+                              <User className='w-5 h-5 text-gray-600' />
+                            )
+                          ) : (
+                            selectedConversation.otherUser.avatar ? (
+                              <Image
+                                src={selectedConversation.otherUser.avatar}
+                                alt={selectedConversation.otherUser.name}
+                                width={32}
+                                height={32}
+                                className='w-full h-full object-cover'
+                              />
+                            ) : (
+                              <User className='w-5 h-5 text-gray-600' />
+                            )
+                          )}
                         </div>
 
                         {/* Message Bubble */}
@@ -816,6 +862,8 @@ export default function Messages() {
                                         <Image
                                           src={attachment.file_url}
                                           alt={attachment.file_name}
+                                          width={100}
+                                          height={100}
                                           className='w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity'
                                           onClick={() =>
                                             setSelectedImage(
@@ -955,6 +1003,8 @@ export default function Messages() {
               </button>
               <Image
                 src={selectedImage}
+                width={1000}
+                height={1000}
                 alt='Full size image'
                 className='max-w-full max-h-full object-contain rounded-lg'
                 onClick={(e) => e.stopPropagation()}

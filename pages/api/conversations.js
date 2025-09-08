@@ -9,11 +9,13 @@ async function handler(req, res) {
 
   try {
     const userId = req.user.id;
-
+    console.log('userId', userId);
     // Get conversations where user is either buyer or seller
-    const { data: conversations, error: conversationsError } = await supabaseAdmin
-      .from('conversations')
-      .select(`
+    const { data: conversations, error: conversationsError } =
+      await supabaseAdmin
+        .from('conversations')
+        .select(
+          `
         id,
         listing_id,
         buyer_id,
@@ -39,15 +41,16 @@ async function handler(req, res) {
           full_name,
           display_name
         )
-      `)
-      .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
-      .order('last_message_at', { ascending: false });
+      `
+        )
+        .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
+        .order('last_message_at', { ascending: false });
 
     if (conversationsError) {
       console.error('Conversations fetch error:', conversationsError);
       return res.status(500).json({
         error: 'Failed to fetch conversations',
-        details: conversationsError.message
+        details: conversationsError.message,
       });
     }
 
@@ -55,9 +58,10 @@ async function handler(req, res) {
     const formattedConversations = await Promise.all(
       conversations.map(async (conversation) => {
         // Determine who the "other user" is
-        const otherUser = conversation.buyer_id === userId 
-          ? conversation.seller 
-          : conversation.buyer;
+        const otherUser =
+          conversation.buyer_id === userId
+            ? conversation.seller
+            : conversation.buyer;
 
         // Get unread message count for this conversation
         const { count: unreadCount } = await supabaseAdmin
@@ -77,7 +81,9 @@ async function handler(req, res) {
           .single();
 
         // Get main listing image
-        const mainImage = conversation.listings?.listing_images?.find(img => img.is_main);
+        const mainImage = conversation.listings?.listing_images?.find(
+          (img) => img.is_main
+        );
 
         return {
           id: conversation.id,
@@ -85,35 +91,36 @@ async function handler(req, res) {
             id: conversation.listings?.id,
             title: conversation.listings?.title,
             price: conversation.listings?.price,
-            image: mainImage?.image_url || null
+            image: mainImage?.image_url || null,
           },
           otherUser: {
             id: otherUser.id,
             name: otherUser.display_name || otherUser.full_name,
-            lastSeen: new Date() // TODO: Implement actual last seen tracking
+            lastSeen: new Date(), // TODO: Implement actual last seen tracking
           },
-          lastMessage: lastMessage ? {
-            content: lastMessage.message,
-            timestamp: new Date(lastMessage.created_at),
-            senderId: lastMessage.sender_id,
-            read: lastMessage.read
-          } : null,
+          lastMessage: lastMessage
+            ? {
+                content: lastMessage.message,
+                timestamp: new Date(lastMessage.created_at),
+                senderId: lastMessage.sender_id,
+                read: lastMessage.read,
+              }
+            : null,
           unreadCount: unreadCount || 0,
-          lastMessageAt: new Date(conversation.last_message_at)
+          lastMessageAt: new Date(conversation.last_message_at),
         };
       })
     );
 
     return res.status(200).json({
       success: true,
-      conversations: formattedConversations
+      conversations: formattedConversations,
     });
-
   } catch (error) {
     console.error('Get conversations error:', error);
     return res.status(500).json({
       error: 'Internal server error',
-      details: 'Could not fetch conversations'
+      details: 'Could not fetch conversations',
     });
   }
 }

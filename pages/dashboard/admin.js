@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 import Link from 'next/link';
+import { useOptionalUserSession } from '../../lib/useUserSession';
 import {
   Search,
   Bell,
@@ -27,6 +29,7 @@ import UsersTable from '../../components/UsersTable';
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const { user: sessionUser, avatar: sessionAvatar } = useOptionalUserSession();
   const [searchTerm, setSearchTerm] = useState('');
   const [listings, setListings] = useState([]);
   const [users, setUsers] = useState([]);
@@ -315,14 +318,24 @@ export default function AdminDashboard() {
         {/* Admin User Info */}
         <div className='px-4 py-6 border-t border-green-500'>
           <div className='flex items-center gap-3 mb-4'>
-            <div className='w-8 h-8 bg-green-700 rounded-full flex items-center justify-center'>
-              <span className='text-white text-xs font-bold'>
-                {userProfile?.full_name
-                  ?.split(' ')
-                  .map((n) => n[0])
-                  .join('')
-                  .toUpperCase() || 'AD'}
-              </span>
+            <div className='w-8 h-8 bg-green-700 rounded-full flex items-center justify-center overflow-hidden'>
+              {sessionAvatar ? (
+                <Image
+                  src={sessionAvatar}
+                  alt="Admin avatar"
+                  width={32}
+                  height={32}
+                  className='w-full h-full object-cover'
+                />
+              ) : (
+                <span className='text-white text-xs font-bold'>
+                  {sessionUser?.full_name
+                    ?.split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                    .toUpperCase() || 'AD'}
+                </span>
+              )}
             </div>
             <div className='flex-1 min-w-0'>
               <p className='text-white text-sm font-medium truncate'>

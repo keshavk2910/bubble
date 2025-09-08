@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { useOptionalUserSession } from '../../lib/useUserSession';
 import { useRouter } from 'next/router';
 import { 
   Search,
@@ -23,17 +25,18 @@ import UsersTable from '../../components/UsersTable';
 
 export default function AdminUsers() {
   const router = useRouter();
+  const { user: sessionUser, avatar: sessionAvatar } = useOptionalUserSession();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userProfile, setUserProfile] = useState(null);
 
-  // Mock admin user
+  // Admin user data with session
   const adminUser = {
-    name: 'Admin User',
-    avatar: '/api/placeholder/40/40',
-    initials: 'AD',
+    name: sessionUser?.display_name || sessionUser?.full_name || 'Admin User',
+    avatar: sessionAvatar || '/api/placeholder/40/40',
+    initials: sessionUser?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'AD',
     role: 'Super Admin'
   };
 
@@ -263,8 +266,18 @@ export default function AdminUsers() {
         {/* Admin User Info */}
         <div className="px-4 py-6 border-t border-green-500">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-green-700 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs font-bold">{adminUser.initials}</span>
+            <div className="w-8 h-8 bg-green-700 rounded-full flex items-center justify-center overflow-hidden">
+              {sessionAvatar ? (
+                <Image
+                  src={sessionAvatar}
+                  alt="Admin avatar"
+                  width={32}
+                  height={32}
+                  className='w-full h-full object-cover'
+                />
+              ) : (
+                <span className="text-white text-xs font-bold">{adminUser.initials}</span>
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-medium truncate">{adminUser.name}</p>

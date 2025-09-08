@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     if (!email || !password) {
       return res.status(400).json({
         error: 'Missing required fields',
-        details: 'Email and password are required'
+        details: 'Email and password are required',
       });
     }
 
@@ -20,49 +20,52 @@ export default async function handler(req, res) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({
-        error: 'Invalid email format'
+        error: 'Invalid email format',
       });
     }
 
     // Attempt to sign in with Supabase admin (server-side only)
-    const { data: authData, error: authError } = await supabaseAdmin.auth.signInWithPassword({
-      email,
-      password
-    });
+    const { data: authData, error: authError } =
+      await supabaseAdmin.auth.signInWithPassword({
+        email,
+        password,
+      });
 
     if (authError) {
       // Handle specific auth errors
       if (authError.message.includes('Invalid login credentials')) {
         return res.status(401).json({
           error: 'Invalid credentials',
-          details: 'The email or password you entered is incorrect'
+          details: 'The email or password you entered is incorrect',
         });
       }
-      
+
       if (authError.message.includes('Email not confirmed')) {
         return res.status(401).json({
           error: 'Email not verified',
-          details: 'Please check your email and click the verification link before signing in'
+          details:
+            'Please check your email and click the verification link before signing in',
         });
       }
 
       return res.status(400).json({
         error: 'Sign in failed',
-        details: authError.message
+        details: authError.message,
       });
     }
 
     if (!authData.user) {
       return res.status(400).json({
         error: 'Sign in failed',
-        details: 'No user data returned'
+        details: 'No user data returned',
       });
     }
 
     // Get user profile information using admin client
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('user_profiles')
-      .select(`
+      .select(
+        `
         id,
         full_name,
         display_name,
@@ -74,8 +77,10 @@ export default async function handler(req, res) {
         user_type,
         role,
         status,
-        registration_date
-      `)
+        registration_date,
+        avatar_url
+      `
+      )
       .eq('id', authData.user.id)
       .single();
 
@@ -83,7 +88,7 @@ export default async function handler(req, res) {
       console.error('Profile fetch error:', profileError);
       return res.status(500).json({
         error: 'Profile data unavailable',
-        details: 'Could not fetch user profile information'
+        details: 'Could not fetch user profile information',
       });
     }
 
@@ -91,7 +96,8 @@ export default async function handler(req, res) {
     if (profile.status === 'blocked') {
       return res.status(403).json({
         error: 'Account blocked',
-        details: 'Your account has been suspended. Please contact support for assistance.'
+        details:
+          'Your account has been suspended. Please contact support for assistance.',
       });
     }
 
@@ -100,14 +106,15 @@ export default async function handler(req, res) {
       return res.status(202).json({
         success: false,
         error: 'Phone verification required',
-        details: 'Please verify your phone number before accessing your account',
+        details:
+          'Please verify your phone number before accessing your account',
         requires_phone_verification: true,
         user_profile: profile,
         temp_session: {
           access_token: authData.session?.access_token,
           refresh_token: authData.session?.refresh_token,
-          expires_at: authData.session?.expires_at
-        }
+          expires_at: authData.session?.expires_at,
+        },
       });
     }
 
@@ -118,20 +125,19 @@ export default async function handler(req, res) {
         id: authData.user.id,
         email: authData.user.email,
         emailConfirmed: authData.user.email_confirmed_at ? true : false,
-        profile: profile
+        profile: profile,
       },
       session: {
         access_token: authData.session?.access_token,
         refresh_token: authData.session?.refresh_token,
-        expires_at: authData.session?.expires_at
-      }
+        expires_at: authData.session?.expires_at,
+      },
     });
-
   } catch (error) {
     console.error('Sign in error:', error);
     return res.status(500).json({
       error: 'Internal server error',
-      details: 'An unexpected error occurred during sign in'
+      details: 'An unexpected error occurred during sign in',
     });
   }
 }

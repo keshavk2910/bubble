@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { useOptionalUserSession } from '../../lib/useUserSession';
 import { 
   Search,
   Bell,
@@ -20,16 +22,17 @@ import {
 import ListingsTable from '../../components/ListingsTable';
 
 export default function AdminListings() {
+  const { user: sessionUser, avatar: sessionAvatar } = useOptionalUserSession();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [listings, setListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Mock admin user
+  // Admin user data with session
   const adminUser = {
-    name: 'Admin User',
-    avatar: '/api/placeholder/40/40',
-    initials: 'AD',
+    name: sessionUser?.display_name || sessionUser?.full_name || 'Admin User',
+    avatar: sessionAvatar || '/api/placeholder/40/40',
+    initials: sessionUser?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'AD',
     role: 'Super Admin'
   };
 

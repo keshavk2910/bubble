@@ -1,17 +1,66 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { X, Bell, MoreHorizontal } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
+import AvatarUpload from '../../components/AvatarUpload';
 
 export default function DashboardProfile() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     displayName: '',
-    realName: 'PHAM TRAN LAN CAM NGOC',
+    realName: '',
     phone: '',
-    email: 'sunieux@gmail.com',
-    address: '123 Ave, New York, United States',
+    email: '',
+    address: '',
+    avatarUrl: null
   });
 
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load current user data on page load
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const session = localStorage.getItem('supabase_session');
+        if (!session) {
+          router.push('/sign-in?redirect=/dashboard/profile');
+          return;
+        }
+
+        const sessionData = JSON.parse(session);
+        const token = sessionData.access_token;
+
+        const response = await fetch('/api/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          setFormData({
+            displayName: userData.profile.display_name || '',
+            realName: userData.profile.full_name || '',
+            phone: userData.profile.phone || '',
+            email: userData.profile.email || '',
+            address: userData.profile.address || '',
+            avatarUrl: userData.profile.avatar_url || null
+          });
+        } else {
+          router.push('/sign-in?redirect=/dashboard/profile');
+        }
+      } catch (error) {
+        console.error('Failed to load user data:', error);
+        router.push('/sign-in?redirect=/dashboard/profile');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, [router]);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -21,12 +70,35 @@ export default function DashboardProfile() {
     e.preventDefault();
     setIsUpdating(true);
 
-    // Simulate update process
-    setTimeout(() => {
-      console.log('Profile updated:', formData);
+    try {
+      const session = localStorage.getItem('supabase_session');
+      const sessionData = JSON.parse(session);
+      const token = sessionData.access_token;
+
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('Profile updated successfully!');
+        // Reload user data to get fresh info
+        window.location.reload();
+      } else {
+        alert(data.details || 'Failed to update profile.');
+      }
+    } catch (error) {
+      console.error('Profile update error:', error);
+      alert('Failed to update profile. Please try again.');
+    } finally {
       setIsUpdating(false);
-      alert('Profile updated successfully!');
-    }, 1000);
+    }
   };
 
   const handleClearAll = () => {
@@ -42,8 +114,18 @@ export default function DashboardProfile() {
   // Mock user for custom header
   const user = {
     name: 'John Smith',
-    avatar: '/api/placeholder/40/40',
+    avatar: formData.avatarUrl || '/api/placeholder/40/40',
   };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout title="Profile" subtitle="Loading...">
+        <div className="flex items-center justify-center py-12">
+          <div className="w-8 h-8 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <div className='min-h-screen bg-gray-50'>
@@ -85,6 +167,20 @@ export default function DashboardProfile() {
                 <h1 className='text-zinc-800 text-5xl font-bold font-sans leading-[56px]'>
                   Personal info
                 </h1>
+              </div>
+
+              {/* Avatar Upload Section */}
+              <div className='mb-16'>
+                <h2 className='text-zinc-800 text-base font-medium font-sans leading-normal mb-8 text-center'>
+                  Profile Picture
+                </h2>
+                <div className='flex justify-center'>
+                  <AvatarUpload
+                    currentAvatar={formData.avatarUrl}
+                    onAvatarChange={(url) => handleInputChange('avatarUrl', url)}
+                    size="large"
+                  />
+                </div>
               </div>
 
               <form onSubmit={handleUpdateProfile} className='space-y-16'>
