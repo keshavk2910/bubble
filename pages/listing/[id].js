@@ -10,6 +10,8 @@ import {
   CheckCircle,
   Star,
 } from 'lucide-react';
+import Layout from '../../components/Layout';
+import ReportListingModal from '../../components/ReportListingModal';
 
 export default function ListingDetail() {
   const router = useRouter();
@@ -20,6 +22,7 @@ export default function ListingDetail() {
   const [isSaved, setIsSaved] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -183,12 +186,54 @@ export default function ListingDetail() {
     }
   };
 
-  const handleContactSeller = () => {
-    console.log('Contacting seller...');
+  const handleContactSeller = async () => {
+    try {
+      // Check if user is logged in
+      const session = localStorage.getItem('supabase_session');
+      if (!session) {
+        // Redirect to sign in with return URL
+        router.push(`/sign-in?redirect=${encodeURIComponent(router.asPath)}`);
+        return;
+      }
+
+      const sessionData = JSON.parse(session);
+      const token = sessionData.access_token;
+
+      // Create or get existing conversation
+      const response = await fetch('/api/conversations/create', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          listingId: listing.id
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Redirect to messages page with conversation
+        router.push(`/dashboard/messages?conversation=${data.conversationId}`);
+      } else {
+        // Handle specific errors
+        if (data.error === 'Cannot contact yourself') {
+          alert('You cannot contact yourself about your own listing.');
+        } else if (data.error === 'Listing not available') {
+          alert('This listing is not currently available for inquiries.');
+        } else {
+          alert(data.details || 'Failed to start conversation. Please try again.');
+        }
+      }
+    } catch (error) {
+      console.error('Contact seller error:', error);
+      alert('Failed to contact seller. Please check your connection and try again.');
+    }
   };
 
   const handleReportListing = () => {
-    console.log('Reporting listing...');
+    setShowReportModal(true);
   };
 
   const [relatedListings, setRelatedListings] = useState([]);
@@ -282,7 +327,8 @@ export default function ListingDetail() {
   }
   console.log('listing.images?.length', listing.images?.length);
   return (
-    <div className='w-full bg-white overflow-hidden'>
+    <Layout>
+      <div className='w-full bg-white overflow-hidden'>
       {/* Inactive Listing Warning Banner for Owner */}
       {isOwner && listing?.status !== 'active' && (
         <div className='sticky top-0 w-full bg-yellow-500 text-white py-4 px-6 z-50'>
@@ -632,7 +678,16 @@ export default function ListingDetail() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+
+      {/* Report Listing Modal */}
+      <ReportListingModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        listingTitle={listing?.title}
+        listingId={listing?.id}
+      />
+    </Layout>
   );
 }
 

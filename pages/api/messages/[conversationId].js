@@ -27,10 +27,19 @@ const getMessages = async (req, res) => {
       });
     }
 
-    // Get messages for this conversation
+    // Get messages for this conversation with attachments
     const { data: messages, error: messagesError } = await supabaseAdmin
       .from('messages')
-      .select('*')
+      .select(`
+        *,
+        message_attachments (
+          id,
+          file_url,
+          file_name,
+          file_type,
+          file_size
+        )
+      `)
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true });
 
@@ -42,12 +51,18 @@ const getMessages = async (req, res) => {
     }
 
     // Mark messages as read (except those sent by current user)
-    await supabaseAdmin
+    const { error: readError } = await supabaseAdmin
       .from('messages')
       .update({ read: true })
       .eq('conversation_id', conversationId)
       .neq('sender_id', userId)
       .eq('read', false);
+
+    if (readError) {
+      console.error('Mark messages as read error:', readError);
+    } else {
+      console.log('Messages marked as read for conversation:', conversationId);
+    }
 
     return res.status(200).json({
       success: true,
@@ -56,7 +71,8 @@ const getMessages = async (req, res) => {
         content: message.message,
         senderId: message.sender_id,
         timestamp: new Date(message.created_at),
-        read: message.read
+        read: message.read,
+        attachments: message.message_attachments || []
       }))
     });
 
@@ -73,7 +89,7 @@ const getMessages = async (req, res) => {
 const sendMessage = async (req, res) => {
   try {
     const { conversationId } = req.query;
-    const { message } = req.body;
+    const { message, attachmentId } = req.body;
     const userId = req.user.id;
 
     if (!message || !message.trim()) {
@@ -120,6 +136,31 @@ const sendMessage = async (req, res) => {
       });
     }
 
+    // If there's an attachment, link it to the message
+    let attachmentData = null;
+    if (attachmentId) {
+      console.log('🔗 Linking attachment to message:', attachmentId);
+      
+      const { data: newAttachment, error: attachmentError } = await supabaseAdmin
+        .from('message_attachments')
+        .insert({
+          message_id: newMessage.id,
+          file_url: attachmentId.file_url,
+          file_name: attachmentId.file_name,
+          file_type: attachmentId.file_type,
+          file_size: attachmentId.file_size
+        })
+        .select()
+        .single();
+
+      if (attachmentError) {
+        console.error('❌ Failed to link attachment:', attachmentError);
+      } else {
+        console.log('✅ Attachment linked successfully:', newAttachment);
+        attachmentData = newAttachment;
+      }
+    }
+
     return res.status(201).json({
       success: true,
       message: {
@@ -127,7 +168,8 @@ const sendMessage = async (req, res) => {
         content: newMessage.message,
         senderId: newMessage.sender_id,
         timestamp: new Date(newMessage.created_at),
-        read: false
+        read: false,
+        attachments: attachmentData ? [attachmentData] : []
       }
     });
 

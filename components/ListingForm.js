@@ -480,21 +480,74 @@ export default function ListingForm({
 
           {/* Year and Video URL Row */}
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-            <div>
-              <label
-                htmlFor='year'
-                className='block text-gray-700 text-base font-normal font-sans leading-normal mb-2'
-              >
-                Year (if applicable)
-              </label>
-              <input
-                type='text'
-                id='year'
-                value={formData.year}
-                onChange={(e) => handleInputChange('year', e.target.value)}
-                placeholder='Enter year of manufacture'
-                className='w-full bg-white rounded-xl border border-gray-200 px-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
-              />
+            <div className='gap-1 grid  grid-cols-1'>
+              <div className=''>
+                <label
+                  htmlFor='year'
+                  className='block text-gray-700 text-base font-normal font-sans leading-normal '
+                >
+                  Year (if applicable)
+                </label>
+                <input
+                  type='text'
+                  id='year'
+                  value={formData.year}
+                  onChange={(e) => handleInputChange('year', e.target.value)}
+                  placeholder='Enter year of manufacture'
+                  className='w-full bg-white rounded-xl border border-gray-200 px-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
+                />
+              </div>
+              <div className=''>
+                <div>
+                  <label
+                    htmlFor='price'
+                    className='block text-gray-700 text-base font-normal font-sans leading-normal '
+                  >
+                    Price*
+                  </label>
+                  <div className='relative'>
+                    <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                      <span className='text-gray-500 text-base'>$</span>
+                    </div>
+                    <input
+                      type='number'
+                      id='price'
+                      value={formData.price}
+                      onChange={(e) =>
+                        handleInputChange('price', e.target.value)
+                      }
+                      placeholder='0.00'
+                      className='w-full bg-white rounded-xl border border-gray-200 pl-8 pr-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
+                      step='0.01'
+                      min='0'
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div>
+                  <label
+                    htmlFor='zipCode'
+                    className='block text-gray-700 text-base font-normal font-sans leading-normal '
+                  >
+                    ZIP Code*
+                  </label>
+                  <input
+                    type='text'
+                    id='zipCode'
+                    value={formData.zipCode}
+                    onChange={(e) =>
+                      handleInputChange('zipCode', e.target.value)
+                    }
+                    placeholder='Enter ZIP code'
+                    className='w-full bg-white rounded-xl border border-gray-200 px-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
+                    pattern='[0-9]{5}(-[0-9]{4})?'
+                    required
+                  />
+                </div>
+              </div>
             </div>
 
             <div>
@@ -512,60 +565,63 @@ export default function ListingForm({
                 placeholder='Paste YouTube or Vimeo link'
                 className='w-full bg-white rounded-xl border border-gray-200 px-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
               />
-              {formData.videoUrl && (
-                <p className='text-gray-400 text-sm mt-2'>
-                  Video preview will appear here
-                </p>
-              )}
+              <div className='mt-2 w-full aspect-video relative'>
+                {formData.videoUrl ? (
+                  (() => {
+                    // Helper to extract embed URL for YouTube or Vimeo
+                    const getEmbedUrl = (url) => {
+                      // YouTube patterns
+                      const ytMatch = url.match(
+                        /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/
+                      );
+                      if (ytMatch) {
+                        return `https://www.youtube.com/embed/${ytMatch[1]}`;
+                      }
+                      // Vimeo patterns
+                      const vimeoMatch = url.match(
+                        /vimeo\.com\/(?:video\/)?([0-9]+)/
+                      );
+                      if (vimeoMatch) {
+                        return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+                      }
+                      return null;
+                    };
+
+                    const embedUrl = getEmbedUrl(formData.videoUrl);
+
+                    if (embedUrl) {
+                      return (
+                        <iframe
+                          src={embedUrl}
+                          title='Video Preview'
+                          className='w-full h-full absolute top-0 left-0 rounded-lg border border-gray-200'
+                          allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+                          allowFullScreen
+                        />
+                      );
+                    } else {
+                      return (
+                        <div className='w-full h-full absolute top-0 left-0 flex items-center justify-center bg-gray-100 border-2 border-gray-200 rounded-md'>
+                          <p className='text-gray-400 text-sm text-center px-2'>
+                            Enter a valid YouTube or Vimeo link to preview the
+                            video.
+                          </p>
+                        </div>
+                      );
+                    }
+                  })()
+                ) : (
+                  <div className='w-full h-full absolute top-0 left-0 flex items-center justify-center bg-gray-100 border-2 border-gray-200 rounded-md'>
+                    <p className='text-gray-400 text-sm text-center px-2'>
+                      Enter a valid YouTube or Vimeo link to preview the video.
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Price and ZIP Code Row */}
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-            <div>
-              <label
-                htmlFor='price'
-                className='block text-gray-700 text-base font-normal font-sans leading-normal mb-2'
-              >
-                Price*
-              </label>
-              <div className='relative'>
-                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                  <span className='text-gray-500 text-base'>$</span>
-                </div>
-                <input
-                  type='number'
-                  id='price'
-                  value={formData.price}
-                  onChange={(e) => handleInputChange('price', e.target.value)}
-                  placeholder='0.00'
-                  className='w-full bg-white rounded-xl border border-gray-200 pl-8 pr-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
-                  step='0.01'
-                  min='0'
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor='zipCode'
-                className='block text-gray-700 text-base font-normal font-sans leading-normal mb-2'
-              >
-                ZIP Code*
-              </label>
-              <input
-                type='text'
-                id='zipCode'
-                value={formData.zipCode}
-                onChange={(e) => handleInputChange('zipCode', e.target.value)}
-                placeholder='Enter ZIP code'
-                className='w-full bg-white rounded-xl border border-gray-200 px-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
-                pattern='[0-9]{5}(-[0-9]{4})?'
-                required
-              />
-            </div>
-          </div>
         </div>
       </section>
 

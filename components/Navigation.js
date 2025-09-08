@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Logo from './Images/logo.svg';
 import Image from 'next/image';
+import NotificationBell from './NotificationBell';
 
 export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -135,11 +136,14 @@ export default function Navigation() {
                   </Link>
                 </>
               ) : (
-                <Link href={dashboardHref}>
-                  <button className='bg-green-600 text-white text-base font-normal font-sans px-6 py-2 rounded-md hover:bg-green-700 transition-colors'>
-                    Dashboard
-                  </button>
-                </Link>
+                <>
+                  <NotificationBell />
+                  <Link href={dashboardHref}>
+                    <button className='bg-green-600 text-white text-base font-normal font-sans px-6 py-2 rounded-md hover:bg-green-700 transition-colors'>
+                      Dashboard
+                    </button>
+                  </Link>
+                </>
               )}
             </div>
           </div>
