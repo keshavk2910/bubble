@@ -3,7 +3,9 @@ import { requireAuth } from '../../lib/auth-middleware';
 import { Resend } from 'resend';
 
 // Initialize Resend (only if API key is available)
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 // Send admin notification email
 const sendAdminNotification = async (listing, userProfile) => {
@@ -27,7 +29,9 @@ const sendAdminNotification = async (listing, userProfile) => {
           <p><strong>Price:</strong> $${listing.price.toLocaleString()}</p>
           <p><strong>Condition:</strong> ${listing.condition}</p>
           <p><strong>Location:</strong> ${listing.zip_code}</p>
-          <p><strong>Submitted by:</strong> ${userProfile.full_name} (${userProfile.email})</p>
+          <p><strong>Submitted by:</strong> ${userProfile.full_name} (${
+        userProfile.email
+      })</p>
         </div>
         
         <p><strong>Description:</strong></p>
@@ -39,7 +43,7 @@ const sendAdminNotification = async (listing, userProfile) => {
             Review in Admin Dashboard
           </a>
         </div>
-      `
+      `,
     });
     console.log('Admin notification sent successfully');
   } catch (error) {
@@ -59,7 +63,7 @@ const createListing = async (req, res) => {
       year,
       videoUrl,
       zipCode,
-      images
+      images,
     } = req.body;
 
     const userId = req.user.id;
@@ -68,15 +72,23 @@ const createListing = async (req, res) => {
     if (!req.profile.email_verified) {
       return res.status(403).json({
         error: 'Email verification required',
-        details: 'Please verify your email address before creating listings'
+        details: 'Please verify your email address before creating listings',
       });
     }
 
     // Validate required fields
-    if (!title || !description || !category || !condition || !price || !zipCode) {
+    if (
+      !title ||
+      !description ||
+      !category ||
+      !condition ||
+      !price ||
+      !zipCode
+    ) {
       return res.status(400).json({
         error: 'Missing required fields',
-        details: 'Title, description, category, condition, price, and ZIP code are required'
+        details:
+          'Title, description, category, condition, price, and ZIP code are required',
       });
     }
 
@@ -85,16 +97,16 @@ const createListing = async (req, res) => {
     if (isNaN(priceNum) || priceNum < 0) {
       return res.status(400).json({
         error: 'Invalid price',
-        details: 'Price must be a valid number greater than or equal to 0'
+        details: 'Price must be a valid number greater than or equal to 0',
       });
     }
 
     // Validate category
-    const validCategories = ['equipment', 'trucks-vehicles', 'complete-business', 'parts-accessories'];
+    const validCategories = ['equipment', 'truck', 'business', 'parts'];
     if (!validCategories.includes(category)) {
       return res.status(400).json({
         error: 'Invalid category',
-        details: 'Category must be one of: ' + validCategories.join(', ')
+        details: 'Category must be one of: ' + validCategories.join(', '),
       });
     }
 
@@ -103,15 +115,20 @@ const createListing = async (req, res) => {
     if (!validConditions.includes(condition)) {
       return res.status(400).json({
         error: 'Invalid condition',
-        details: 'Condition must be one of: ' + validConditions.join(', ')
+        details: 'Condition must be one of: ' + validConditions.join(', '),
       });
     }
 
     // Validate year if provided
-    if (year && (isNaN(parseInt(year)) || parseInt(year) < 1900 || parseInt(year) > new Date().getFullYear() + 1)) {
+    if (
+      year &&
+      (isNaN(parseInt(year)) ||
+        parseInt(year) < 1900 ||
+        parseInt(year) > new Date().getFullYear() + 1)
+    ) {
       return res.status(400).json({
         error: 'Invalid year',
-        details: 'Year must be between 1900 and next year'
+        details: 'Year must be between 1900 and next year',
       });
     }
 
@@ -128,7 +145,7 @@ const createListing = async (req, res) => {
         year: year ? parseInt(year) : null,
         video_url: videoUrl || null,
         zip_code: zipCode.trim(),
-        status: 'pending' // All new listings start as pending
+        status: 'pending', // All new listings start as pending
       })
       .select()
       .single();
@@ -137,7 +154,7 @@ const createListing = async (req, res) => {
       console.error('Listing creation error:', listingError);
       return res.status(500).json({
         error: 'Failed to create listing',
-        details: listingError.message
+        details: listingError.message,
       });
     }
 
@@ -147,7 +164,7 @@ const createListing = async (req, res) => {
         listing_id: newListing.id,
         image_url: image.url,
         is_main: image.isMain || index === 0,
-        display_order: index
+        display_order: index,
       }));
 
       const { error: imagesError } = await supabaseAdmin
@@ -175,15 +192,14 @@ const createListing = async (req, res) => {
         id: newListing.id,
         title: newListing.title,
         status: newListing.status,
-        created_at: newListing.created_at
-      }
+        created_at: newListing.created_at,
+      },
     });
-
   } catch (error) {
     console.error('Create listing error:', error);
     return res.status(500).json({
       error: 'Internal server error',
-      details: 'Could not create listing'
+      details: 'Could not create listing',
     });
   }
 };
@@ -192,12 +208,19 @@ const createListing = async (req, res) => {
 const getListings = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { status, limit = 50, offset = 0, search, include_deleted = 'false' } = req.query;
+    const {
+      status,
+      limit = 50,
+      offset = 0,
+      search,
+      include_deleted = 'false',
+    } = req.query;
     const isAdmin = req.profile.role === 'admin';
 
     let query = supabaseAdmin
       .from('listings')
-      .select(`
+      .select(
+        `
         *,
         listing_images (
           id,
@@ -205,7 +228,8 @@ const getListings = async (req, res) => {
           is_main,
           display_order
         )
-      `)
+      `
+      )
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
@@ -228,7 +252,10 @@ const getListings = async (req, res) => {
     }
 
     if (offset) {
-      query = query.range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1);
+      query = query.range(
+        parseInt(offset),
+        parseInt(offset) + parseInt(limit) - 1
+      );
     }
 
     const { data: listings, error } = await query;
@@ -236,24 +263,24 @@ const getListings = async (req, res) => {
     if (error) {
       return res.status(500).json({
         error: 'Failed to fetch listings',
-        details: error.message
+        details: error.message,
       });
     }
 
     return res.status(200).json({
       success: true,
-      listings: listings.map(listing => ({
+      listings: listings.map((listing) => ({
         ...listing,
-        main_image: listing.listing_images.find(img => img.is_main)?.image_url || null,
-        image_count: listing.listing_images.length
-      }))
+        main_image:
+          listing.listing_images.find((img) => img.is_main)?.image_url || null,
+        image_count: listing.listing_images.length,
+      })),
     });
-
   } catch (error) {
     console.error('Get listings error:', error);
     return res.status(500).json({
       error: 'Internal server error',
-      details: 'Could not fetch listings'
+      details: 'Could not fetch listings',
     });
   }
 };
@@ -274,7 +301,7 @@ const updateListing = async (req, res) => {
       year,
       videoUrl,
       zipCode,
-      status
+      status,
     } = req.body;
 
     // Check ownership or admin privileges
@@ -286,19 +313,19 @@ const updateListing = async (req, res) => {
 
     if (fetchError || !existingListing) {
       return res.status(404).json({
-        error: 'Listing not found'
+        error: 'Listing not found',
       });
     }
 
     if (existingListing.user_id !== userId && !isAdmin) {
       return res.status(403).json({
         error: 'Access denied',
-        details: 'You can only edit your own listings'
+        details: 'You can only edit your own listings',
       });
     }
 
     const updateData = {};
-    
+
     // Only update provided fields
     if (title !== undefined) updateData.title = title.trim();
     if (description !== undefined) updateData.description = description.trim();
@@ -308,7 +335,7 @@ const updateListing = async (req, res) => {
     if (year !== undefined) updateData.year = year ? parseInt(year) : null;
     if (videoUrl !== undefined) updateData.video_url = videoUrl || null;
     if (zipCode !== undefined) updateData.zip_code = zipCode.trim();
-    
+
     // Only admins can change status
     if (status !== undefined && isAdmin) {
       updateData.status = status;
@@ -324,21 +351,20 @@ const updateListing = async (req, res) => {
     if (updateError) {
       return res.status(500).json({
         error: 'Failed to update listing',
-        details: updateError.message
+        details: updateError.message,
       });
     }
 
     return res.status(200).json({
       success: true,
       message: 'Listing updated successfully',
-      listing: updatedListing
+      listing: updatedListing,
     });
-
   } catch (error) {
     console.error('Update listing error:', error);
     return res.status(500).json({
       error: 'Internal server error',
-      details: 'Could not update listing'
+      details: 'Could not update listing',
     });
   }
 };
@@ -359,14 +385,14 @@ const deleteListing = async (req, res) => {
 
     if (fetchError || !existingListing) {
       return res.status(404).json({
-        error: 'Listing not found'
+        error: 'Listing not found',
       });
     }
 
     if (existingListing.user_id !== userId && !isAdmin) {
       return res.status(403).json({
         error: 'Access denied',
-        details: 'You can only delete your own listings'
+        details: 'You can only delete your own listings',
       });
     }
 
@@ -375,27 +401,26 @@ const deleteListing = async (req, res) => {
       .from('listings')
       .update({
         deleted_at: new Date().toISOString(),
-        status: 'deleted'
+        status: 'deleted',
       })
       .eq('id', listingId);
 
     if (deleteError) {
       return res.status(500).json({
         error: 'Failed to delete listing',
-        details: deleteError.message
+        details: deleteError.message,
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: 'Listing deleted successfully'
+      message: 'Listing deleted successfully',
     });
-
   } catch (error) {
     console.error('Delete listing error:', error);
     return res.status(500).json({
       error: 'Internal server error',
-      details: 'Could not delete listing'
+      details: 'Could not delete listing',
     });
   }
 };

@@ -5,6 +5,8 @@ import { Star, Tag, Edit, Trash2 } from 'lucide-react';
 import { useOptionalUserSession } from '../../lib/useUserSession';
 import AdminLayout from '../../components/AdminLayout';
 import ListingsTable from '../../components/ListingsTable';
+import ListingEditModal from '../../components/ListingEditModal';
+import ConfirmationModal from '../../components/ConfirmationModal';
 
 export default function AdminListings() {
   const router = useRouter();
@@ -16,6 +18,10 @@ export default function AdminListings() {
   const [showFeatured, setShowFeatured] = useState(false);
   const [showDeleted, setShowDeleted] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
+  const [selectedListing, setSelectedListing] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [statusAction, setStatusAction] = useState(null);
 
   // Load real listings data from database
   useEffect(() => {
@@ -51,9 +57,14 @@ export default function AdminListings() {
 
         setUserProfile(userData.profile);
 
-        // Load listings with all statuses including deleted
+        // Load listings with filters
+        const params = new URLSearchParams();
+        params.append('limit', '100');
+        params.append('include_deleted', 'true');
+        if (searchTerm) params.append('search', searchTerm);
+        
         const listingsResponse = await fetch(
-          '/api/admin/listings?limit=100&include_deleted=true',
+          `/api/admin/listings?${params}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -75,7 +86,7 @@ export default function AdminListings() {
     };
 
     loadAdminData();
-  }, [router]);
+  }, [router, searchTerm]);
 
   // Calculate filter buttons based on real data
   const filterButtons = [
@@ -113,7 +124,14 @@ export default function AdminListings() {
 
   // Handler functions
   const handleEdit = (listing) => {
-    router.push(`/dashboard/edit-listing/${listing.id}`);
+    setSelectedListing(listing);
+    setShowEditModal(true);
+  };
+
+  const handleListingUpdated = (updatedListing) => {
+    setListings(prev => prev.map(listing => 
+      listing.id === updatedListing.id ? { ...updatedListing, ...listing } : listing
+    ));
   };
 
   const handleDelete = (listing) => {
@@ -243,6 +261,7 @@ export default function AdminListings() {
   const handleExport = () => {
     console.log('Exporting listings...');
   };
+
   const handleToggleFeatured = async (listing) => {
     try {
       const session = localStorage.getItem('supabase_session');
@@ -398,6 +417,17 @@ export default function AdminListings() {
             onToggleFeatured={handleToggleFeatured}
           />
         </div>
+
+        {/* Listing Edit Modal */}
+        <ListingEditModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedListing(null);
+          }}
+          listing={selectedListing}
+          onListingUpdated={handleListingUpdated}
+        />
       </AdminLayout>
     </>
   );

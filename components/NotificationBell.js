@@ -10,14 +10,14 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { supabaseClient } from '../lib/supabase';
-
+import { useRouter } from 'next/router';
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const dropdownRef = useRef(null);
-
+  const router = useRouter();
   // Load notifications
   useEffect(() => {
     const loadNotifications = async () => {
@@ -169,6 +169,7 @@ export default function NotificationBell() {
   };
 
   const markAsRead = async (notificationId) => {
+    console.log('notificationId', notificationId);
     try {
       const session = localStorage.getItem('supabase_session');
       const sessionData = JSON.parse(session);
@@ -305,9 +306,16 @@ export default function NotificationBell() {
                   className={`px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer ${
                     !notification.read ? 'bg-green-50' : ''
                   }`}
-                  onClick={() =>
-                    !notification.read && markAsRead(notification.id)
-                  }
+                  onClick={() => {
+                    //if notification type is new_message onclick send to messages page
+                    if (notification.type === 'new_message') {
+                      console.log('new_message');
+                      markAsRead(notification.id);
+                      router.push(
+                        `/dashboard/messages?conversation=${notification.data.conversation_id}`
+                      );
+                    }
+                  }}
                 >
                   <div className='flex items-start gap-3'>
                     <div className='flex-shrink-0 mt-0.5'>

@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
 import UsersTable from '../../components/UsersTable';
+import UserEditModal from '../../components/UserEditModal';
+import ConfirmationModal from '../../components/ConfirmationModal';
 
 export default function AdminUsers() {
   const router = useRouter();
@@ -21,6 +23,11 @@ export default function AdminUsers() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [userTypeFilter, setUserTypeFilter] = useState('all');
   const [userProfile, setUserProfile] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showBlockModal, setShowBlockModal] = useState(false);
+  const [userToBlock, setUserToBlock] = useState(null);
+  const [isBlocking, setIsBlocking] = useState(false);
 
   // Load real users data from database
   useEffect(() => {
@@ -88,19 +95,33 @@ export default function AdminUsers() {
 
   // Handler functions for user management
   const handleEditUser = (user) => {
-    console.log('Edit user:', user);
-    // TODO: Implement user editing
+    setSelectedUser(user);
+    setShowEditModal(true);
   };
 
-  const handleBlockUser = async (user) => {
+  const handleUserUpdated = (updatedUser) => {
+    setUsers(prev => prev.map(u => 
+      u.id === updatedUser.id ? updatedUser : u
+    ));
+  };
+
+  const handleBlockUser = (user) => {
+    setUserToBlock(user);
+    setShowBlockModal(true);
+  };
+
+  const confirmBlockUser = async () => {
+    if (!userToBlock) return;
+
+    setIsBlocking(true);
     try {
       const session = localStorage.getItem('supabase_session');
       const sessionData = JSON.parse(session);
       const token = sessionData.access_token;
 
-      const newStatus = user.status === 'blocked' ? 'active' : 'blocked';
+      const newStatus = userToBlock.status === 'blocked' ? 'active' : 'blocked';
       
-      const response = await fetch(`/api/admin/users/${user.id}/status`, {
+      const response = await fetch(`/api/admin/users/${userToBlock.id}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -110,15 +131,23 @@ export default function AdminUsers() {
       });
 
       if (response.ok) {
+        const data = await response.json();
         // Update local state
         setUsers(prev => prev.map(u => 
-          u.id === user.id 
+          u.id === userToBlock.id 
             ? { ...u, status: newStatus }
             : u
         ));
+        setShowBlockModal(false);
+        setUserToBlock(null);
+      } else {
+        const errorData = await response.json();
+        console.error('Block user error:', errorData);
       }
     } catch (error) {
       console.error('Block user error:', error);
+    } finally {
+      setIsBlocking(false);
     }
   };
 
@@ -214,6 +243,40 @@ export default function AdminUsers() {
             onView={handleViewUser}
           />
         </div>
+
+        {/* User Edit Modal */}
+        <UserEditModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedUser(null);
+          }}
+          user={selectedUser}
+          onUserUpdated={handleUserUpdated}
+        />
+
+        {/* Block/Unblock Confirmation Modal */}
+        <ConfirmationModal
+          isOpen={showBlockModal}
+          onClose={() => {
+            setShowBlockModal(false);
+            setUserToBlock(null);
+          }}
+          onConfirm={confirmBlockUser}
+          title={userToBlock?.status === 'blocked' ? 'Unblock User' : 'Block User'}
+          message={
+            userToBlock?.status === 'blocked' 
+              ? `Are you sure you want to unblock ${userToBlock?.full_name || userToBlock?.email}? This will restore their listings to pending status for review.`
+              : `Are you sure you want to block ${userToBlock?.full_name || userToBlock?.email}? This will immediately hide all their active listings from the marketplace.`
+          }
+          confirmText={userToBlock?.status === 'blocked' ? 'Unblock' : 'Block'}
+          confirmButtonColor={
+            userToBlock?.status === 'blocked' 
+              ? 'bg-green-600 hover:bg-green-700' 
+              : 'bg-red-600 hover:bg-red-700'
+          }
+          isLoading={isBlocking}
+        />
       </AdminLayout>
     </>
   );

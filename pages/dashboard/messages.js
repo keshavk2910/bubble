@@ -587,8 +587,8 @@ export default function Messages() {
 
       {/* Main Content Area - offset by sidebar width */}
       <div className='flex-1 ml-60 overflow-hidden'>
-        {/* Header */}
-        <header className='bg-white border-b border-gray-200 px-6 py-4'>
+        {/* Dashboard Header */}
+        <header className='sticky top-0 bg-white border-b border-gray-200 px-6 py-4 z-30'>
           <div className='flex items-center justify-between'>
             <div>
               <h1 className='text-gray-900 text-2xl font-semibold font-sans'>
@@ -599,6 +599,36 @@ export default function Messages() {
               </p>
             </div>
             <div className='flex items-center gap-4'>
+              {/* Notifications */}
+              <button className='relative p-2 text-gray-400 hover:text-gray-600 transition-colors'>
+                <svg className='w-6 h-6' fill='currentColor' viewBox='0 0 20 20'>
+                  <path d='M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z' />
+                </svg>
+                <span className='absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full'></span>
+              </button>
+              
+              {/* User Menu */}
+              <div className='flex items-center gap-3'>
+                <div className='w-10 h-10 bg-gray-100 rounded-full overflow-hidden'>
+                  {sessionAvatar ? (
+                    <Image
+                      src={sessionAvatar}
+                      alt='User avatar'
+                      width={40}
+                      height={40}
+                      className='w-full h-full object-cover'
+                    />
+                  ) : (
+                    <User className='w-6 h-6 text-gray-600' />
+                  )}
+                </div>
+                <button className='text-gray-700 hover:text-gray-900 transition-colors'>
+                  <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 20 20'>
+                    <path d='M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z' />
+                  </svg>
+                </button>
+              </div>
+              
               <span className='text-sm text-gray-500'>
                 {conversations.filter((c) => c.unreadCount > 0).length} unread
                 conversations

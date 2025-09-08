@@ -8,9 +8,11 @@ const getAllUsers = async (req, res) => {
 
     let query = supabaseAdmin
       .from('user_profiles')
-      .select(`
+      .select(
+        `
         *
-      `)
+      `
+      )
       .order('registration_date', { ascending: false });
 
     if (status && status !== 'all') {
@@ -23,7 +25,9 @@ const getAllUsers = async (req, res) => {
 
     // Search functionality
     if (search && search.trim()) {
-      query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%,display_name.ilike.%${search}%`);
+      query = query.or(
+        `full_name.ilike.%${search}%,email.ilike.%${search}%,display_name.ilike.%${search}%`
+      );
     }
 
     if (limit) {
@@ -31,15 +35,18 @@ const getAllUsers = async (req, res) => {
     }
 
     if (offset) {
-      query = query.range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1);
+      query = query.range(
+        parseInt(offset),
+        parseInt(offset) + parseInt(limit) - 1
+      );
     }
 
     const { data: users, error } = await query;
-
+    console.log('error', error);
     if (error) {
       return res.status(500).json({
         error: 'Failed to fetch users',
-        details: error.message
+        details: error.message,
       });
     }
 
@@ -54,21 +61,20 @@ const getAllUsers = async (req, res) => {
 
         return {
           ...user,
-          listings_count: count || 0
+          listing_count: count || 0,
         };
       })
     );
 
     return res.status(200).json({
       success: true,
-      users: usersWithCounts
+      users: usersWithCounts,
     });
-
   } catch (error) {
     console.error('Get admin users error:', error);
     return res.status(500).json({
       error: 'Internal server error',
-      details: 'Could not fetch users'
+      details: 'Could not fetch users',
     });
   }
 };

@@ -20,6 +20,7 @@ export default function VerifyPhoneRequired() {
         }
 
         const profile = JSON.parse(tempProfile);
+        console.log(profile);
         setUserProfile(profile);
 
         // If phone is already verified, redirect to dashboard

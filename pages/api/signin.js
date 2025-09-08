@@ -30,7 +30,8 @@ export default async function handler(req, res) {
         email,
         password,
       });
-
+    console.log('authData', authData);
+    console.log('authError', authError);
     if (authError) {
       // Handle specific auth errors
       if (authError.message.includes('Invalid login credentials')) {
@@ -78,7 +79,8 @@ export default async function handler(req, res) {
         role,
         status,
         registration_date,
-        avatar_url
+        avatar_url,
+        email_verified
       `
       )
       .eq('id', authData.user.id)

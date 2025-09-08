@@ -1,13 +1,21 @@
-import { MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react';
+import { MoreHorizontal, Edit, Ban, CheckCircle, Eye } from 'lucide-react';
 
-export default function UsersTable({ users = [], isLoading = false, onEdit, onDelete, onView }) {
+export default function UsersTable({ users = [], isLoading = false, onEdit, onBlock, onView }) {
   const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case 'active': return 'bg-green-100 text-green-700';
-      case 'inactive': return 'bg-red-100 text-red-700';
-      case 'new': return 'bg-blue-100 text-blue-700';
-      case 'pending': return 'bg-yellow-100 text-yellow-700';
+      case 'blocked': return 'bg-red-100 text-red-700';
+      case 'inactive': return 'bg-gray-100 text-gray-700';
       default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch {
+      return 'N/A';
     }
   };
 
@@ -31,9 +39,11 @@ export default function UsersTable({ users = [], isLoading = false, onEdit, onDe
               <th className="w-4 px-4 py-3">
                 <input type="checkbox" className="rounded border-gray-300" />
               </th>
-              <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Username</th>
+              <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Name</th>
               <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Email</th>
-              <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Registration Date</th>
+              <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Phone</th>
+              <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Joined</th>
+              <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Type</th>
               <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Status</th>
               <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Listings</th>
               <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Actions</th>
@@ -42,7 +52,7 @@ export default function UsersTable({ users = [], isLoading = false, onEdit, onDe
           <tbody className="divide-y divide-gray-200">
             {users.length === 0 ? (
               <tr>
-                <td colSpan="7" className="px-6 py-12 text-center">
+                <td colSpan="9" className="px-6 py-12 text-center">
                   <div className="text-gray-500 text-base font-normal font-sans">
                     No users found
                   </div>
@@ -55,22 +65,38 @@ export default function UsersTable({ users = [], isLoading = false, onEdit, onDe
                     <input type="checkbox" className="rounded border-gray-300" />
                   </td>
                   <td className="px-4 py-3 text-gray-700 text-sm font-normal font-sans leading-tight">
-                    {user.username}
+                    <div>
+                      <div className="font-medium">{user.full_name || 'N/A'}</div>
+                      {user.display_name && user.display_name !== user.full_name && (
+                        <div className="text-xs text-gray-500">@{user.display_name}</div>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">
-                    {user.email}
+                    <div>
+                      <div>{user.email}</div>
+                      {user.email_verified === false && (
+                        <div className="text-xs text-red-500">Unverified</div>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">
-                    {user.registrationDate}
+                    {user.phone || 'N/A'}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">
+                    {formatDate(user.created_at)}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">
+                    <span className="capitalize">{user.user_type || 'customer'}</span>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
                       <div className="w-1.5 h-1.5 bg-current rounded-full mr-1"></div>
-                      {user.status}
+                      <span className="capitalize">{user.status || 'active'}</span>
                     </span>
                   </td>
                   <td className="px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">
-                    {user.listings}
+                    {user.listing_count || 0}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
@@ -83,13 +109,21 @@ export default function UsersTable({ users = [], isLoading = false, onEdit, onDe
                           <Edit className="w-4 h-4" />
                         </button>
                       )}
-                      {onDelete && (
+                      {onBlock && (
                         <button 
-                          onClick={() => onDelete(user)}
-                          className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                          title="Delete user"
+                          onClick={() => onBlock(user)}
+                          className={`p-1 transition-colors ${
+                            user.status === 'blocked' 
+                              ? 'text-gray-400 hover:text-green-600' 
+                              : 'text-gray-400 hover:text-red-600'
+                          }`}
+                          title={user.status === 'blocked' ? 'Unblock user' : 'Block user'}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          {user.status === 'blocked' ? (
+                            <CheckCircle className="w-4 h-4" />
+                          ) : (
+                            <Ban className="w-4 h-4" />
+                          )}
                         </button>
                       )}
                       {onView && (
@@ -101,9 +135,6 @@ export default function UsersTable({ users = [], isLoading = false, onEdit, onDe
                           <Eye className="w-4 h-4" />
                         </button>
                       )}
-                      <button className="p-1 text-gray-400 hover:text-gray-600 transition-colors">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </button>
                     </div>
                   </td>
                 </tr>

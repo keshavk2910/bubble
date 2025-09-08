@@ -29,7 +29,7 @@ export default function SignIn() {
           // Verify session is still valid
           const response = await fetch('/api/me', {
             headers: {
-              'Authorization': `Bearer ${token}`,
+              Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json',
             },
           });
@@ -99,7 +99,7 @@ export default function SignIn() {
 
       const data = await response.json();
 
-      if (!response.ok) {
+      if (response.status != 200) {
         // Handle phone verification requirement
         if (data.requires_phone_verification) {
           // Store temporary profile and session for verification page

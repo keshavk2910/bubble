@@ -71,9 +71,9 @@ export default function ListingsTable({
   const getCategoryIcon = (category) => {
     const icons = {
       equipment: '🔧',
-      'trucks-vehicles': '🚗',
-      'complete-business': '🏢',
-      'parts-accessories': '🔧',
+      truck: '🚗',
+      business: '🏢',
+      parts: '🔧',
     };
     return icons[category] || '📦';
   };
@@ -81,9 +81,9 @@ export default function ListingsTable({
   const formatCategoryDisplay = (category) => {
     const categoryMap = {
       equipment: 'Equipment',
-      'trucks-vehicles': 'Trucks & Vehicles',
-      'complete-business': 'Complete Business',
-      'parts-accessories': 'Parts & Accessories',
+      truck: 'Trucks & Vehicles',
+      business: 'Business',
+      parts: 'Parts & Accessories',
     };
     return categoryMap[category] || category;
   };

@@ -40,9 +40,13 @@ export default function SmsVerificationModal({
 
   const handleSendOTP = async () => {
     try {
-      const session = localStorage.getItem('supabase_session') || localStorage.getItem('temp_session');
-      const profile = localStorage.getItem('temp_unverified_profile') || localStorage.getItem('user_profile');
-      
+      const session =
+        localStorage.getItem('supabase_session') ||
+        localStorage.getItem('temp_session');
+      const profile =
+        localStorage.getItem('temp_unverified_profile') ||
+        localStorage.getItem('user_profile');
+
       if (!session || !profile) {
         return;
       }
@@ -54,12 +58,12 @@ export default function SmsVerificationModal({
       const response = await fetch('/api/verify-phone', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           userId: profileData.id,
-          phone: phoneNumber
+          phone: phoneNumber,
         }),
       });
 
@@ -99,19 +103,24 @@ export default function SmsVerificationModal({
   const handleVerify = async () => {
     const code = verificationCode.join('');
     if (code.length !== 6) return;
-
+    const session =
+      localStorage.getItem('supabase_session') ||
+      localStorage.getItem('temp_session');
+    const profile =
+      localStorage.getItem('temp_unverified_profile') ||
+      localStorage.getItem('user_profile');
+    const sessionData = JSON.parse(session);
+    const profileData = JSON.parse(profile);
+    const token = sessionData.access_token;
     setIsVerifying(true);
 
     try {
       // For registration flow, we don&apos;t have a session yet - use server-side verification
-      const profile = localStorage.getItem('temp_unverified_profile');
-      
+
       if (!profile) {
         alert('Registration session expired. Please register again.');
         return;
       }
-
-      const profileData = JSON.parse(profile);
 
       // During registration, we don&apos;t have a token yet, so we'll verify directly
       // For post-registration verification, we'll use a different approach
@@ -120,13 +129,13 @@ export default function SmsVerificationModal({
       const response = await fetch('/api/verify-phone', {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           userId: profileData.id,
           otp: code,
-          phone: phoneNumber
+          phone: phoneNumber,
         }),
       });
 
@@ -153,7 +162,7 @@ export default function SmsVerificationModal({
 
     setResendCooldown(30); // 30 second cooldown
     setVerificationCode(['', '', '', '', '', '']);
-    
+
     // Send new OTP
     await handleSendOTP();
   };
@@ -199,7 +208,7 @@ export default function SmsVerificationModal({
           {phoneNumber && (
             <p className='text-gray-400 text-sm mt-1'>{phoneNumber}</p>
           )}
-          
+
           {/* Development Mode OTP Display */}
           {isDevMode && currentOTP && (
             <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4'>

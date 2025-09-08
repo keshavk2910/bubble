@@ -44,9 +44,9 @@ export default function ListingForm({
   const conditionOptions = ['new', 'excellent', 'good', 'fair', 'poor'];
   const categoryOptions = [
     { value: 'equipment', label: 'Equipment' },
-    { value: 'trucks-vehicles', label: 'Trucks & Vehicles' },
-    { value: 'complete-business', label: 'Complete Business' },
-    { value: 'parts-accessories', label: 'Parts & Accessories' },
+    { value: 'truck', label: 'Trucks & Vehicles' },
+    { value: 'business', label: 'Business' },
+    { value: 'parts', label: 'Parts & Accessories' },
   ];
 
   // Load existing images for edit mode
@@ -317,9 +317,9 @@ export default function ListingForm({
       // Map category to database format
       const categoryMap = {
         Equipment: 'equipment',
-        'Trucks & Vehicles': 'trucks-vehicles',
-        'Complete Business': 'complete-business',
-        'Parts & Accessories': 'parts-accessories',
+        'Trucks & Vehicles': 'truck',
+        Business: 'business',
+        'Parts & Accessories': 'parts',
       };
 
       // Prepare listing data

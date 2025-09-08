@@ -6,7 +6,7 @@ async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
-
+  console.log(req.user);
   try {
     // Return basic user info immediately without expensive stats queries
     // Stats can be loaded separately if needed
@@ -15,25 +15,24 @@ async function handler(req, res) {
       user: {
         id: req.user.id,
         email: req.user.email,
-        emailConfirmed: req.user.email_confirmed_at ? true : false
+        emailConfirmed: req.user.email_confirmed_at ? true : false,
       },
       profile: {
         ...req.profile,
-        email_verified: req.profile.email_verified || false
+        email_verified: req.profile.email_verified || false,
       },
       stats: {
         total_listings: 0,
         active_listings: 0,
         wishlist_count: 0,
-        unread_messages: 0
-      }
+        unread_messages: 0,
+      },
     });
-
   } catch (error) {
     console.error('Get current user error:', error);
     return res.status(500).json({
       error: 'Internal server error',
-      details: 'Could not fetch user information'
+      details: 'Could not fetch user information',
     });
   }
 }
