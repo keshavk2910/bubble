@@ -102,7 +102,7 @@ export default function SignIn() {
       if (response.status != 200) {
         // Handle phone verification requirement
         if (data.requires_phone_verification) {
-          // Store temporary profile and session for verification page
+          // Store temporary profile and session for verification pag
           localStorage.setItem(
             'temp_unverified_profile',
             JSON.stringify(data.user_profile)
