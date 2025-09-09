@@ -1,11 +1,21 @@
-import { useState } from 'react';
-import { X, Flag, CheckCircle, AlertTriangle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Flag, CheckCircle, AlertTriangle, Mail } from 'lucide-react';
+import { useOptionalUserSession } from '../lib/useUserSession';
 
 export default function ReportListingModal({ isOpen, onClose, listingTitle, listingId }) {
+  const { user, isAuthenticated } = useOptionalUserSession();
   const [selectedReason, setSelectedReason] = useState('');
   const [customReason, setCustomReason] = useState('');
+  const [reporterEmail, setReporterEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReported, setIsReported] = useState(false);
+
+  // Auto-fill email if user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && user?.email) {
+      setReporterEmail(user.email);
+    }
+  }, [isAuthenticated, user]);
 
   const predefinedReasons = [
     {
@@ -58,30 +68,58 @@ export default function ReportListingModal({ isOpen, onClose, listingTitle, list
       return;
     }
 
+    if (!reporterEmail.trim()) {
+      alert('Please provide your email address.');
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // Mock API call - will be replaced with real API later
-    setTimeout(() => {
-      console.log('Report submitted:', {
-        listingId,
-        reason: selectedReason,
-        customReason: customReason,
-        timestamp: new Date().toISOString()
+    try {
+      const session = localStorage.getItem('supabase_session');
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
+      if (session) {
+        const sessionData = JSON.parse(session);
+        headers['Authorization'] = `Bearer ${sessionData.access_token}`;
+      }
+
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          listingId,
+          reason: selectedReason,
+          customReason: customReason.trim() || null,
+          reporterEmail: reporterEmail.trim()
+        }),
       });
-      
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setIsReported(true);
+        // Auto-close after showing success message
+        setTimeout(() => {
+          handleClose();
+        }, 3000);
+      } else {
+        alert(data.details || 'Failed to submit report. Please try again.');
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error('Report submission error:', error);
+      alert('Failed to submit report. Please check your connection and try again.');
       setIsSubmitting(false);
-      setIsReported(true);
-      
-      // Auto-close after showing success message
-      setTimeout(() => {
-        handleClose();
-      }, 3000);
-    }, 1000);
+    }
   };
 
   const handleClose = () => {
     setSelectedReason('');
     setCustomReason('');
+    setReporterEmail('');
     setIsSubmitting(false);
     setIsReported(false);
     onClose();
@@ -220,6 +258,34 @@ export default function ReportListingModal({ isOpen, onClose, listingTitle, list
                 />
               </div>
             )}
+
+            {/* Email Input */}
+            <div className="mb-6">
+              <label htmlFor="reporterEmail" className="block text-gray-900 text-base font-semibold font-sans mb-3">
+                Your Email Address *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="w-4 h-4 text-gray-400" />
+                </div>
+                <input
+                  type="email"
+                  id="reporterEmail"
+                  value={reporterEmail}
+                  onChange={(e) => setReporterEmail(e.target.value)}
+                  placeholder="your.email@example.com"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl text-gray-700 text-sm font-normal font-sans focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  required
+                  disabled={isAuthenticated} // Disable if user is logged in
+                />
+              </div>
+              <p className="text-gray-500 text-xs font-normal font-sans mt-2">
+                {isAuthenticated 
+                  ? 'Using your account email address'
+                  : 'We may need to contact you about this report'
+                }
+              </p>
+            </div>
 
             {/* Action Buttons */}
             <div className="flex items-center gap-4 pt-4 border-t border-gray-200">

@@ -18,7 +18,7 @@ async function handler(req, res) {
       zip_code,
       address,
       user_type,
-      status
+      status,
     } = req.body;
 
     // Check if user exists
@@ -27,10 +27,10 @@ async function handler(req, res) {
       .select('id, email')
       .eq('id', id)
       .single();
-
+    console.log(existingUser);
     if (fetchError || !existingUser) {
       return res.status(404).json({
-        error: 'User not found'
+        error: 'User not found',
       });
     }
 
@@ -38,7 +38,7 @@ async function handler(req, res) {
     if (!full_name?.trim() || !email?.trim()) {
       return res.status(400).json({
         error: 'Missing required fields',
-        details: 'Full name and email are required'
+        details: 'Full name and email are required',
       });
     }
 
@@ -47,7 +47,7 @@ async function handler(req, res) {
     if (!emailRegex.test(email.trim())) {
       return res.status(400).json({
         error: 'Invalid email format',
-        details: 'Please provide a valid email address'
+        details: 'Please provide a valid email address',
       });
     }
 
@@ -63,7 +63,7 @@ async function handler(req, res) {
       if (emailExists) {
         return res.status(400).json({
           error: 'Email already exists',
-          details: 'This email address is already registered by another user'
+          details: 'This email address is already registered by another user',
         });
       }
     }
@@ -73,7 +73,7 @@ async function handler(req, res) {
     if (user_type && !validUserTypes.includes(user_type)) {
       return res.status(400).json({
         error: 'Invalid user type',
-        details: 'User type must be either customer or service_provider'
+        details: 'User type must be either customer or service_provider',
       });
     }
 
@@ -82,7 +82,7 @@ async function handler(req, res) {
     if (status && !validStatuses.includes(status)) {
       return res.status(400).json({
         error: 'Invalid status',
-        details: 'Status must be either active or blocked'
+        details: 'Status must be either active or blocked',
       });
     }
 
@@ -90,7 +90,7 @@ async function handler(req, res) {
     const updateData = {
       full_name: full_name.trim(),
       email: email.trim().toLowerCase(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
 
     // Add optional fields if provided
@@ -127,21 +127,20 @@ async function handler(req, res) {
     if (updateError) {
       return res.status(500).json({
         error: 'Failed to update user',
-        details: updateError.message
+        details: updateError.message,
       });
     }
 
     return res.status(200).json({
       success: true,
       message: 'User profile updated successfully',
-      user: updatedUser
+      user: updatedUser,
     });
-
   } catch (error) {
     console.error('Update user error:', error);
     return res.status(500).json({
       error: 'Internal server error',
-      details: 'Could not update user profile'
+      details: 'Could not update user profile',
     });
   }
 }

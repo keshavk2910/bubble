@@ -23,7 +23,7 @@ export default function ListingCard({ listing }) {
   const locationDisplay =
     listing.city && listing.zip_code
       ? `${listing.city}, ${listing.zip_code}`
-      : listing.location || '';
+      : listing.zip_code || '';
 
   return (
     <div className='bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow'>
@@ -55,7 +55,8 @@ export default function ListingCard({ listing }) {
             listing.category
           )} ${listing.featured ? 'top-11' : 'top-3'}`}
         >
-          {listing.category?.charAt(0).toUpperCase() + listing.category?.slice(1)}
+          {listing.category?.charAt(0).toUpperCase() +
+            listing.category?.slice(1)}
         </span>
       </div>
 

@@ -63,6 +63,7 @@ const createListing = async (req, res) => {
       year,
       videoUrl,
       zipCode,
+      city,
       images,
     } = req.body;
 
@@ -83,12 +84,13 @@ const createListing = async (req, res) => {
       !category ||
       !condition ||
       !price ||
-      !zipCode
+      !zipCode ||
+      !city
     ) {
       return res.status(400).json({
         error: 'Missing required fields',
         details:
-          'Title, description, category, condition, price, and ZIP code are required',
+          'Title, description, category, condition, price, city, and ZIP code are required',
       });
     }
 
@@ -145,6 +147,7 @@ const createListing = async (req, res) => {
         year: year ? parseInt(year) : null,
         video_url: videoUrl || null,
         zip_code: zipCode.trim(),
+        city: city ? city.trim() : null,
         status: 'pending', // All new listings start as pending
       })
       .select()
@@ -301,6 +304,7 @@ const updateListing = async (req, res) => {
       year,
       videoUrl,
       zipCode,
+      city,
       status,
     } = req.body;
 
@@ -335,6 +339,7 @@ const updateListing = async (req, res) => {
     if (year !== undefined) updateData.year = year ? parseInt(year) : null;
     if (videoUrl !== undefined) updateData.video_url = videoUrl || null;
     if (zipCode !== undefined) updateData.zip_code = zipCode.trim();
+    if (city !== undefined) updateData.city = city ? city.trim() : null;
 
     // Only admins can change status
     if (status !== undefined && isAdmin) {

@@ -541,7 +541,6 @@ export default function ListingForm({
                   onChange={(e) => handleInputChange('city', e.target.value)}
                   placeholder='Enter City'
                   className='w-full bg-white rounded-xl border border-gray-200 px-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
-                  pattern='[a-zA-Z]+'
                   required
                 />
               </div>

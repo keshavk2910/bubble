@@ -5,6 +5,8 @@ import {
   Home,
   FileText,
   Users,
+  MessageCircle,
+  Shield,
   Tag,
   BarChart3,
   Settings,
@@ -25,6 +27,18 @@ export default function AdminSidebar({ currentPage }) {
       key: 'listings',
     },
     { name: 'Users', href: '/dashboard/users', icon: Users, key: 'users' },
+    {
+      name: 'Reports',
+      href: '/dashboard/reports',
+      icon: Shield,
+      key: 'reports',
+    },
+    {
+      name: 'Messages',
+      href: '/dashboard/admin-messages',
+      icon: MessageCircle,
+      key: 'admin-messages',
+    },
     // { name: 'Tags', href: '/dashboard/tags', icon: Tag, key: 'tags' },
     // { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3, key: 'analytics' },
     // { name: 'Settings', href: '/dashboard/settings', icon: Settings, key: 'settings' }

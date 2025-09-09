@@ -403,7 +403,7 @@ export default function ListingDetail() {
                 <div className='flex items-center gap-2'>
                   <MapPin className='w-4 h-4 text-gray-600' />
                   <span className='text-gray-600 text-base font-normal font-sans leading-normal'>
-                    ZIP: {listing.zip_code}
+                    {listing.city}, {listing.zip_code}
                   </span>
                 </div>
 
@@ -535,7 +535,7 @@ export default function ListingDetail() {
                           <div className='flex items-center gap-2 mb-3'>
                             <MapPin className='w-3.5 h-3.5 text-gray-600' />
                             <span className='text-gray-600 text-sm font-normal font-sans leading-tight'>
-                              ZIP: {item.zip_code}
+                              {item.city}, {item.zip_code}
                             </span>
                           </div>
                           <p className='text-gray-700 text-sm font-normal font-sans leading-tight'>
