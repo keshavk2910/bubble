@@ -20,6 +20,7 @@ import {
   Smile,
   X,
 } from 'lucide-react';
+import NotificationBell from '../../components/NotificationBell';
 import EmojiPicker from 'emoji-picker-react';
 import DashboardSidebar from '../../components/DashboardSidebar';
 import Head from 'next/head';
@@ -40,7 +41,6 @@ export default function Messages() {
   const realtimeChannelRef = useRef(null);
   const selectedConversationRef = useRef(null);
   const userProfileRef = useRef(null);
-  console.log('sessionUser', sessionUser);
   // Scroll to bottom of messages
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -600,13 +600,7 @@ export default function Messages() {
             </div>
             <div className='flex items-center gap-4'>
               {/* Notifications */}
-              <button className='relative p-2 text-gray-400 hover:text-gray-600 transition-colors'>
-                <svg className='w-6 h-6' fill='currentColor' viewBox='0 0 20 20'>
-                  <path d='M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z' />
-                </svg>
-                <span className='absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full'></span>
-              </button>
-              
+              <NotificationBell />
               {/* User Menu */}
               <div className='flex items-center gap-3'>
                 <div className='w-10 h-10 bg-gray-100 rounded-full overflow-hidden'>
@@ -622,13 +616,17 @@ export default function Messages() {
                     <User className='w-6 h-6 text-gray-600' />
                   )}
                 </div>
-                <button className='text-gray-700 hover:text-gray-900 transition-colors'>
-                  <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 20 20'>
+                {/* <button className='text-gray-700 hover:text-gray-900 transition-colors'>
+                  <svg
+                    className='w-4 h-4'
+                    fill='currentColor'
+                    viewBox='0 0 20 20'
+                  >
                     <path d='M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z' />
                   </svg>
-                </button>
+                </button> */}
               </div>
-              
+
               <span className='text-sm text-gray-500'>
                 {conversations.filter((c) => c.unreadCount > 0).length} unread
                 conversations
