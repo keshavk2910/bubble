@@ -68,8 +68,8 @@ export default async function handler(req, res) {
       return res.status(200).json({
         success: true,
         message: 'OTP sent successfully',
-        // Show OTP in development mode only
-        ...(process.env.SHOW_OTP_IN_DEV === 'true' && {
+        // Show OTP when flag is set
+        ...(process.env.SHOW_OTP_IN_DEV && {
           otp: otp,
           dev_mode: true,
         }),
