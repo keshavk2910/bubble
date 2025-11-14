@@ -1,4 +1,59 @@
 import { supabaseAdmin } from '../../lib/supabase';
+import twilio from 'twilio';
+
+// Initialize Twilio client
+const twilioClient = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
+
+// Country code to dial code mapping
+const COUNTRY_DIAL_CODES = {
+  US: '+1',  // United States
+  CA: '+1',  // Canada
+  GB: '+44', // United Kingdom
+  AU: '+61', // Australia
+  IN: '+91', // India
+  DE: '+49', // Germany
+  FR: '+33', // France
+  JP: '+81', // Japan
+  CN: '+86', // China
+  BR: '+55', // Brazil
+  MX: '+52', // Mexico
+  IT: '+39', // Italy
+  ES: '+34', // Spain
+  NL: '+31', // Netherlands
+  SE: '+46', // Sweden
+  NO: '+47', // Norway
+  DK: '+45', // Denmark
+  FI: '+358', // Finland
+  NZ: '+64', // New Zealand
+  SG: '+65', // Singapore
+  // Add more countries as needed
+};
+
+// Helper function to normalize phone number to E.164 format
+function normalizePhoneNumber(phone, countryCode = 'US') {
+  // If it already has +, return as is
+  if (phone.startsWith('+')) {
+    return phone;
+  }
+
+  // Remove all non-digit characters
+  const cleaned = phone.replace(/\D/g, '');
+
+  // Get dial code for the country
+  const dialCode = COUNTRY_DIAL_CODES[countryCode] || '+1'; // Default to US
+
+  // If number already includes country code, just add +
+  const dialCodeDigits = dialCode.replace('+', '');
+  if (cleaned.startsWith(dialCodeDigits)) {
+    return `+${cleaned}`;
+  }
+
+  // Add country dial code
+  return `${dialCode}${cleaned}`;
+}
 
 export default async function handler(req, res) {
   try {
@@ -6,7 +61,7 @@ export default async function handler(req, res) {
 
     if (method === 'POST') {
       // Send OTP for registration phone verification
-      const { userId, phone } = req.body;
+      const { userId, phone, country } = req.body;
 
       if (!userId || !phone) {
         return res.status(400).json({
@@ -28,43 +83,39 @@ export default async function handler(req, res) {
         });
       }
 
-      // Generate and store OTP in database
-      const { data: otpData, error: otpError } = await supabaseAdmin.rpc(
-        'generate_verification_code',
-        {
-          p_user_id: userId,
-          p_code_type: 'phone',
-          p_phone: phone,
-        }
-      );
+      // Normalize phone number to E.164 format using country code
+      const normalizedPhone = normalizePhoneNumber(phone, country || 'US');
 
-      if (otpError) {
-        console.error('Registration phone OTP generation error:', otpError);
+      console.log(`Normalizing ${phone} with country ${country || 'US'} -> ${normalizedPhone}`);
+
+      // Send OTP via Twilio Verify
+      try {
+        const verification = await twilioClient.verify.v2
+          .services(process.env.TWILIO_VERIFY_SERVICE_SID)
+          .verifications.create({
+            to: normalizedPhone,
+            channel: 'sms',
+          });
+
+        console.log(
+          `Registration Twilio verification sent to ${phone}, status: ${verification.status}`
+        );
+
+        return res.status(200).json({
+          success: true,
+          message: 'Verification code sent successfully',
+          status: verification.status, // 'pending'
+        });
+      } catch (twilioError) {
+        console.error('Registration Twilio verification error:', twilioError);
         return res.status(500).json({
-          error: 'Failed to generate verification code',
-          details: otpError.message,
+          error: 'Failed to send verification code',
+          details: twilioError.message,
         });
       }
-
-      const otp = otpData;
-
-      console.log(
-        `Registration SMS to ${phone}: Your verification code is ${otp}`
-      );
-
-      return res.status(200).json({
-        success: true,
-        message: 'OTP sent successfully',
-        // Show OTP when flag is set
-        ...(process.env.SHOW_OTP_IN_DEV && {
-          otp: otp,
-          dev_mode: true,
-        }),
-        expiresIn: 300, // 5 minutes
-      });
     } else if (method === 'PUT') {
       // Verify OTP for registration
-      const { userId, otp, phone } = req.body;
+      const { userId, otp, phone, country } = req.body;
 
       if (!userId || !otp || !phone) {
         return res.status(400).json({
@@ -81,31 +132,46 @@ export default async function handler(req, res) {
         });
       }
 
-      // Verify OTP against stored value in database
-      const { data: isValidOTP, error: verifyError } = await supabaseAdmin.rpc(
-        'verify_code',
-        {
-          p_user_id: userId,
-          p_code: otp,
-          p_code_type: 'phone',
-        }
-      );
+      // Normalize phone number to E.164 format using country code
+      const normalizedPhone = normalizePhoneNumber(phone, country || 'US');
 
-      if (verifyError) {
-        console.error(
-          'Registration phone OTP verification error:',
-          verifyError
+      // Verify OTP using Twilio Verify
+      try {
+        const verificationCheck = await twilioClient.verify.v2
+          .services(process.env.TWILIO_VERIFY_SERVICE_SID)
+          .verificationChecks.create({
+            to: normalizedPhone,
+            code: otp,
+          });
+
+        console.log(
+          `Registration Twilio verification check for ${phone}, status: ${verificationCheck.status}`
         );
+
+        // Check if verification was approved
+        if (verificationCheck.status !== 'approved') {
+          return res.status(400).json({
+            error: 'Invalid or expired code',
+            details: 'Please check your code or request a new one',
+          });
+        }
+      } catch (twilioError) {
+        console.error(
+          'Registration Twilio verification check error:',
+          twilioError
+        );
+
+        // Handle specific Twilio errors
+        if (twilioError.code === 20404) {
+          return res.status(400).json({
+            error: 'Invalid or expired code',
+            details: 'Please check your code or request a new one',
+          });
+        }
+
         return res.status(500).json({
           error: 'Verification failed',
-          details: 'Could not verify code',
-        });
-      }
-
-      if (!isValidOTP) {
-        return res.status(400).json({
-          error: 'Invalid or expired code',
-          details: 'Please check your code or request a new one',
+          details: twilioError.message,
         });
       }
 

@@ -22,12 +22,28 @@ import Image from 'next/image';
 
 export default function Register() {
   const router = useRouter();
-  const countries = [
+
+  // Base countries available to all users
+  const baseCountries = [
     { value: '', label: 'Select your country', flag: '🌍' },
     { value: 'US', label: 'United States', flag: '🇺🇸' },
     { value: 'CA', label: 'Canada', flag: '🇨🇦' },
     { value: 'GB', label: 'United Kingdom', flag: '🇬🇧' },
     { value: 'AU', label: 'Australia', flag: '🇦🇺' },
+  ];
+
+  // Dev mode countries
+  const devCountries = [
+    { value: 'IN', label: 'India', flag: '🇮🇳' },
+  ];
+
+  // Check if dev mode is enabled
+  const isDevMode = process.env.NODE_ENV === 'development';
+
+  // Combine countries based on mode
+  const countries = [
+    ...baseCountries,
+    ...(isDevMode ? devCountries : []),
     { value: 'OTHER', label: 'Other', flag: '🌐' },
   ];
   const [formData, setFormData] = useState({
@@ -671,6 +687,7 @@ export default function Register() {
           onClose={handleCloseModal}
           phoneNumber={formData.phone}
           userId={registeredUserId}
+          country={formData.country}
           onVerified={handleSmsVerified}
         />
 

@@ -1,10 +1,15 @@
 import { supabaseAdmin } from '../../lib/supabase';
 import { requireAuth } from '../../lib/auth-middleware';
-import { Resend } from 'resend';
+import formData from 'form-data';
+import Mailgun from 'mailgun.js';
 
-// Initialize Resend (only if API key is available)
-const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
+// Initialize Mailgun
+const mailgun = new Mailgun(formData);
+const mg = process.env.MAILGUN_API_KEY
+  ? mailgun.client({
+      username: 'api',
+      key: process.env.MAILGUN_API_KEY,
+    })
   : null;
 
 // Send email verification OTP
@@ -40,9 +45,9 @@ const sendEmailVerificationOTP = async (req, res) => {
     // For demo purposes, log OTP to console
     console.log(`Email verification OTP for ${userEmail}: ${otp}`);
 
-    if (!resend || !process.env.RESEND_FROM_EMAIL) {
+    if (!mg || !process.env.MAILGUN_DOMAIN || !process.env.MAILGUN_FROM_EMAIL) {
       console.log(
-        'Email verification OTP sent (simulated - no Resend configured)'
+        'Email verification OTP sent (simulated - no Mailgun configured)'
       );
       return res.status(200).json({
         success: true,
@@ -54,25 +59,25 @@ const sendEmailVerificationOTP = async (req, res) => {
     }
 
     try {
-      await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL,
-        to: userEmail,
+      await mg.messages.create(process.env.MAILGUN_DOMAIN, {
+        from: process.env.MAILGUN_FROM_EMAIL,
+        to: [userEmail],
         subject: 'Email Verification - Bin Cleaning Classifieds',
         html: `
           <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
             <h2 style="color: #16a34a; text-align: center;">Email Verification</h2>
             <p>Hello ${req.profile.full_name || 'User'},</p>
-            
+
             <p>Thank you for using Bin Cleaning Classifieds. Please use the following verification code to verify your email address:</p>
-            
+
             <div style="background: #f8f9fa; border: 2px dashed #16a34a; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
               <h3 style="font-size: 32px; color: #16a34a; margin: 0; letter-spacing: 8px;">${otp}</h3>
             </div>
-            
+
             <p style="color: #666; font-size: 14px;">
               This code will expire in 10 minutes. If you didn't request this verification, please ignore this email.
             </p>
-            
+
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
               <p style="color: #999; font-size: 12px; text-align: center;">
                 Bin Cleaning Classifieds - The premier marketplace for pressure washing and bin cleaning businesses.
@@ -81,7 +86,7 @@ const sendEmailVerificationOTP = async (req, res) => {
           </div>
         `,
       });
-      console.log('Email verification OTP sent successfully');
+      console.log('Email verification OTP sent successfully via Mailgun');
     } catch (emailError) {
       console.error('Failed to send email verification:', emailError);
       // Still return success since OTP was generated

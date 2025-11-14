@@ -6,6 +6,7 @@ export default function SmsVerificationModalRegistration({
   onClose,
   phoneNumber,
   userId,
+  country,
   onVerified,
 }) {
   const [verificationCode, setVerificationCode] = useState([
@@ -48,7 +49,8 @@ export default function SmsVerificationModalRegistration({
         },
         body: JSON.stringify({
           userId: userId,
-          phone: phoneNumber
+          phone: phoneNumber,
+          country: country
         }),
       });
 
@@ -101,7 +103,8 @@ export default function SmsVerificationModalRegistration({
         body: JSON.stringify({
           userId: userId,
           otp: code,
-          phone: phoneNumber
+          phone: phoneNumber,
+          country: country
         }),
       });
 

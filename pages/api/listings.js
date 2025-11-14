@@ -1,28 +1,33 @@
 import { supabaseAdmin } from '../../lib/supabase';
 import { requireAuth } from '../../lib/auth-middleware';
-import { Resend } from 'resend';
+import formData from 'form-data';
+import Mailgun from 'mailgun.js';
 
-// Initialize Resend (only if API key is available)
-const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
+// Initialize Mailgun
+const mailgun = new Mailgun(formData);
+const mg = process.env.MAILGUN_API_KEY
+  ? mailgun.client({
+      username: 'api',
+      key: process.env.MAILGUN_API_KEY,
+    })
   : null;
 
 // Send admin notification email
 const sendAdminNotification = async (listing, userProfile) => {
-  if (!resend || !process.env.ADMIN_EMAIL || !process.env.RESEND_FROM_EMAIL) {
-    console.log('Email notification skipped - Resend not configured');
+  if (!mg || !process.env.ADMIN_EMAIL || !process.env.MAILGUN_DOMAIN || !process.env.MAILGUN_FROM_EMAIL) {
+    console.log('Email notification skipped - Mailgun not configured');
     return;
   }
 
   try {
-    await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL,
-      to: process.env.ADMIN_EMAIL,
+    await mg.messages.create(process.env.MAILGUN_DOMAIN, {
+      from: process.env.MAILGUN_FROM_EMAIL,
+      to: [process.env.ADMIN_EMAIL],
       subject: 'New Listing Awaiting Approval',
       html: `
         <h2>New Listing Submitted</h2>
         <p>A new listing has been submitted and requires approval:</p>
-        
+
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 16px 0;">
           <h3>${listing.title}</h3>
           <p><strong>Category:</strong> ${listing.category}</p>
@@ -33,19 +38,19 @@ const sendAdminNotification = async (listing, userProfile) => {
         userProfile.email
       })</p>
         </div>
-        
+
         <p><strong>Description:</strong></p>
         <p>${listing.description}</p>
-        
+
         <div style="margin-top: 20px;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/admin" 
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/admin"
              style="background: #16a34a; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">
             Review in Admin Dashboard
           </a>
         </div>
       `,
     });
-    console.log('Admin notification sent successfully');
+    console.log('Admin notification sent successfully via Mailgun');
   } catch (error) {
     console.error('Failed to send admin notification:', error);
   }
