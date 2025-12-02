@@ -22,6 +22,9 @@ export default function AdminListings() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [statusAction, setStatusAction] = useState(null);
+  const [selectedListings, setSelectedListings] = useState([]);
+  const [isBulkActionLoading, setIsBulkActionLoading] = useState(false);
+  const [bulkActionMessage, setBulkActionMessage] = useState('');
 
   // Load real listings data from database
   useEffect(() => {
@@ -258,9 +261,9 @@ export default function AdminListings() {
     );
   }
 
-  const handleExport = () => {
-    console.log('Exporting listings...');
-  };
+  // const handleExport = () => {
+  //   console.log('Exporting listings...');
+  // };
 
   const handleToggleFeatured = async (listing) => {
     try {
@@ -293,6 +296,163 @@ export default function AdminListings() {
     }
   };
 
+  // Bulk Actions
+  const handleSelectAll = () => {
+    if (selectedListings.length === filteredListings.length) {
+      setSelectedListings([]);
+    } else {
+      setSelectedListings(filteredListings.map(l => l.id));
+    }
+  };
+
+  const handleToggleSelect = (listingId) => {
+    setSelectedListings(prev =>
+      prev.includes(listingId)
+        ? prev.filter(id => id !== listingId)
+        : [...prev, listingId]
+    );
+  };
+
+  const handleBulkRemove = async () => {
+    if (selectedListings.length === 0) return;
+
+    if (!confirm(`Are you sure you want to delete ${selectedListings.length} listing(s)?`)) {
+      return;
+    }
+
+    setIsBulkActionLoading(true);
+    setBulkActionMessage(`Deleting ${selectedListings.length} listing(s)...`);
+
+    try {
+      const session = localStorage.getItem('supabase_session');
+      const sessionData = JSON.parse(session);
+      const token = sessionData.access_token;
+
+      for (const listingId of selectedListings) {
+        await fetch(`/api/listings?listingId=${listingId}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      }
+
+      // Reload listings
+      setListings(prev => prev.filter(l => !selectedListings.includes(l.id)));
+      setSelectedListings([]);
+    } catch (error) {
+      console.error('Bulk remove error:', error);
+      alert('Error deleting listings. Please try again.');
+    } finally {
+      setIsBulkActionLoading(false);
+      setBulkActionMessage('');
+    }
+  };
+
+  const handleBulkFeature = async () => {
+    if (selectedListings.length === 0) return;
+
+    // Only feature listings that are NOT already featured
+    const listingsToFeature = selectedListings.filter(id => {
+      const listing = listings.find(l => l.id === id);
+      return listing && !listing.featured;
+    });
+
+    if (listingsToFeature.length === 0) {
+      alert('All selected listings are already featured.');
+      return;
+    }
+
+    setIsBulkActionLoading(true);
+    setBulkActionMessage(`Featuring ${listingsToFeature.length} listing(s)...`);
+
+    try {
+      const session = localStorage.getItem('supabase_session');
+      const sessionData = JSON.parse(session);
+      const token = sessionData.access_token;
+
+      for (const listingId of listingsToFeature) {
+        await fetch(`/api/admin/listings/${listingId}/featured`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ featured: true }),
+        });
+      }
+
+      // Update local state
+      setListings(prev =>
+        prev.map(l =>
+          listingsToFeature.includes(l.id) ? { ...l, featured: true } : l
+        )
+      );
+      setSelectedListings([]);
+    } catch (error) {
+      console.error('Bulk feature error:', error);
+      alert('Error featuring listings. Please try again.');
+    } finally {
+      setIsBulkActionLoading(false);
+      setBulkActionMessage('');
+    }
+  };
+
+  const handleBulkUnfeature = async () => {
+    if (selectedListings.length === 0) return;
+
+    // Only unfeature listings that ARE featured
+    const listingsToUnfeature = selectedListings.filter(id => {
+      const listing = listings.find(l => l.id === id);
+      return listing && listing.featured;
+    });
+
+    if (listingsToUnfeature.length === 0) {
+      alert('No featured listings selected to unfeature.');
+      return;
+    }
+
+    setIsBulkActionLoading(true);
+    setBulkActionMessage(`Unfeaturing ${listingsToUnfeature.length} listing(s)...`);
+
+    try {
+      const session = localStorage.getItem('supabase_session');
+      const sessionData = JSON.parse(session);
+      const token = sessionData.access_token;
+
+      for (const listingId of listingsToUnfeature) {
+        await fetch(`/api/admin/listings/${listingId}/featured`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ featured: false }),
+        });
+      }
+
+      // Update local state
+      setListings(prev =>
+        prev.map(l =>
+          listingsToUnfeature.includes(l.id) ? { ...l, featured: false } : l
+        )
+      );
+      setSelectedListings([]);
+    } catch (error) {
+      console.error('Bulk unfeature error:', error);
+      alert('Error unfeaturing listings. Please try again.');
+    } finally {
+      setIsBulkActionLoading(false);
+      setBulkActionMessage('');
+    }
+  };
+
+  // const handleBulkTag = () => {
+  //   if (selectedListings.length === 0) return;
+  //   alert('Tag functionality coming soon!');
+  // };
+
   return (
     <>
       <Head>
@@ -308,7 +468,7 @@ export default function AdminListings() {
         title='Listings Center'
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        onExport={handleExport}
+        // onExport={handleExport}
         analytics={{}}
         isLoading={false}
       >
@@ -351,26 +511,55 @@ export default function AdminListings() {
 
               {/* Bulk Actions */}
               <div className='flex items-center gap-3'>
-                <button className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors'>
-                  <input type='checkbox' className='rounded border-gray-300' />
-                  <span>Select All</span>
+                <button
+                  onClick={handleSelectAll}
+                  disabled={isBulkActionLoading}
+                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                >
+                  <input
+                    type='checkbox'
+                    className='rounded border-gray-300'
+                    checked={selectedListings.length === filteredListings.length && filteredListings.length > 0}
+                    onChange={handleSelectAll}
+                    onClick={(e) => e.stopPropagation()}
+                    disabled={isBulkActionLoading}
+                  />
+                  <span>Select All ({selectedListings.length})</span>
                 </button>
-                <button className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors'>
-                  <Edit className='w-4 h-4' />
-                  <span>Edit</span>
-                </button>
-                <button className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors'>
+                {/* Removed Edit button */}
+                <button
+                  onClick={handleBulkRemove}
+                  disabled={selectedListings.length === 0 || isBulkActionLoading}
+                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                >
                   <Trash2 className='w-4 h-4' />
                   <span>Remove</span>
                 </button>
-                <button className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors'>
+                <button
+                  onClick={handleBulkFeature}
+                  disabled={selectedListings.length === 0 || isBulkActionLoading}
+                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                >
                   <Star className='w-4 h-4' />
                   <span>Feature</span>
                 </button>
-                <button className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors'>
+                <button
+                  onClick={handleBulkUnfeature}
+                  disabled={selectedListings.length === 0 || isBulkActionLoading}
+                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                >
+                  <Star className='w-4 h-4 fill-gray-400' />
+                  <span>Unfeature</span>
+                </button>
+                {/* Tag button - commented out for now */}
+                {/* <button
+                  onClick={handleBulkTag}
+                  disabled={selectedListings.length === 0 || isBulkActionLoading}
+                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                >
                   <Tag className='w-4 h-4' />
                   <span>Tag</span>
-                </button>
+                </button> */}
               </div>
             </div>
 
@@ -415,6 +604,8 @@ export default function AdminListings() {
             onReject={handleReject}
             onRecover={handleRecover}
             onToggleFeatured={handleToggleFeatured}
+            selectedListings={selectedListings}
+            onToggleSelect={handleToggleSelect}
           />
         </div>
 
@@ -428,6 +619,28 @@ export default function AdminListings() {
           listing={selectedListing}
           onListingUpdated={handleListingUpdated}
         />
+
+        {/* Bulk Action Loading Overlay */}
+        {isBulkActionLoading && (
+          <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50'>
+            <div className='bg-white rounded-xl p-8 shadow-2xl max-w-md w-full mx-4'>
+              <div className='flex flex-col items-center gap-4'>
+                <div className='w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin'></div>
+                <div className='text-center'>
+                  <h3 className='text-gray-900 text-lg font-semibold font-sans mb-2'>
+                    Processing...
+                  </h3>
+                  <p className='text-gray-600 text-base font-normal font-sans'>
+                    {bulkActionMessage}
+                  </p>
+                  <p className='text-gray-500 text-sm font-normal font-sans mt-2'>
+                    Please wait, do not close this page.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </AdminLayout>
     </>
   );

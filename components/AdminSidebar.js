@@ -11,6 +11,7 @@ import {
   BarChart3,
   Settings,
   LogOut,
+  ArrowLeft,
 } from 'lucide-react';
 import { useOptionalUserSession } from '../lib/useUserSession';
 
@@ -72,6 +73,18 @@ export default function AdminSidebar({ currentPage }) {
     <div className='fixed left-0 top-0 w-60 h-screen bg-green-600 flex flex-col z-40'>
       {/* Logo */}
       <div className='px-6 py-6 border-b border-green-500'>
+        {/* Back to Site Button */}
+        <Link
+          href='/'
+          className='flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-green-700 hover:bg-green-800 transition-colors group'
+          title='Back to Home'
+        >
+          <ArrowLeft className='w-4 h-4 text-green-100 group-hover:text-white transition-colors' />
+          <span className='text-sm font-medium text-green-100 group-hover:text-white transition-colors'>
+            Back to Site
+          </span>
+        </Link>
+
         <div className='flex items-center gap-3'>
           <div className='w-8 h-8 bg-white rounded-full flex items-center justify-center'>
             <span className='text-green-600 text-sm font-bold'>B</span>

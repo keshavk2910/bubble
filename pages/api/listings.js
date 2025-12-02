@@ -66,6 +66,7 @@ const createListing = async (req, res) => {
       condition,
       price,
       year,
+      yearEstablished,
       videoUrl,
       zipCode,
       city,
@@ -82,30 +83,41 @@ const createListing = async (req, res) => {
       });
     }
 
-    // Validate required fields
-    if (
-      !title ||
-      !description ||
-      !category ||
-      !condition ||
-      !price ||
-      !zipCode ||
-      !city
-    ) {
+    // Validate required fields (condition and price are optional for business category)
+    const isBusiness = category === 'business';
+
+    if (!title || !description || !category || !city) {
       return res.status(400).json({
         error: 'Missing required fields',
-        details:
-          'Title, description, category, condition, price, city, and ZIP code are required',
+        details: 'Title, description, category, and city are required',
       });
     }
 
-    // Validate price
-    const priceNum = parseFloat(price);
-    if (isNaN(priceNum) || priceNum < 0) {
+    // Condition is required for non-business listings
+    if (!isBusiness && !condition) {
       return res.status(400).json({
-        error: 'Invalid price',
-        details: 'Price must be a valid number greater than or equal to 0',
+        error: 'Missing required fields',
+        details: 'Condition is required for this category',
       });
+    }
+
+    // Price is required for non-business listings
+    if (!isBusiness && !price) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        details: 'Price is required for this category',
+      });
+    }
+
+    // Validate price if provided
+    if (price) {
+      const priceNum = parseFloat(price);
+      if (isNaN(priceNum) || priceNum < 0) {
+        return res.status(400).json({
+          error: 'Invalid price',
+          details: 'Price must be a valid number greater than or equal to 0',
+        });
+      }
     }
 
     // Validate category
@@ -117,13 +129,15 @@ const createListing = async (req, res) => {
       });
     }
 
-    // Validate condition
-    const validConditions = ['new', 'excellent', 'good', 'fair', 'poor'];
-    if (!validConditions.includes(condition)) {
-      return res.status(400).json({
-        error: 'Invalid condition',
-        details: 'Condition must be one of: ' + validConditions.join(', '),
-      });
+    // Validate condition (only for non-business listings)
+    if (!isBusiness) {
+      const validConditions = ['new', 'excellent', 'good', 'fair', 'poor'];
+      if (!validConditions.includes(condition)) {
+        return res.status(400).json({
+          error: 'Invalid condition',
+          details: 'Condition must be one of: ' + validConditions.join(', '),
+        });
+      }
     }
 
     // Validate year if provided
@@ -140,21 +154,26 @@ const createListing = async (req, res) => {
     }
 
     // Create the listing
+    const insertData = {
+      user_id: userId,
+      title: title.trim(),
+      description: description.trim(),
+      category,
+      // Only include condition for non-business listings
+      ...(isBusiness ? {} : { condition }),
+      price: price ? parseFloat(price) : null,
+      year: year ? parseInt(year) : null,
+      // Include yearEstablished only for business listings
+      ...(isBusiness && yearEstablished ? { year_established: parseInt(yearEstablished) } : {}),
+      video_url: videoUrl || null,
+      zip_code: zipCode ? zipCode.trim() : null,
+      city: city ? city.trim() : null,
+      status: 'pending', // All new listings start as pending
+    };
+
     const { data: newListing, error: listingError } = await supabaseAdmin
       .from('listings')
-      .insert({
-        user_id: userId,
-        title: title.trim(),
-        description: description.trim(),
-        category,
-        condition,
-        price: priceNum,
-        year: year ? parseInt(year) : null,
-        video_url: videoUrl || null,
-        zip_code: zipCode.trim(),
-        city: city ? city.trim() : null,
-        status: 'pending', // All new listings start as pending
-      })
+      .insert(insertData)
       .select()
       .single();
 
@@ -307,6 +326,7 @@ const updateListing = async (req, res) => {
       condition,
       price,
       year,
+      yearEstablished,
       videoUrl,
       zipCode,
       city,
@@ -334,16 +354,22 @@ const updateListing = async (req, res) => {
     }
 
     const updateData = {};
+    const isBusiness = category === 'business';
 
     // Only update provided fields
     if (title !== undefined) updateData.title = title.trim();
     if (description !== undefined) updateData.description = description.trim();
     if (category !== undefined) updateData.category = category;
-    if (condition !== undefined) updateData.condition = condition;
-    if (price !== undefined) updateData.price = parseFloat(price);
+    // Only update condition for non-business listings
+    if (condition !== undefined && !isBusiness) updateData.condition = condition;
+    if (price !== undefined) updateData.price = price ? parseFloat(price) : null;
     if (year !== undefined) updateData.year = year ? parseInt(year) : null;
+    // Update yearEstablished for business listings
+    if (yearEstablished !== undefined && isBusiness) {
+      updateData.year_established = yearEstablished ? parseInt(yearEstablished) : null;
+    }
     if (videoUrl !== undefined) updateData.video_url = videoUrl || null;
-    if (zipCode !== undefined) updateData.zip_code = zipCode.trim();
+    if (zipCode !== undefined) updateData.zip_code = zipCode ? zipCode.trim() : null;
     if (city !== undefined) updateData.city = city ? city.trim() : null;
 
     // Only admins can change status

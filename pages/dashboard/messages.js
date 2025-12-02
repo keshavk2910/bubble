@@ -13,6 +13,7 @@ import {
   Clock,
   Check,
   CheckCheck,
+  CheckCircle,
   User,
   Package,
   Image as ImageIcon,
@@ -351,6 +352,12 @@ export default function Messages() {
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedConversation) return;
 
+    // Prevent sending messages if listing is sold/deleted
+    if (selectedConversation.listing.status === 'deleted' || selectedConversation.listing.status === 'inactive') {
+      alert('This listing has been sold. You cannot send new messages.');
+      return;
+    }
+
     const message = {
       id: Date.now().toString(),
       content: newMessage.trim(),
@@ -423,6 +430,12 @@ export default function Messages() {
   };
 
   const handleImageUpload = async (file) => {
+    // Prevent uploads if listing is sold/deleted
+    if (selectedConversation?.listing.status === 'deleted' || selectedConversation?.listing.status === 'inactive') {
+      alert('This listing has been sold. You cannot send attachments.');
+      return;
+    }
+
     try {
       const session = localStorage.getItem('supabase_session');
       const sessionData = JSON.parse(session);
@@ -721,6 +734,11 @@ export default function Messages() {
                           >
                             {conversation.listing.title}
                           </a>
+                          {(conversation.listing.status === 'deleted' || conversation.listing.status === 'inactive') && (
+                            <span className='inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200 flex-shrink-0'>
+                              Sold
+                            </span>
+                          )}
                         </div>
 
                         {/* Last message */}
@@ -798,7 +816,11 @@ export default function Messages() {
                 </div>
 
                 {/* Listing Info Bar */}
-                <div className='bg-blue-50 border-b border-blue-200 px-6 py-3'>
+                <div className={`border-b px-6 py-3 ${
+                  selectedConversation.listing.status === 'deleted' || selectedConversation.listing.status === 'inactive'
+                    ? 'bg-gray-100 border-gray-200'
+                    : 'bg-blue-50 border-blue-200'
+                }`}>
                   <a
                     href={`/listing/${
                       selectedConversation.listing.slug ||
@@ -806,7 +828,11 @@ export default function Messages() {
                     }`}
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='flex items-center gap-3 hover:bg-blue-100 rounded-lg p-2 -m-2 transition-colors'
+                    className={`flex items-center gap-3 rounded-lg p-2 -m-2 transition-colors ${
+                      selectedConversation.listing.status === 'deleted' || selectedConversation.listing.status === 'inactive'
+                        ? 'hover:bg-gray-200'
+                        : 'hover:bg-blue-100'
+                    }`}
                   >
                     {selectedConversation.listing.image ? (
                       <Image
@@ -821,12 +847,27 @@ export default function Messages() {
                         <Package className='w-5 h-5 text-gray-600' />
                       </div>
                     )}
-                    <div>
-                      <h4 className='text-blue-900 text-sm font-medium font-sans hover:text-blue-700 transition-colors'>
-                        {selectedConversation.listing.title}
-                      </h4>
-                      <p className='text-blue-700 text-xs font-normal font-sans'>
-                        ${selectedConversation.listing.price.toLocaleString()}
+                    <div className='flex-1'>
+                      <div className='flex items-center gap-2'>
+                        <h4 className={`text-sm font-medium font-sans transition-colors ${
+                          selectedConversation.listing.status === 'deleted' || selectedConversation.listing.status === 'inactive'
+                            ? 'text-gray-700'
+                            : 'text-blue-900 hover:text-blue-700'
+                        }`}>
+                          {selectedConversation.listing.title}
+                        </h4>
+                        {(selectedConversation.listing.status === 'deleted' || selectedConversation.listing.status === 'inactive') && (
+                          <span className='inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200'>
+                            Sold
+                          </span>
+                        )}
+                      </div>
+                      <p className={`text-xs font-normal font-sans ${
+                        selectedConversation.listing.status === 'deleted' || selectedConversation.listing.status === 'inactive'
+                          ? 'text-gray-500'
+                          : 'text-blue-700'
+                      }`}>
+                        ${selectedConversation.listing.price?.toLocaleString() || 'N/A'}
                       </p>
                     </div>
                   </a>
@@ -938,66 +979,95 @@ export default function Messages() {
                 </div>
 
                 {/* Message Input */}
-                <div className='bg-white border-t border-gray-200 p-4'>
-                  {/* Emoji Picker */}
-                  {showEmojiPicker && (
-                    <div className='mb-4'>
-                      <EmojiPicker
-                        onEmojiClick={onEmojiClick}
-                        width='100%'
-                        height={300}
-                      />
+                <div className='bg-white border-t border-gray-200'>
+                  {/* Listing Sold/Deleted Banner */}
+                  {(selectedConversation.listing.status === 'deleted' ||
+                    selectedConversation.listing.status === 'inactive') && (
+                    <div className='bg-amber-50 border-b border-amber-200 px-6 py-4'>
+                      <div className='flex items-start gap-3'>
+                        <div className='w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0'>
+                          <CheckCircle className='w-5 h-5 text-amber-600' />
+                        </div>
+                        <div>
+                          <h4 className='text-amber-900 text-sm font-semibold font-sans mb-1'>
+                            This listing has been sold
+                          </h4>
+                          <p className='text-amber-700 text-sm font-normal font-sans'>
+                            Thank you for your interest! This listing is no longer available for purchase. You can still view your conversation history.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
 
-                  <div className='flex items-center gap-3'>
-                    {/* Emoji Button */}
-                    <button
-                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                      className='w-10 h-10 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors'
-                    >
-                      <Smile className='w-5 h-5' />
-                    </button>
+                  <div className='p-4'>
+                    {/* Emoji Picker */}
+                    {showEmojiPicker && (
+                      <div className='mb-4'>
+                        <EmojiPicker
+                          onEmojiClick={onEmojiClick}
+                          width='100%'
+                          height={300}
+                        />
+                      </div>
+                    )}
 
-                    {/* Attachment Button */}
-                    <button
-                      onClick={() =>
-                        document.getElementById('attachment-upload').click()
-                      }
-                      className='w-10 h-10 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors'
-                    >
-                      <Paperclip className='w-5 h-5' />
-                    </button>
+                    <div className='flex items-center gap-3'>
+                      {/* Emoji Button */}
+                      <button
+                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                        disabled={selectedConversation.listing.status === 'deleted' || selectedConversation.listing.status === 'inactive'}
+                        className='w-10 h-10 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                      >
+                        <Smile className='w-5 h-5' />
+                      </button>
 
-                    <input
-                      id='attachment-upload'
-                      type='file'
-                      accept='image/*'
-                      onChange={(e) => {
-                        if (e.target.files[0]) {
-                          handleImageUpload(e.target.files[0]);
+                      {/* Attachment Button */}
+                      <button
+                        onClick={() =>
+                          document.getElementById('attachment-upload').click()
                         }
-                      }}
-                      className='hidden'
-                    />
+                        disabled={selectedConversation.listing.status === 'deleted' || selectedConversation.listing.status === 'inactive'}
+                        className='w-10 h-10 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                      >
+                        <Paperclip className='w-5 h-5' />
+                      </button>
 
-                    <div className='flex-1'>
                       <input
-                        type='text'
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                        placeholder='Type a message...'
-                        className='w-full bg-gray-100 rounded-full px-4 py-2 text-sm font-normal font-sans focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-colors'
+                        id='attachment-upload'
+                        type='file'
+                        accept='image/*'
+                        onChange={(e) => {
+                          if (e.target.files[0]) {
+                            handleImageUpload(e.target.files[0]);
+                          }
+                        }}
+                        className='hidden'
                       />
+
+                      <div className='flex-1'>
+                        <input
+                          type='text'
+                          value={newMessage}
+                          onChange={(e) => setNewMessage(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                          placeholder={
+                            selectedConversation.listing.status === 'deleted' || selectedConversation.listing.status === 'inactive'
+                              ? 'This listing has been sold'
+                              : 'Type a message...'
+                          }
+                          disabled={selectedConversation.listing.status === 'deleted' || selectedConversation.listing.status === 'inactive'}
+                          className='w-full bg-gray-100 rounded-full px-4 py-2 text-sm font-normal font-sans focus:outline-none focus:ring-2 focus:ring-green-600 focus:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                        />
+                      </div>
+                      <button
+                        onClick={sendMessage}
+                        disabled={!newMessage.trim() || selectedConversation.listing.status === 'deleted' || selectedConversation.listing.status === 'inactive'}
+                        className='w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed'
+                      >
+                        <Send className='w-4 h-4' />
+                      </button>
                     </div>
-                    <button
-                      onClick={sendMessage}
-                      disabled={!newMessage.trim()}
-                      className='w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed'
-                    >
-                      <Send className='w-4 h-4' />
-                    </button>
                   </div>
                 </div>
               </>

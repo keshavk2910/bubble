@@ -26,6 +26,8 @@ async function handler(req, res) {
           id,
           title,
           price,
+          status,
+          slug,
           listing_images!inner (
             image_url,
             is_main
@@ -97,6 +99,8 @@ async function handler(req, res) {
             id: conversation.listings?.id,
             title: conversation.listings?.title,
             price: conversation.listings?.price,
+            status: conversation.listings?.status,
+            slug: conversation.listings?.slug,
             image: mainImage?.image_url || null,
           },
           otherUser: {

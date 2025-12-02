@@ -11,6 +11,10 @@ import {
   ChevronDown,
   Package,
   Star,
+  Wrench,
+  Truck,
+  Building2,
+  Settings,
 } from 'lucide-react';
 
 export default function ListingsTable({
@@ -24,6 +28,8 @@ export default function ListingsTable({
   onReject,
   onRecover,
   onToggleFeatured,
+  selectedListings = [],
+  onToggleSelect,
 }) {
   const [deleteConfirm, setDeleteConfirm] = useState({
     show: false,
@@ -69,13 +75,15 @@ export default function ListingsTable({
   };
 
   const getCategoryIcon = (category) => {
+    const iconProps = 'w-4 h-4 text-gray-600';
+
     const icons = {
-      equipment: '🔧',
-      truck: '🚗',
-      business: '🏢',
-      parts: '🔧',
+      equipment: <Wrench className={iconProps} />,
+      truck: <Truck className={iconProps} />,
+      business: <Building2 className={iconProps} />,
+      parts: <Settings className={iconProps} />,
     };
-    return icons[category] || '📦';
+    return icons[category] || <Package className={iconProps} />;
   };
 
   const formatCategoryDisplay = (category) => {
@@ -106,7 +114,8 @@ export default function ListingsTable({
           <thead className='bg-gray-50'>
             <tr>
               <th className='w-4 px-4 py-3'>
-                <input type='checkbox' className='rounded border-gray-300' />
+                {/* Header checkbox is controlled by parent component's Select All button */}
+                <div className='w-4'></div>
               </th>
               <th className='text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight'>
                 ID
@@ -153,6 +162,8 @@ export default function ListingsTable({
                     <input
                       type='checkbox'
                       className='rounded border-gray-300'
+                      checked={selectedListings.includes(listing.id)}
+                      onChange={() => onToggleSelect && onToggleSelect(listing.id)}
                     />
                   </td>
                   <td className='px-4 py-3'>
@@ -193,10 +204,8 @@ export default function ListingsTable({
                     </div>
                   </td>
                   <td className='px-4 py-3'>
-                    <span className='inline-flex items-center gap-1 text-sm'>
-                      <span className='text-lg'>
-                        {getCategoryIcon(listing.category)}
-                      </span>
+                    <span className='inline-flex items-center gap-2 text-sm'>
+                      {getCategoryIcon(listing.category)}
                       <span className='text-gray-700 font-normal font-sans'>
                         {formatCategoryDisplay(listing.category)}
                       </span>

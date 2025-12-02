@@ -333,10 +333,10 @@ export default function AdminDashboard() {
     console.log('View user:', user);
   };
 
-  const handleExport = () => {
-    console.log('Exporting data...');
-    // Handle export functionality
-  };
+  // const handleExport = () => {
+  //   console.log('Exporting data...');
+  //   // Handle export functionality
+  // };
 
   return (
     <>
@@ -352,7 +352,7 @@ export default function AdminDashboard() {
         title='Admin Control Center'
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        onExport={handleExport}
+        // onExport={handleExport}
         analytics={analytics}
         isLoading={isLoading}
       >

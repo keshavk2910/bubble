@@ -1,6 +1,15 @@
 import { supabaseAdmin } from '../../lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 
+// Increase body size limit to 10MB to handle base64 encoded images
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+  },
+};
+
 // Create client with user's session for RLS
 const createUserSupabase = (userToken) => {
   return createClient(

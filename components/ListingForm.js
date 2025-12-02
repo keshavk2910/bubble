@@ -10,6 +10,10 @@ import {
   Save,
   AlertCircle,
   ChevronDown,
+  Wrench,
+  Truck,
+  Building2,
+  Settings,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -27,6 +31,7 @@ export default function ListingForm({
     description: initialData?.description || '',
     condition: initialData?.condition || 'new',
     year: initialData?.year || '',
+    yearEstablished: initialData?.year_established || '',
     videoUrl: initialData?.video_url || '',
     price: initialData?.price?.toString() || '',
     zipCode: initialData?.zip_code || '',
@@ -43,10 +48,10 @@ export default function ListingForm({
 
   const conditionOptions = ['new', 'excellent', 'good', 'fair', 'poor'];
   const categoryOptions = [
-    { value: 'equipment', label: 'Equipment' },
-    { value: 'truck', label: 'Trucks & Vehicles' },
-    { value: 'business', label: 'Business' },
-    { value: 'parts', label: 'Parts & Accessories' },
+    { value: 'equipment', label: 'Equipment', icon: Wrench },
+    { value: 'truck', label: 'Trucks & Vehicles', icon: Truck },
+    { value: 'business', label: 'Business', icon: Building2 },
+    { value: 'parts', label: 'Parts & Accessories', icon: Settings },
   ];
 
   // Load existing images for edit mode
@@ -68,6 +73,55 @@ export default function ListingForm({
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  // Get category-specific placeholders
+  const getPlaceholders = () => {
+    switch (formData.category) {
+      case 'business':
+        return {
+          title: 'e.g., Established Bin Cleaning Business - Turnkey Operation',
+          description: 'Describe the business (services offered, customer base, revenue, equipment included, reason for selling, etc.)',
+          price: 'Contact for pricing',
+          city: 'e.g., Phoenix',
+          yearEstablished: 'e.g., 2015',
+        };
+      case 'equipment':
+        return {
+          title: 'e.g., Honda Pressure Washer 3000 PSI',
+          description: 'Provide detailed information (condition, features, specifications, hours used, maintenance history, etc.)',
+          price: '0.00',
+          city: 'e.g., Phoenix',
+          year: 'e.g., 2020',
+        };
+      case 'truck':
+        return {
+          title: 'e.g., 2015 Ford F-150 Service Truck',
+          description: 'Provide detailed information (condition, mileage, features, modifications, service history, etc.)',
+          price: '0.00',
+          city: 'e.g., Phoenix',
+          year: 'e.g., 2015',
+        };
+      case 'parts':
+        return {
+          title: 'e.g., Replacement Nozzles and Spray Tips Set',
+          description: 'Provide detailed information (condition, compatibility, brand, quantity, specifications, etc.)',
+          price: '0.00',
+          city: 'e.g., Phoenix',
+          year: '',
+        };
+      default:
+        return {
+          title: 'Enter a descriptive title',
+          description: 'Provide detailed information about your listing',
+          price: '0.00',
+          city: 'Enter city',
+          year: '',
+          yearEstablished: '',
+        };
+    }
+  };
+
+  const placeholders = getPlaceholders();
 
   const handleImageUpload = (files) => {
     const totalImages = existingImages.length + newImages.length;
@@ -314,22 +368,17 @@ export default function ListingForm({
         await saveImageOrder();
       }
 
-      // Map category to database format
-      const categoryMap = {
-        Equipment: 'equipment',
-        'Trucks & Vehicles': 'truck',
-        Business: 'business',
-        'Parts & Accessories': 'parts',
-      };
-
       // Prepare listing data
       const listingData = {
         title: formData.title,
         description: formData.description,
-        category: categoryMap[formData.category] || formData.category,
-        condition: formData.condition.toLowerCase(),
+        category: formData.category, // Already in database format (equipment, truck, business, parts)
+        // Only include condition if not business category
+        ...(formData.category !== 'business' ? { condition: formData.condition.toLowerCase() } : {}),
         price: formData.price,
         year: formData.year,
+        // Include yearEstablished only for business category
+        ...(formData.category === 'business' ? { yearEstablished: formData.yearEstablished } : {}),
         videoUrl: formData.videoUrl,
         city: formData.city,
         zipCode: formData.zipCode,
@@ -401,7 +450,7 @@ export default function ListingForm({
               id='title'
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
-              placeholder='Enter a descriptive title (e.g. 2020 Pressure Washer - 4000 PSI)'
+              placeholder={placeholders.title}
               className='w-full bg-white rounded-xl border border-gray-200 px-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 placeholder:text-gray-400'
               required
             />
@@ -409,32 +458,40 @@ export default function ListingForm({
 
           {/* Category */}
           <div>
-            <label
-              htmlFor='category'
-              className='block text-gray-700 text-base font-normal font-sans leading-normal mb-2'
-            >
+            <label className='block text-gray-700 text-base font-normal font-sans leading-normal mb-4'>
               Category*
             </label>
-            <div className='relative'>
-              <select
-                id='category'
-                value={formData.category}
-                onChange={(e) => handleInputChange('category', e.target.value)}
-                className='w-full appearance-none bg-white border border-gray-200 rounded-xl px-4 py-3 pr-8 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600'
-                required
-              >
-                <option value='' disabled>
-                  Select a category
-                </option>
-                {categoryOptions.map((option) => (
-                  <option key={option.value} value={option.label}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <div className='absolute inset-y-0 right-4 flex items-center pointer-events-none'>
-                <ChevronDown className='w-4 h-4 text-gray-400' />
-              </div>
+            <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+              {categoryOptions.map((option) => {
+                const Icon = option.icon;
+                const isSelected = formData.category === option.value;
+
+                return (
+                  <button
+                    key={option.value}
+                    type='button'
+                    onClick={() => handleInputChange('category', option.value)}
+                    className={`flex flex-col items-center gap-3 p-6 rounded-xl border-2 transition-all ${
+                      isSelected
+                        ? 'border-green-600 bg-green-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className={`p-3 rounded-lg ${
+                      isSelected ? 'bg-green-600' : 'bg-gray-100'
+                    }`}>
+                      <Icon className={`w-6 h-6 ${
+                        isSelected ? 'text-white' : 'text-gray-600'
+                      }`} />
+                    </div>
+                    <span className={`text-sm font-medium font-sans text-center ${
+                      isSelected ? 'text-green-600' : 'text-gray-700'
+                    }`}>
+                      {option.label}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -450,62 +507,86 @@ export default function ListingForm({
               id='description'
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder='Provide detailed information about your listing (condition, features, specifications, etc.)'
+              placeholder={placeholders.description}
               rows={6}
               className='w-full bg-white rounded-xl border border-gray-200 px-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 resize-none placeholder:text-gray-400'
               required
             />
           </div>
 
-          {/* Condition */}
-          <div>
-            <label className='block text-gray-700 text-base font-normal font-sans leading-normal mb-4'>
-              Condition*
-            </label>
-            <div className='flex flex-wrap gap-3'>
-              {conditionOptions.map((condition) => (
-                <button
-                  key={condition}
-                  type='button'
-                  onClick={() => handleInputChange('condition', condition)}
-                  className={`px-6 py-3 rounded-xl text-base font-normal font-sans leading-normal transition-colors ${
-                    formData.condition === condition
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  {condition.charAt(0).toUpperCase() + condition.slice(1)}
-                </button>
-              ))}
+          {/* Condition - Hidden for Business category */}
+          {formData.category !== 'business' && (
+            <div>
+              <label className='block text-gray-700 text-base font-normal font-sans leading-normal mb-4'>
+                Condition*
+              </label>
+              <div className='flex flex-wrap gap-3'>
+                {conditionOptions.map((condition) => (
+                  <button
+                    key={condition}
+                    type='button'
+                    onClick={() => handleInputChange('condition', condition)}
+                    className={`px-6 py-3 rounded-xl text-base font-normal font-sans leading-normal transition-colors ${
+                      formData.condition === condition
+                        ? 'bg-gray-900 text-white'
+                        : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {condition.charAt(0).toUpperCase() + condition.slice(1)}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Year Established - Only for Business category */}
+          {formData.category === 'business' && (
+            <div>
+              <label
+                htmlFor='yearEstablished'
+                className='block text-gray-700 text-base font-normal font-sans leading-normal mb-2'
+              >
+                Year Established (Optional)
+              </label>
+              <input
+                type='text'
+                id='yearEstablished'
+                value={formData.yearEstablished}
+                onChange={(e) => handleInputChange('yearEstablished', e.target.value)}
+                placeholder={placeholders.yearEstablished || 'e.g., 2015'}
+                className='w-full bg-white rounded-xl border border-gray-200 px-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
+              />
+            </div>
+          )}
 
           {/* Year and Video URL Row */}
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             <div className='gap-1 grid  grid-cols-1'>
-              <div className=''>
-                <label
-                  htmlFor='year'
-                  className='block text-gray-700 text-base font-normal font-sans leading-normal '
-                >
-                  Year (if applicable)
-                </label>
-                <input
-                  type='text'
-                  id='year'
-                  value={formData.year}
-                  onChange={(e) => handleInputChange('year', e.target.value)}
-                  placeholder='Enter year of manufacture'
-                  className='w-full bg-white rounded-xl border border-gray-200 px-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
-                />
-              </div>
+              {formData.category !== 'business' && (
+                <div className=''>
+                  <label
+                    htmlFor='year'
+                    className='block text-gray-700 text-base font-normal font-sans leading-normal '
+                  >
+                    Year (if applicable)
+                  </label>
+                  <input
+                    type='text'
+                    id='year'
+                    value={formData.year}
+                    onChange={(e) => handleInputChange('year', e.target.value)}
+                    placeholder={placeholders.year || 'Enter year'}
+                    className='w-full bg-white rounded-xl border border-gray-200 px-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
+                  />
+                </div>
+              )}
               <div className=''>
                 <div>
                   <label
                     htmlFor='price'
                     className='block text-gray-700 text-base font-normal font-sans leading-normal '
                   >
-                    Price*
+                    {formData.category === 'business' ? 'Asking Price (Optional)' : 'Price*'}
                   </label>
                   <div className='relative'>
                     <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
@@ -518,11 +599,11 @@ export default function ListingForm({
                       onChange={(e) =>
                         handleInputChange('price', e.target.value)
                       }
-                      placeholder='0.00'
+                      placeholder={placeholders.price}
                       className='w-full bg-white rounded-xl border border-gray-200 pl-8 pr-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
                       step='0.01'
                       min='0'
-                      required
+                      required={formData.category !== 'business'}
                     />
                   </div>
                 </div>
@@ -539,7 +620,7 @@ export default function ListingForm({
                   id='city'
                   value={formData.city}
                   onChange={(e) => handleInputChange('city', e.target.value)}
-                  placeholder='Enter City'
+                  placeholder={placeholders.city || 'Enter city'}
                   className='w-full bg-white rounded-xl border border-gray-200 px-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
                   required
                 />
@@ -549,7 +630,7 @@ export default function ListingForm({
                   htmlFor='zipCode'
                   className='block text-gray-700 text-base font-normal font-sans leading-normal '
                 >
-                  ZIP Code
+                  ZIP Code (Optional)
                 </label>
                 <input
                   type='text'
@@ -559,7 +640,6 @@ export default function ListingForm({
                   placeholder='Enter ZIP code'
                   className='w-full bg-white rounded-xl border border-gray-200 px-4 py-3 text-gray-700 text-base font-normal font-sans leading-normal focus:outline-none focus:ring-2 focus:ring-green-600 placeholder:text-gray-400'
                   pattern='[0-9]{5}(-[0-9]{4})?'
-                  required
                 />
               </div>
             </div>
@@ -781,16 +861,19 @@ export default function ListingForm({
                     {Array.from({
                       length: 10 - (existingImages.length + newImages.length),
                     }).map((_, index) => (
-                      <div
+                      <button
                         key={`empty-${index}`}
-                        className='aspect-square bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center'
+                        type='button'
+                        onClick={() => document.getElementById('file-upload').click()}
+                        className='aspect-square bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center hover:border-green-600 hover:bg-green-50 transition-all cursor-pointer group'
+                        title='Click to upload images'
                       >
-                        <div className='w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center'>
-                          <div className='text-gray-400 text-2xl font-thin'>
+                        <div className='w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center group-hover:bg-green-600 transition-all'>
+                          <div className='text-gray-400 text-3xl font-thin group-hover:text-white transition-all'>
                             +
                           </div>
                         </div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 )}

@@ -8,6 +8,7 @@ import {
   HelpCircle,
   LogOut,
   Plus,
+  ArrowLeft,
 } from 'lucide-react';
 import logoIcon from './Images/logoIcon.png';
 import Image from 'next/image';
@@ -68,6 +69,18 @@ export default function DashboardSidebar() {
     <div className='fixed left-0 top-0 w-60 h-screen bg-white border-r border-gray-200 flex flex-col z-40'>
       {/* Dashboard Header */}
       <div className='px-6 py-6 border-b border-gray-200'>
+        {/* Back to Site Button */}
+        <Link
+          href='/'
+          className='flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors group'
+          title='Back to Home'
+        >
+          <ArrowLeft className='w-4 h-4 text-gray-600 group-hover:text-gray-900 transition-colors' />
+          <span className='text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors'>
+            Back to Site
+          </span>
+        </Link>
+
         <Link href='/'>
           <div className='flex items-center gap-3 '>
             <Image

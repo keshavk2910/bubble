@@ -16,6 +16,10 @@ import {
   CheckCircle,
   MessageCircle,
   Package,
+  Wrench,
+  Truck,
+  Building2,
+  Settings,
 } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
 import EmailVerificationModal from '../../components/EmailVerificationModal';
@@ -665,7 +669,7 @@ export default function UserDashboard() {
                                 />
                               ) : (
                                 <div className='w-full h-full flex items-center justify-center'>
-                                  <Package className='w-6 h-6 text-gray-400' />
+                                  {getCategoryIconForPlaceholder(listing.category)}
                                 </div>
                               )}
                             </div>
@@ -689,10 +693,8 @@ export default function UserDashboard() {
                           </div>
                         </td>
                         <td className='px-6 py-4'>
-                          <span className='inline-flex items-center gap-1 text-sm'>
-                            <span className='text-lg'>
-                              {getCategoryIcon(listing.category)}
-                            </span>
+                          <span className='inline-flex items-center gap-2 text-sm'>
+                            {getCategoryIcon(listing.category)}
                             <span className='text-gray-700 font-normal font-sans'>
                               {formatCategoryDisplay(listing.category)}
                             </span>
@@ -900,18 +902,43 @@ export default function UserDashboard() {
 }
 
 function getCategoryIcon(category) {
+  const iconProps = 'w-5 h-5 text-gray-600';
+
   const icons = {
-    equipment: '🔧',
-    'trucks-vehicles': '🚗',
-    'complete-business': '🏢',
-    'parts-accessories': '🔧',
+    equipment: <Wrench className={iconProps} />,
+    truck: <Truck className={iconProps} />,
+    'trucks-vehicles': <Truck className={iconProps} />,
+    business: <Building2 className={iconProps} />,
+    'complete-business': <Building2 className={iconProps} />,
+    parts: <Settings className={iconProps} />,
+    'parts-accessories': <Settings className={iconProps} />,
     // Legacy support for old format
-    Business: '🏢',
-    Equipment: '🔧',
-    Vehicles: '🚗',
-    Commercial: '🏪',
+    Business: <Building2 className={iconProps} />,
+    Equipment: <Wrench className={iconProps} />,
+    Vehicles: <Truck className={iconProps} />,
+    Commercial: <Building2 className={iconProps} />,
   };
-  return icons[category] || '📦';
+  return icons[category] || <Package className={iconProps} />;
+}
+
+function getCategoryIconForPlaceholder(category) {
+  const iconProps = 'w-6 h-6 text-gray-400';
+
+  const icons = {
+    equipment: <Wrench className={iconProps} />,
+    truck: <Truck className={iconProps} />,
+    'trucks-vehicles': <Truck className={iconProps} />,
+    business: <Building2 className={iconProps} />,
+    'complete-business': <Building2 className={iconProps} />,
+    parts: <Settings className={iconProps} />,
+    'parts-accessories': <Settings className={iconProps} />,
+    // Legacy support for old format
+    Business: <Building2 className={iconProps} />,
+    Equipment: <Wrench className={iconProps} />,
+    Vehicles: <Truck className={iconProps} />,
+    Commercial: <Building2 className={iconProps} />,
+  };
+  return icons[category] || <Package className={iconProps} />;
 }
 
 function formatCategoryDisplay(category) {

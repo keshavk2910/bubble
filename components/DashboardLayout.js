@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { Bell, MoreHorizontal, LogOut, User, Settings } from 'lucide-react';
+import { Bell, MoreHorizontal, LogOut, User, Settings, ArrowLeft } from 'lucide-react';
 import DashboardSidebar from './DashboardSidebar';
 import Link from 'next/link';
 import { useOptionalUserSession } from '../lib/useUserSession';
 import NotificationBell from './NotificationBell';
+import { useRouter } from 'next/router';
 
 export default function DashboardLayout({
   children,
@@ -14,6 +15,7 @@ export default function DashboardLayout({
 }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const dropdownRef = useRef(null);
+  const router = useRouter();
   const { user, avatar, isAuthenticated } = useOptionalUserSession();
 
   // User data with fallback for header
