@@ -316,7 +316,7 @@ export default function Register() {
   return (
     <>
       <Head>
-        <title>Register - Bin Cleaning Classifieds</title>
+        <title>Register - Bins Buy Sell</title>
         <meta
           name='description'
           content='Create a free account to start buying and selling on our marketplace.'

@@ -177,7 +177,7 @@ export default function AdminUsers() {
   return (
     <>
       <Head>
-        <title>Users Management - Bin Cleaning Classifieds</title>
+        <title>Users Management - Bins Buy Sell</title>
         <meta name="description" content="Manage all marketplace users with admin controls" />
       </Head>
       

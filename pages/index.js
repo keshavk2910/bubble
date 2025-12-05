@@ -83,7 +83,7 @@ export default function Home() {
     <>
       <Head>
         <title>
-          Bin Cleaning Classifieds - Buy & Sell Pressure Washing Equipment
+          Bins Buy Sell - Buy & Sell Pressure Washing Equipment
         </title>
         <meta
           name='description'
@@ -572,7 +572,7 @@ export default function Home() {
                 {/* Right Image */}
                 <div className='rounded-lg overflow-hidden'>
                   <Image
-                    src='/Unsplash Image.png'
+                    src={Image1.src}
                     alt='Ready to grow business'
                     width={600}
                     height={384}

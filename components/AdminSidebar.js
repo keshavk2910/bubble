@@ -89,7 +89,7 @@ export default function AdminSidebar({ currentPage }) {
           <div className='w-8 h-8 bg-white rounded-full flex items-center justify-center'>
             <span className='text-green-600 text-sm font-bold'>B</span>
           </div>
-          <h1 className='text-white text-lg font-bold font-sans'>Bubblebinz</h1>
+          <h1 className='text-white text-lg font-bold font-sans'>Bins Buy Sell</h1>
         </div>
       </div>
 

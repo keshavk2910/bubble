@@ -85,7 +85,7 @@ async function handler(req, res) {
 
     // Validate status
     if (status) {
-      const validStatuses = ['pending', 'active', 'sponsored', 'bubble_binz', 'inactive', 'deleted'];
+      const validStatuses = ['pending', 'active', 'sponsored', 'bins_buy_sell', 'inactive', 'deleted'];
       if (!validStatuses.includes(status)) {
         return res.status(400).json({
           error: 'Invalid status',

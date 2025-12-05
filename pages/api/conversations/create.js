@@ -41,7 +41,7 @@ async function handler(req, res) {
     }
 
     // Check if listing is active/visible
-    if (!['active', 'sponsored', 'bubble_binz'].includes(listing.status)) {
+    if (!['active', 'sponsored', 'bins_buy_sell'].includes(listing.status)) {
       return res.status(403).json({
         error: 'Listing not available',
         details: 'This listing is not currently available for inquiries'

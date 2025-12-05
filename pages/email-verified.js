@@ -40,7 +40,7 @@ export default function EmailVerified() {
   return (
     <div className='min-h-screen bg-gray-50 flex items-center justify-center py-12 px-6'>
       <Head>
-        <title>Email Verified - Bin Cleaning Classifieds</title>
+        <title>Email Verified - Bins Buy Sell</title>
         <meta
           name='description'
           content='Your email has been successfully verified.'
@@ -63,7 +63,7 @@ export default function EmailVerified() {
             </h1>
             <p className='text-gray-600 text-base font-normal font-sans leading-normal'>
               Your email has been successfully verified. You can now access all
-              features of Bin Cleaning Classifieds.
+              features of Bins Buy Sell.
             </p>
           </div>
 

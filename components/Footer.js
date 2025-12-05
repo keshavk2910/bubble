@@ -138,7 +138,7 @@ export default function Footer() {
         <div className='border-t border-white/20 mt-12 pt-8'>
           <div className='flex flex-col md:flex-row justify-between items-center gap-4'>
             <p className='text-white text-base font-normal font-sans leading-normal'>
-              © 2025 Bubblebinz. All rights reserved.
+              © 2025 Bins Buy Sell. All rights reserved.
             </p>
             <div className='flex flex-wrap gap-8 justify-center md:justify-end'>
               <Link

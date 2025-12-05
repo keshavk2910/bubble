@@ -27,7 +27,7 @@ export default function FAQ() {
           id: 'free-to-join',
           question: 'Is it free to join?',
           answer:
-            'Yes, joining Bin Cleaning Classifieds is completely free! You can create an account, browse listings, and contact sellers without any cost. We only charge a small fee when you successfully sell an item through our platform.',
+            'Yes, joining Bins Buy Sell is completely free! You can create an account, browse listings, and contact sellers without any cost. We only charge a small fee when you successfully sell an item through our platform.',
         },
         {
           id: 'platform-features',
@@ -57,7 +57,7 @@ export default function FAQ() {
           id: 'forgot-password',
           question: 'What happens if I forget my password?',
           answer:
-            'No worries! Click the "Forgot Password" link on the sign-in page, enter your email address, and we&apos;ll send you a secure link to reset your password. Make sure to check your spam folder if you don&apos;t see the email.',
+            'No worries! Click the "Forgot Password" link on the sign-in page, enter your email address, and we\'ll send you a secure link to reset your password. Make sure to check your spam folder if you don\'t see the email.',
         },
       ],
     },
@@ -117,7 +117,7 @@ export default function FAQ() {
           id: 'contact-support',
           question: 'How can I contact customer support?',
           answer:
-            'Reach out to our support team through the "Contact Support" button in your account dashboard, or email us directly at support@bincleaningclassifieds.com. We strive to respond to all inquiries within 24 hours.',
+            'Reach out to our support team through the "Contact Support" button in your account dashboard, or email us directly at support@binsbuysell.com. We strive to respond to all inquiries within 24 hours.',
         },
         {
           id: 'support-hours',
@@ -138,10 +138,10 @@ export default function FAQ() {
   return (
     <Layout>
       <Head>
-        <title>FAQ - Bin Cleaning Classifieds</title>
+        <title>FAQ - Bins Buy Sell</title>
         <meta
           name='description'
-          content='Frequently asked questions about Bin Cleaning Classifieds'
+          content='Frequently asked questions about Bins Buy Sell'
         />
       </Head>
       <div className='bg-white'>

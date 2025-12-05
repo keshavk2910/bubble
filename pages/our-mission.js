@@ -6,7 +6,7 @@ export default function OurMission() {
   return (
     <Layout>
       <Head>
-        <title>Our Mission - Bin Cleaning Classifieds</title>
+        <title>Our Mission - Bins Buy Sell</title>
         <meta
           name='description'
           content='Our mission is to create the most straightforward marketplace for bin cleaning professionals to buy, sell, and grow their businesses.'

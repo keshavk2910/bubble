@@ -37,23 +37,9 @@ export default function Contact() {
     {
       icon: Mail,
       title: 'Email Us',
-      details: 'support@bubblebinz.com',
+      details: 'support@binsbuysell.com',
       description: 'Send us an email anytime',
       color: 'bg-blue-50 border-blue-200 text-blue-600',
-    },
-    {
-      icon: Phone,
-      title: 'Call Us',
-      details: '+1 (555) 123-4567',
-      description: 'Mon-Fri 9AM-6PM EST',
-      color: 'bg-green-50 border-green-200 text-green-600',
-    },
-    {
-      icon: MapPin,
-      title: 'Visit Us',
-      details: '123 Business Ave, Suite 100',
-      description: 'Philadelphia, PA 19103',
-      color: 'bg-purple-50 border-purple-200 text-purple-600',
     },
     {
       icon: Clock,
@@ -62,6 +48,7 @@ export default function Contact() {
       description: '9:00 AM - 6:00 PM EST',
       color: 'bg-orange-50 border-orange-200 text-orange-600',
     },
+    // Removed Call Us and Visit Us sections
   ];
 
   const handleInputChange = (field, value) => {
@@ -96,7 +83,7 @@ export default function Contact() {
     return (
       <>
         <Head>
-          <title>Contact Us - Bin Cleaning Classifieds</title>
+          <title>Contact Us - Bins Buy Sell</title>
           <meta
             name='description'
             content="Get in touch with our team. We're here to help with any questions about our marketplace."

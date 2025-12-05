@@ -29,7 +29,7 @@ export default function ListingEditModal({ isOpen, onClose, listing, onListingUp
     { value: 'pending', label: 'Pending' },
     { value: 'active', label: 'Active' },
     { value: 'sponsored', label: 'Sponsored' },
-    { value: 'bubble_binz', label: 'Bubble Binz' },
+    { value: 'bins_buy_sell', label: 'Bins Buy Sell' },
     { value: 'inactive', label: 'Inactive' },
     { value: 'deleted', label: 'Deleted' },
   ];

@@ -27,7 +27,7 @@ Status types
 Active
 Pending
 Sponsored
-Bubble Binz
+Bins Buy Sell
 InActive
 
 Admin can also see all users on platform and block unblock them edit them

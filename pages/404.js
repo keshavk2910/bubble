@@ -19,7 +19,7 @@ export default function Custom404() {
   return (
     <Layout>
       <Head>
-        <title>404 - Bin Cleaning Classifieds</title>
+        <title>404 - Bins Buy Sell</title>
         <meta name='description' content='Page not found' />
       </Head>
       <div className='min-h-screen bg-white'>

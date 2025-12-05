@@ -114,9 +114,9 @@ export default function AdminListings() {
       count: listings.filter((l) => l.status === 'sponsored').length,
     },
     {
-      key: 'bubble_binz',
-      label: 'Bubble Binz',
-      count: listings.filter((l) => l.status === 'bubble_binz').length,
+      key: 'bins_buy_sell',
+      label: 'Bins Buy Sell',
+      count: listings.filter((l) => l.status === 'bins_buy_sell').length,
     },
   ];
 
@@ -456,7 +456,7 @@ export default function AdminListings() {
   return (
     <>
       <Head>
-        <title>Listings Center - Bin Cleaning Classifieds</title>
+        <title>Listings Center - Bins Buy Sell</title>
         <meta
           name='description'
           content='Manage all marketplace listings with admin controls, featuring, and status management.'

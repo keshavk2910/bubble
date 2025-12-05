@@ -166,7 +166,7 @@ export default function BrowseListings() {
   return (
     <Layout>
       <Head>
-        <title>Browse Listings - Bin Cleaning Classifieds</title>
+        <title>Browse Listings - Bins Buy Sell</title>
         <meta
           name='description'
           content='Find pressure washing equipment, trucks, and businesses for sale. Filter by category, price, and location.'

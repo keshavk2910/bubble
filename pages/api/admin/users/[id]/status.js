@@ -65,7 +65,7 @@ async function handler(req, res) {
           deleted_at: new Date().toISOString()
         })
         .eq('user_id', id)
-        .in('status', ['active', 'pending', 'sponsored', 'bubble_binz']);
+        .in('status', ['active', 'pending', 'sponsored', 'bins_buy_sell']);
 
       if (listingError) {
         console.error('Failed to update user listings on block:', listingError);

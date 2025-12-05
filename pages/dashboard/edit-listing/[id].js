@@ -74,7 +74,7 @@ export default function EditListing() {
         subtitle='Update your listing information'
       >
         <Head>
-          <title>Edit Listing - Bin Cleaning Classifieds</title>
+          <title>Edit Listing - Bins Buy Sell</title>
           <meta name='description' content='Update your listing information' />
         </Head>
         <div className='flex items-center justify-center py-12'>
@@ -91,7 +91,7 @@ export default function EditListing() {
         subtitle='The requested listing could not be found'
       >
         <Head>
-          <title>Listing Not Found - Bin Cleaning Classifieds</title>
+          <title>Listing Not Found - Bins Buy Sell</title>
           <meta
             name='description'
             content='The requested listing could not be found'
@@ -121,7 +121,7 @@ export default function EditListing() {
         subtitle='Your listing has been updated successfully'
       >
         <Head>
-          <title>Listing Updated - Bin Cleaning Classifieds</title>
+          <title>Listing Updated - Bins Buy Sell</title>
           <meta
             name='description'
             content='Your listing has been updated successfully'
@@ -162,7 +162,7 @@ export default function EditListing() {
       subtitle='Update your listing information'
     >
       <Head>
-        <title>Edit Listing - Bin Cleaning Classifieds</title>
+        <title>Edit Listing - Bins Buy Sell</title>
         <meta name='description' content='Update your listing information' />
       </Head>
       <div className='max-w-4xl mx-auto'>

@@ -593,7 +593,7 @@ export default function Messages() {
   return (
     <div className='min-h-screen bg-gray-50 flex'>
       <Head>
-        <title>Messages - Bin Cleaning Classifieds</title>
+        <title>Messages - Bins Buy Sell</title>
         <meta name='description' content='Connect with buyers and sellers' />
       </Head>
       <DashboardSidebar />

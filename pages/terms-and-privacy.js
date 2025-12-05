@@ -25,7 +25,7 @@ export default function TermsAndPrivacy() {
     <Layout>
       <Head>
         <title>
-          Terms of Service & Privacy Policy - Bin Cleaning Classifieds
+          Terms of Service & Privacy Policy - Bins Buy Sell
         </title>
         <meta
           name='description'

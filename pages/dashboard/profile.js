@@ -131,7 +131,7 @@ export default function DashboardProfile() {
   return (
     <>
       <Head>
-        <title>Profile Settings - Bin Cleaning Classifieds</title>
+        <title>Profile Settings - Bins Buy Sell</title>
         <meta name="description" content="Update your personal information and profile settings." />
       </Head>
       <div className='min-h-screen bg-gray-50'>

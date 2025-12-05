@@ -89,7 +89,7 @@ export default function VerifyPhoneRequired() {
   return (
     <>
       <Head>
-        <title>Phone Verification Required - Bin Cleaning Classifieds</title>
+        <title>Phone Verification Required - Bins Buy Sell</title>
         <meta
           name='description'
           content='To ensure the security of our marketplace, please verify your phone number before accessing your account.'

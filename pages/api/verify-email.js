@@ -62,13 +62,13 @@ const sendEmailVerificationOTP = async (req, res) => {
       await mg.messages.create(process.env.MAILGUN_DOMAIN, {
         from: process.env.MAILGUN_FROM_EMAIL,
         to: [userEmail],
-        subject: 'Email Verification - Bin Cleaning Classifieds',
+        subject: 'Email Verification - Bins Buy Sell',
         html: `
           <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
             <h2 style="color: #16a34a; text-align: center;">Email Verification</h2>
             <p>Hello ${req.profile.full_name || 'User'},</p>
 
-            <p>Thank you for using Bin Cleaning Classifieds. Please use the following verification code to verify your email address:</p>
+            <p>Thank you for using Bins Buy Sell. Please use the following verification code to verify your email address:</p>
 
             <div style="background: #f8f9fa; border: 2px dashed #16a34a; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
               <h3 style="font-size: 32px; color: #16a34a; margin: 0; letter-spacing: 8px;">${otp}</h3>
@@ -80,7 +80,7 @@ const sendEmailVerificationOTP = async (req, res) => {
 
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
               <p style="color: #999; font-size: 12px; text-align: center;">
-                Bin Cleaning Classifieds - The premier marketplace for pressure washing and bin cleaning businesses.
+                Bins Buy Sell - The premier marketplace for pressure washing and bin cleaning businesses.
               </p>
             </div>
           </div>

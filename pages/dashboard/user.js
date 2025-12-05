@@ -347,7 +347,7 @@ export default function UserDashboard() {
         return 'bg-gray-100 text-gray-700 border-gray-200';
       case 'sponsored':
         return 'bg-purple-100 text-purple-700 border-purple-200';
-      case 'bubble_binz':
+      case 'bins_buy_sell':
         return 'bg-blue-100 text-blue-700 border-blue-200';
       default:
         return 'bg-gray-100 text-gray-700 border-gray-200';
@@ -357,7 +357,7 @@ export default function UserDashboard() {
   return (
     <>
       <Head>
-        <title>Dashboard - Bin Cleaning Classifieds</title>
+        <title>Dashboard - Bins Buy Sell</title>
         <meta
           name='description'
           content='Manage your listings, view statistics, and track your marketplace activity.'
@@ -957,7 +957,7 @@ function formatStatusDisplay(status) {
     active: 'Active',
     inactive: 'Inactive',
     sponsored: 'Sponsored',
-    bubble_binz: 'Bubble Binz',
+    bins_buy_sell: 'Bins Buy Sell',
   };
   return statusMap[status] || status;
 }

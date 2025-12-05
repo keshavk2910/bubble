@@ -42,7 +42,7 @@ async function handler(req, res) {
           activeListings: activeListings || 0,
           pendingListings: pendingListings || 0,
           sponsoredListings: sponsoredListings || 0,
-          bubbleBinzListings: 0, // Can be added if needed
+          binsBuySellListings: 0, // Can be added if needed
           inactiveListings: (totalListings || 0) - (activeListings || 0) - (pendingListings || 0) - (sponsoredListings || 0)
         }
       });

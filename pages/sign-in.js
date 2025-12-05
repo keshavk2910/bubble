@@ -141,7 +141,7 @@ export default function SignIn() {
   return (
     <>
       <Head>
-        <title>Sign In - Bin Cleaning Classifieds</title>
+        <title>Sign In - Bins Buy Sell</title>
         <meta
           name='description'
           content='Sign in to your account to manage listings, messages, and account settings.'

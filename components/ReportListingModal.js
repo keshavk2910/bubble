@@ -166,7 +166,7 @@ export default function ReportListingModal({ isOpen, onClose, listingTitle, list
               Thank you for reporting this listing. Our admin team will review your report and take appropriate action.
             </p>
             <p className="text-green-600 text-sm font-normal font-sans mb-6">
-              We appreciate your help in keeping Bubble Binz Classifieds clean and safe for everyone.
+              We appreciate your help in keeping Bins Buy Sell Classifieds clean and safe for everyone.
             </p>
             <button
               onClick={handleClose}

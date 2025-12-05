@@ -119,7 +119,7 @@ export default function AdminMessages() {
   return (
     <>
       <Head>
-        <title>Messages Monitoring - Bin Cleaning Classifieds</title>
+        <title>Messages Monitoring - Bins Buy Sell</title>
         <meta name="description" content="Monitor all platform conversations and messages" />
       </Head>
       

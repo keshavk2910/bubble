@@ -61,9 +61,9 @@ export default function ListingsTable({
         return 'bg-yellow-100 text-yellow-700';
       case 'sponsored':
         return 'bg-blue-100 text-blue-700';
-      case 'bubble binz':
+      case 'bins buy sell':
         return 'bg-purple-100 text-purple-700';
-      case 'bubble_binz':
+      case 'bins_buy_sell':
         return 'bg-purple-100 text-purple-700';
       case 'inactive':
         return 'bg-red-100 text-red-700';
@@ -234,7 +234,7 @@ export default function ListingsTable({
                           <option value='pending'>Pending</option>
                           <option value='active'>Active</option>
                           <option value='sponsored'>Sponsored</option>
-                          <option value='bubble_binz'>Bubble Binz</option>
+                          <option value='bins_buy_sell'>Bins Buy Sell</option>
                           <option value='inactive'>Inactive</option>
                           <option value='deleted'>Deleted</option>
                         </select>

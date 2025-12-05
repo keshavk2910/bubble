@@ -211,7 +211,7 @@ export default function AdminReports() {
   return (
     <>
       <Head>
-        <title>Reports Management - Bin Cleaning Classifieds</title>
+        <title>Reports Management - Bins Buy Sell</title>
         <meta name="description" content="Manage listing reports and moderate marketplace content." />
       </Head>
       

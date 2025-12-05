@@ -154,7 +154,7 @@ export default function PostNewListing() {
       subtitle='Create a new listing to sell your equipment or business'
     >
       <Head>
-        <title>Post New Listing - Bin Cleaning Classifieds</title>
+        <title>Post New Listing - Bins Buy Sell</title>
         <meta
           name='description'
           content='Create a new listing to sell your equipment or business'
@@ -166,8 +166,7 @@ export default function PostNewListing() {
             Got Something to Sell?
           </h1>
           <p className='text-gray-600 text-base font-normal font-sans leading-normal'>
-            Complete the form below to list your item on Bin Cleaning
-            Classifieds
+            Complete the form below to list your item on Bin Buy Sell
           </p>
         </div>
 

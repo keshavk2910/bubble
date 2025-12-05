@@ -341,7 +341,7 @@ export default function AdminDashboard() {
   return (
     <>
       <Head>
-        <title>Admin Dashboard - Bin Cleaning Classifieds</title>
+        <title>Admin Dashboard - Bins Buy Sell</title>
         <meta
           name='description'
           content='Admin control center for managing listings, users, and marketplace analytics.'

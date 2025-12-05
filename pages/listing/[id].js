@@ -337,8 +337,8 @@ export default function ListingDetail() {
       <Head>
         <title>
           {listing?.title
-            ? `${listing.title} - Bin Cleaning Classifieds`
-            : 'Loading Listing - Bin Cleaning Classifieds'}
+            ? `${listing.title} - Bins Buy Sell`
+            : 'Loading Listing - Bins Buy Sell'}
         </title>
         <meta
           name='description'
