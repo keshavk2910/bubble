@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react';
-import Logo from '../components/Images/logo.svg';
+import Logo from '../components/Images/logoTest.png';
 import Image from 'next/image';
 
 export default function SignIn() {
@@ -154,7 +154,7 @@ export default function SignIn() {
             {/* Logo */}
             <div className='text-center mb-8 flex justify-center'>
               <Link href='/'>
-                <Image src={Logo.src} alt='Logo' width={300} height={300} />
+                <Image src={Logo.src} alt='Logo' width={100} height={100} />
               </Link>
             </div>
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
-import LogoWhite from './Images/logoWhite.svg';
+import LogoLight from './Images/logoLight.png';
 import Image from 'next/image';
 export default function Footer() {
   const [email, setEmail] = useState('');
@@ -18,7 +18,7 @@ export default function Footer() {
         <div className='grid grid-cols-1 md:grid-cols-4 gap-12'>
           {/* Company Info */}
           <div>
-            <Image src={LogoWhite} alt='Logo' width={180} height={180} />
+            <Image src={LogoLight} alt='Logo' width={150} height={150} />
             <p className='text-white text-base font-normal font-sans leading-normal mt-4'>
               The premier marketplace for pressure washing and bin cleaning
               businesses.

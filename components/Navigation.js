@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import Logo from './Images/logo.svg';
+import Logo from './Images/logoTest.png';
 import Image from 'next/image';
 import NotificationBell from './NotificationBell';
 
@@ -62,7 +62,7 @@ export default function Navigation() {
           {/* Logo */}
           <Link href='/' className='flex items-center gap-3'>
             <div className=''>
-              <Image src={Logo.src} alt='Logo' width={280} height={180} />
+              <Image src={Logo.src} alt='Logo' width={100} height={100} />
             </div>
           </Link>
           <div className='flex gap-4'>

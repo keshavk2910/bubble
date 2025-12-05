@@ -10,7 +10,7 @@ import {
   Plus,
   ArrowLeft,
 } from 'lucide-react';
-import logoIcon from './Images/logoIcon.png';
+import logoTest from './Images/logoTest.png';
 import Image from 'next/image';
 
 export default function DashboardSidebar() {
@@ -84,7 +84,7 @@ export default function DashboardSidebar() {
         <Link href='/'>
           <div className='flex items-center gap-3 '>
             <Image
-              src={logoIcon.src}
+              src={logoTest.src}
               alt='Logo'
               width={32}
               height={32}

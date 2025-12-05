@@ -14,6 +14,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { useOptionalUserSession } from '../lib/useUserSession';
+import LogoLight from './Images/logoLight.png';
 
 export default function AdminSidebar({ currentPage }) {
   const router = useRouter();
@@ -85,11 +86,8 @@ export default function AdminSidebar({ currentPage }) {
           </span>
         </Link>
 
-        <div className='flex items-center gap-3'>
-          <div className='w-8 h-8 bg-white rounded-full flex items-center justify-center'>
-            <span className='text-green-600 text-sm font-bold'>B</span>
-          </div>
-          <h1 className='text-white text-lg font-bold font-sans'>Bins Buy Sell</h1>
+        <div className='flex items-center justify-center'>
+          <Image src={LogoLight.src} alt='Logo' width={60} height={60} />
         </div>
       </div>
 
