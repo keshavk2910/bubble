@@ -41,12 +41,19 @@ export default async function handler(req, res) {
       });
     }
 
+    // Determine the redirect URL based on environment
+    const redirectUrl = process.env.NODE_ENV === 'production'
+      ? 'https://binsbuysell.com/reset-password'
+      : `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password`;
+
+    console.log(`Generating password reset link with redirect to: ${redirectUrl}`);
+
     // Use Supabase Auth to send password reset email
     const { data, error } = await supabaseAdmin.auth.admin.generateLink({
       type: 'recovery',
       email: email,
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`,
+        redirectTo: redirectUrl,
       },
     });
 
@@ -57,6 +64,8 @@ export default async function handler(req, res) {
         details: error.message,
       });
     }
+
+    console.log(`Password reset link generated for ${email}:`, data.properties.action_link);
 
     // Send email via Mailgun
     if (process.env.MAILGUN_API_KEY && process.env.MAILGUN_DOMAIN) {

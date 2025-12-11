@@ -17,17 +17,34 @@ export default function ResetPassword() {
   const [success, setSuccess] = useState(false);
   const [accessToken, setAccessToken] = useState('');
 
-  // Extract access token from URL hash
+  // Extract access token from URL hash or query params
   useEffect(() => {
-    // Supabase sends the token in the URL hash
+    // Supabase redirects with token in URL hash after clicking the verify link
     const hash = window.location.hash;
-    const params = new URLSearchParams(hash.substring(1));
-    const token = params.get('access_token');
-    const type = params.get('type');
+    const search = window.location.search;
+
+    // Try to get token from hash first (Supabase default behavior)
+    let token = null;
+    let type = null;
+
+    if (hash) {
+      const hashParams = new URLSearchParams(hash.substring(1));
+      token = hashParams.get('access_token');
+      type = hashParams.get('type');
+    }
+
+    // Fallback to query params if not in hash
+    if (!token && search) {
+      const queryParams = new URLSearchParams(search);
+      token = queryParams.get('access_token');
+      type = queryParams.get('type');
+    }
 
     if (type === 'recovery' && token) {
       setAccessToken(token);
-    } else {
+      console.log('Reset token found:', token.substring(0, 20) + '...');
+    } else if (hash || search) {
+      console.error('Invalid token or type. Hash:', hash, 'Search:', search);
       setError('Invalid or expired reset link. Please request a new one.');
     }
   }, []);
