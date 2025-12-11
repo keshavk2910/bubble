@@ -11,6 +11,8 @@ import {
   CheckCircle,
   Star,
   User,
+  ZoomIn,
+  X,
 } from 'lucide-react';
 import Layout from '../../components/Layout';
 import ReportListingModal from '../../components/ReportListingModal';
@@ -25,6 +27,8 @@ export default function ListingDetail() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showLightbox, setShowLightbox] = useState(false);
+  const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -159,6 +163,45 @@ export default function ListingDetail() {
       prev === listing.images?.length - 1 ? 0 : prev + 1
     );
   };
+
+  const openLightbox = (index) => {
+    setLightboxImageIndex(index);
+    setShowLightbox(true);
+  };
+
+  const closeLightbox = () => {
+    setShowLightbox(false);
+  };
+
+  const handleLightboxPrevious = () => {
+    setLightboxImageIndex((prev) =>
+      prev === 0 ? listing.images?.length - 1 : prev - 1
+    );
+  };
+
+  const handleLightboxNext = () => {
+    setLightboxImageIndex((prev) =>
+      prev === listing.images?.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    if (!showLightbox) return;
+
+    const handleKeyPress = (e) => {
+      if (e.key === 'Escape') {
+        closeLightbox();
+      } else if (e.key === 'ArrowLeft') {
+        handleLightboxPrevious();
+      } else if (e.key === 'ArrowRight') {
+        handleLightboxNext();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [showLightbox, listing]);
 
   const handleSaveListing = async () => {
     const session = localStorage.getItem('supabase_session');
@@ -387,48 +430,132 @@ export default function ListingDetail() {
             </div>
           )}
 
-          {/* Page Header */}
-          <div className='max-w-7xl mx-auto px-6 py-8'>
-            {/* Title and Meta Info */}
-            <div className='mb-8'>
-              <h1 className='text-gray-900 text-4xl font-medium font-sans leading-10 mb-6'>
-                {listing.title}
-              </h1>
+          {/* Page Content */}
+          <div className='max-w-7xl mx-auto'>
+            {/* Mobile Layout: Images First */}
+            <div className='lg:hidden'>
+              {/* Images - 50vh on mobile */}
+              <div className='bg-white border-b border-gray-200 overflow-hidden'>
+                <div className='relative h-[50vh]'>
+                  {/* Main Image */}
+                  <Image
+                    src={listing.images?.[currentImageIndex]?.image_url}
+                    alt='Listing image'
+                    fill
+                    className='object-cover'
+                  />
 
-              <div className='flex items-center gap-6 flex-wrap'>
-                <div className='text-gray-900 text-2xl font-normal font-sans leading-loose'>
-                  ${listing.price?.toLocaleString()}
+                  {/* Navigation Arrows */}
+                  {listing.images?.length > 1 && (
+                    <>
+                      <button
+                        onClick={handlePreviousImage}
+                        className='absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white/90 transition-colors'
+                      >
+                        <ChevronLeft className='w-6 h-6 text-gray-700' />
+                      </button>
+                      <button
+                        onClick={handleNextImage}
+                        className='absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white/90 transition-colors'
+                      >
+                        <ChevronRight className='w-6 h-6 text-gray-700' />
+                      </button>
+                    </>
+                  )}
+
+                  {/* Image Counter */}
+                  <div className='absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/80 rounded-full px-3 py-1'>
+                    <span className='text-black text-sm font-normal font-sans leading-tight'>
+                      {currentImageIndex + 1} / {listing?.images?.length || 1}
+                    </span>
+                  </div>
+
+                  {/* Magnifying Glass Icon */}
+                  <button
+                    onClick={() => openLightbox(currentImageIndex)}
+                    className='absolute top-4 right-4 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white/90 transition-colors group'
+                    title='View fullscreen'
+                  >
+                    <ZoomIn className='w-5 h-5 text-gray-700 group-hover:text-green-600 transition-colors' />
+                  </button>
+                </div>
+              </div>
+
+              {/* Title and Price Section */}
+              <div className='px-6 py-6 bg-white border-b border-gray-200'>
+                <h1 className='text-gray-900 text-2xl font-semibold font-sans mb-4'>
+                  {listing.title}
+                </h1>
+
+                <div className='flex items-center justify-between mb-4'>
+                  <div className='text-gray-900 text-3xl font-semibold font-sans'>
+                    ${listing.price?.toLocaleString()}
+                  </div>
                 </div>
 
-                <div className='flex items-center gap-2'>
+                <div className='flex items-center gap-2 mb-3'>
                   <MapPin className='w-4 h-4 text-gray-600' />
-                  <span className='text-gray-600 text-base font-normal font-sans leading-normal'>
+                  <span className='text-gray-600 text-base font-normal font-sans'>
                     {listing.city}, {listing.zip_code}
                   </span>
                 </div>
 
-                <div className='bg-green-600/10 rounded-full px-3 py-1'>
-                  <span className='text-green-600 text-sm font-normal font-sans leading-tight'>
-                    {formatCategoryDisplay(listing.category)}
+                <div className='flex items-center gap-3 flex-wrap'>
+                  <div className='bg-green-600/10 rounded-full px-3 py-1'>
+                    <span className='text-green-600 text-sm font-normal font-sans'>
+                      {formatCategoryDisplay(listing.category)}
+                    </span>
+                  </div>
+                  <span className='text-gray-500 text-sm font-normal font-sans'>
+                    Listed {new Date(listing.created_at).toLocaleDateString()}
                   </span>
                 </div>
-
-                <span className='text-gray-600 text-base font-normal font-sans leading-normal'>
-                  Listed on{' '}
-                  {new Date(listing.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </span>
               </div>
             </div>
 
-            <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+            {/* Desktop Layout: Original */}
+            <div className='hidden lg:block px-6 py-8'>
+              {/* Title and Meta Info */}
+              <div className='mb-8'>
+                <h1 className='text-gray-900 text-4xl font-medium font-sans leading-10 mb-6'>
+                  {listing.title}
+                </h1>
+
+                <div className='flex items-center gap-6 flex-wrap'>
+                  <div className='text-gray-900 text-2xl font-normal font-sans leading-loose'>
+                    ${listing.price?.toLocaleString()}
+                  </div>
+
+                  <div className='flex items-center gap-2'>
+                    <MapPin className='w-4 h-4 text-gray-600' />
+                    <span className='text-gray-600 text-base font-normal font-sans leading-normal'>
+                      {listing.city}, {listing.zip_code}
+                    </span>
+                  </div>
+
+                  <div className='bg-green-600/10 rounded-full px-3 py-1'>
+                    <span className='text-green-600 text-sm font-normal font-sans leading-tight'>
+                      {formatCategoryDisplay(listing.category)}
+                    </span>
+                  </div>
+
+                  <span className='text-gray-600 text-base font-normal font-sans leading-normal'>
+                    Listed on{' '}
+                    {new Date(listing.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 px-6 lg:px-6'>
               {/* Left Column - Images and Description */}
               <div className='lg:col-span-2 space-y-8'>
-                {/* Main Image Carousel */}
-                <div className='bg-white rounded-xl border border-gray-200 overflow-hidden'>
+                {/* Main Image Carousel - Desktop Only */}
+                <div className='hidden lg:block bg-white rounded-xl border border-gray-200 overflow-hidden'>
                   <div className='relative'>
                     {/* Main Image */}
                     <div className='relative aspect-[820/400] overflow-hidden'>
@@ -461,22 +588,33 @@ export default function ListingDetail() {
                           {listing?.images?.length || 1}
                         </span>
                       </div>
+
+                      {/* Magnifying Glass Icon - Top Right */}
+                      <button
+                        onClick={() => openLightbox(currentImageIndex)}
+                        className='absolute top-4 right-4 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white/90 transition-colors group'
+                        title='View fullscreen'
+                      >
+                        <ZoomIn className='w-5 h-5 text-gray-700 group-hover:text-green-600 transition-colors' />
+                      </button>
                     </div>
                   </div>
                 </div>
 
-                {/* Thumbnail Images */}
+                {/* Thumbnail Images - Desktop Only */}
                 {listing.images && listing.images.length > 1 && (
-                  <div className='flex gap-4 overflow-x-auto pb-2'>
+                  <div className='hidden lg:flex gap-4 overflow-x-auto pb-2'>
                     {listing.images.map((image, index) => (
                       <button
                         key={index}
                         onClick={() => setCurrentImageIndex(index)}
-                        className={`flex-shrink-0 w-24 h-24 rounded-lg border-2 overflow-hidden transition-colors ${
+                        onDoubleClick={() => openLightbox(index)}
+                        className={`relative flex-shrink-0 w-24 h-24 rounded-lg border-2 overflow-hidden transition-colors group ${
                           index === currentImageIndex
                             ? 'border-green-600'
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
+                        title='Click to preview, double-click to enlarge'
                       >
                         <Image
                           src={image.image_url}
@@ -485,6 +623,10 @@ export default function ListingDetail() {
                           height={96}
                           className='w-full h-full object-cover'
                         />
+                        {/* Magnifying Glass Hint on Hover */}
+                        <div className='absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center'>
+                          <ZoomIn className='w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity' />
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -729,6 +871,109 @@ export default function ListingDetail() {
           listingTitle={listing?.title}
           listingId={listing?.id}
         />
+
+        {/* Image Lightbox Modal */}
+        {showLightbox && listing.images && (
+          <div
+            className='fixed inset-0 bg-black/95 z-50 flex items-center justify-center'
+            onClick={closeLightbox}
+          >
+            <div className='relative w-full h-full flex items-center justify-center p-4'>
+              {/* Close Button */}
+              <button
+                onClick={closeLightbox}
+                className='absolute top-4 right-4 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors z-10'
+              >
+                <X className='w-6 h-6 text-white' />
+              </button>
+
+              {/* Image Counter */}
+              <div className='absolute top-4 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 z-10'>
+                <span className='text-white text-sm font-medium font-sans'>
+                  {lightboxImageIndex + 1} / {listing.images.length}
+                </span>
+              </div>
+
+              {/* Previous Button */}
+              {listing.images.length > 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLightboxPrevious();
+                  }}
+                  className='absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors z-10'
+                >
+                  <ChevronLeft className='w-8 h-8 text-white' />
+                </button>
+              )}
+
+              {/* Main Image */}
+              <div
+                className='relative max-w-7xl max-h-full w-full h-full flex items-center justify-center'
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Image
+                  src={listing.images[lightboxImageIndex]?.image_url}
+                  alt={`Image ${lightboxImageIndex + 1}`}
+                  width={1920}
+                  height={1080}
+                  className='max-w-full max-h-[90vh] w-auto h-auto object-contain'
+                  priority
+                />
+              </div>
+
+              {/* Next Button */}
+              {listing.images.length > 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLightboxNext();
+                  }}
+                  className='absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors z-10'
+                >
+                  <ChevronRight className='w-8 h-8 text-white' />
+                </button>
+              )}
+
+              {/* Thumbnail Strip */}
+              {listing.images.length > 1 && (
+                <div className='absolute bottom-4 left-1/2 -translate-x-1/2 max-w-full overflow-x-auto z-10'>
+                  <div className='flex gap-2 px-4'>
+                    {listing.images.map((image, index) => (
+                      <button
+                        key={index}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setLightboxImageIndex(index);
+                        }}
+                        className={`flex-shrink-0 w-16 h-16 rounded-lg border-2 overflow-hidden transition-all ${
+                          index === lightboxImageIndex
+                            ? 'border-green-500 scale-110'
+                            : 'border-white/30 hover:border-white/60'
+                        }`}
+                      >
+                        <Image
+                          src={image.image_url}
+                          alt={`Thumbnail ${index + 1}`}
+                          width={64}
+                          height={64}
+                          className='w-full h-full object-cover'
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Keyboard Navigation Hint */}
+              <div className='absolute bottom-24 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2'>
+                <span className='text-white text-xs font-normal font-sans'>
+                  Use arrow keys or click arrows to navigate
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
       </Layout>
     </>
   );
