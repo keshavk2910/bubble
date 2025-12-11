@@ -45,6 +45,8 @@ export default function ListingForm({
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
 
   const conditionOptions = ['new', 'excellent', 'good', 'fair', 'poor'];
   const categoryOptions = [
@@ -134,6 +136,16 @@ export default function ListingForm({
 
     if (invalidFiles.length > 0) {
       alert(`Unsupported file format detected. Please upload only JPG, PNG, WEBP, or GIF images.\n\nNote: Apple HEIC/HEIF formats are not supported. Please convert to JPG or PNG first.`);
+      return;
+    }
+
+    // Validate file size - max 20MB per image
+    const maxSize = 20 * 1024 * 1024; // 20MB
+    const oversizedFiles = filesArray.filter(file => file.size > maxSize);
+
+    if (oversizedFiles.length > 0) {
+      const fileNames = oversizedFiles.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(2)}MB)`).join('\n');
+      alert(`Some files are too large. Maximum size is 20MB per image.\n\nOversized files:\n${fileNames}\n\nPlease compress or resize these images and try again.`);
       return;
     }
 
@@ -335,7 +347,13 @@ export default function ListingForm({
       // Upload new images first
       const uploadedImages = [];
       if (newImages.length > 0) {
-        for (const imageData of newImages) {
+        setIsUploadingImages(true);
+        setUploadProgress({ current: 0, total: newImages.length });
+
+        for (let i = 0; i < newImages.length; i++) {
+          const imageData = newImages[i];
+          setUploadProgress({ current: i + 1, total: newImages.length });
+
           try {
             const url = await uploadNewImage(imageData.file);
 
@@ -370,8 +388,16 @@ export default function ListingForm({
             }
           } catch (error) {
             console.error('Image upload error:', error);
+            setIsUploadingImages(false);
+            setUploadProgress({ current: 0, total: 0 });
+            setSubmitError('Failed to upload some images. Please try again.');
+            setIsSubmitting(false);
+            return;
           }
         }
+
+        setIsUploadingImages(false);
+        setUploadProgress({ current: 0, total: 0 });
       }
 
       // Save image order for edit mode
@@ -437,6 +463,7 @@ export default function ListingForm({
   };
 
   return (
+    <>
     <form
       onSubmit={handleSubmit}
       className='bg-white rounded-xl border border-gray-200 p-8 space-y-8'
@@ -926,7 +953,7 @@ export default function ListingForm({
                 </button>
               </div>
               <p className='text-gray-500 text-sm font-normal font-sans'>
-                Supported formats: JPG, PNG, WEBP, GIF (Max 5MB each)
+                Supported formats: JPG, PNG, WEBP, GIF (Max 20MB each)
               </p>
               <p className='text-gray-400 text-xs font-normal font-sans mt-1'>
                 Note: Apple HEIC/HEIF formats not supported
@@ -1052,5 +1079,37 @@ export default function ListingForm({
         </button>
       </div>
     </form>
+
+    {/* Image Upload Progress Modal */}
+    {isUploadingImages && (
+      <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50'>
+        <div className='bg-white rounded-xl p-8 shadow-2xl max-w-md w-full mx-4'>
+          <div className='flex flex-col items-center gap-4'>
+            <div className='w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin'></div>
+            <div className='text-center'>
+              <h3 className='text-gray-900 text-lg font-semibold font-sans mb-2'>
+                Uploading Images...
+              </h3>
+              <p className='text-gray-600 text-base font-normal font-sans mb-3'>
+                Image {uploadProgress.current} of {uploadProgress.total}
+              </p>
+              {/* Progress Bar */}
+              <div className='w-full bg-gray-200 rounded-full h-2.5 mb-2'>
+                <div
+                  className='bg-green-600 h-2.5 rounded-full transition-all duration-300'
+                  style={{
+                    width: `${(uploadProgress.current / uploadProgress.total) * 100}%`,
+                  }}
+                ></div>
+              </div>
+              <p className='text-gray-500 text-sm font-normal font-sans'>
+                Please wait, do not close this page.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </>
   );
 }

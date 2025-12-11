@@ -1,11 +1,13 @@
 import { supabaseAdmin } from '../../lib/supabase';
 import { requireAuth } from '../../lib/auth-middleware';
 
-// Increase body size limit to 10MB to handle base64 encoded images
+// Increase body size limit to 20MB to handle base64 encoded images
+// Base64 encoding increases file size by ~33%, so 5MB image becomes ~6.7MB
+// 20MB allows comfortable headroom for multiple large images
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '10mb',
+      sizeLimit: '20mb',
     },
   },
 };
@@ -53,12 +55,12 @@ export default requireAuth(async function handler(req, res) {
       });
     }
 
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Validate file size (max 20MB)
+    const maxSize = 20 * 1024 * 1024; // 20MB
     if (imageBuffer.length > maxSize) {
       return res.status(400).json({
         error: 'File too large',
-        details: 'Image must be smaller than 5MB'
+        details: 'Image must be smaller than 20MB'
       });
     }
 

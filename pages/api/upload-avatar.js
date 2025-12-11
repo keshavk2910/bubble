@@ -1,11 +1,13 @@
 import { supabaseAdmin } from '../../lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 
-// Increase body size limit to 10MB to handle base64 encoded images
+// Increase body size limit to 20MB to handle base64 encoded images
+// Base64 encoding increases file size by ~33%, so 5MB image becomes ~6.7MB
+// 20MB allows comfortable headroom
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '10mb',
+      sizeLimit: '20mb',
     },
   },
 };
@@ -69,11 +71,11 @@ export default async function handler(req, res) {
     const base64Data = file.replace(/^data:image\/\w+;base64,/, '');
     const buffer = Buffer.from(base64Data, 'base64');
 
-    // Validate file size (max 5MB)
-    if (buffer.length > 5 * 1024 * 1024) {
-      return res.status(400).json({ 
+    // Validate file size (max 20MB)
+    if (buffer.length > 20 * 1024 * 1024) {
+      return res.status(400).json({
         error: 'File too large',
-        details: 'Avatar must be less than 5MB'
+        details: 'Avatar must be less than 20MB'
       });
     }
 
