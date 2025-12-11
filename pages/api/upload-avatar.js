@@ -56,11 +56,12 @@ export default async function handler(req, res) {
       });
     }
 
-    // Validate file type
-    if (!fileType.startsWith('image/')) {
-      return res.status(400).json({ 
+    // Validate file type - only allow specific formats (no Apple HEIC/HEIF)
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(fileType.toLowerCase())) {
+      return res.status(400).json({
         error: 'Invalid file type',
-        details: 'Only image files are allowed'
+        details: 'Only JPG, PNG, WEBP, and GIF images are allowed. Apple HEIC/HEIF formats are not supported.'
       });
     }
 

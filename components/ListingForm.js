@@ -126,7 +126,18 @@ export default function ListingForm({
   const handleImageUpload = (files) => {
     const totalImages = existingImages.length + newImages.length;
     const maxNewImages = 10 - totalImages;
-    const filesToUpload = Array.from(files).slice(0, maxNewImages);
+    const filesArray = Array.from(files).slice(0, maxNewImages);
+
+    // Validate file types - only allow specific image formats
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    const invalidFiles = filesArray.filter(file => !allowedTypes.includes(file.type.toLowerCase()));
+
+    if (invalidFiles.length > 0) {
+      alert(`Unsupported file format detected. Please upload only JPG, PNG, WEBP, or GIF images.\n\nNote: Apple HEIC/HEIF formats are not supported. Please convert to JPG or PNG first.`);
+      return;
+    }
+
+    const filesToUpload = filesArray.filter(file => allowedTypes.includes(file.type.toLowerCase()));
 
     const newImageFiles = filesToUpload.map((file, index) => ({
       id: Date.now() + index,
@@ -915,7 +926,10 @@ export default function ListingForm({
                 </button>
               </div>
               <p className='text-gray-500 text-sm font-normal font-sans'>
-                Supported formats: JPG, PNG, GIF (Max 5MB each)
+                Supported formats: JPG, PNG, WEBP, GIF (Max 5MB each)
+              </p>
+              <p className='text-gray-400 text-xs font-normal font-sans mt-1'>
+                Note: Apple HEIC/HEIF formats not supported
               </p>
             </div>
 
@@ -923,7 +937,7 @@ export default function ListingForm({
               id='file-upload'
               type='file'
               multiple
-              accept='image/*'
+              accept='image/jpeg,image/jpg,image/png,image/webp,image/gif'
               onChange={(e) => handleImageUpload(e.target.files)}
               className='hidden'
             />

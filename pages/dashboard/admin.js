@@ -34,6 +34,11 @@ export default function AdminDashboard() {
   const [userToBlock, setUserToBlock] = useState(null);
   const [isBlocking, setIsBlocking] = useState(false);
 
+  // Bulk actions state
+  const [selectedListings, setSelectedListings] = useState([]);
+  const [isBulkActionLoading, setIsBulkActionLoading] = useState(false);
+  const [bulkActionMessage, setBulkActionMessage] = useState('');
+
   // Load admin data
   useEffect(() => {
     const loadAdminData = async () => {
@@ -338,6 +343,159 @@ export default function AdminDashboard() {
   //   // Handle export functionality
   // };
 
+  // Bulk Actions for Listings
+  const currentListings = showDeleted
+    ? listings.filter((l) => l.status === 'deleted')
+    : showFeatured
+    ? listings.filter((l) => l.featured === true && l.status !== 'deleted')
+    : listings.filter((l) => l.status !== 'deleted');
+
+  const handleSelectAll = () => {
+    if (selectedListings.length === currentListings.length) {
+      setSelectedListings([]);
+    } else {
+      setSelectedListings(currentListings.map(l => l.id));
+    }
+  };
+
+  const handleToggleSelect = (listingId) => {
+    setSelectedListings(prev =>
+      prev.includes(listingId)
+        ? prev.filter(id => id !== listingId)
+        : [...prev, listingId]
+    );
+  };
+
+  const handleBulkRemove = async () => {
+    if (selectedListings.length === 0) return;
+
+    if (!confirm(`Are you sure you want to delete ${selectedListings.length} listing(s)?`)) {
+      return;
+    }
+
+    setIsBulkActionLoading(true);
+    setBulkActionMessage(`Deleting ${selectedListings.length} listing(s)...`);
+
+    try {
+      const session = localStorage.getItem('supabase_session');
+      const sessionData = JSON.parse(session);
+      const token = sessionData.access_token;
+
+      for (const listingId of selectedListings) {
+        await fetch(`/api/listings?listingId=${listingId}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      }
+
+      setListings(prev => prev.filter(l => !selectedListings.includes(l.id)));
+      setSelectedListings([]);
+    } catch (error) {
+      console.error('Bulk remove error:', error);
+      alert('Error deleting listings. Please try again.');
+    } finally {
+      setIsBulkActionLoading(false);
+      setBulkActionMessage('');
+    }
+  };
+
+  const handleBulkFeature = async () => {
+    if (selectedListings.length === 0) return;
+
+    const listingsToFeature = selectedListings.filter(id => {
+      const listing = listings.find(l => l.id === id);
+      return listing && !listing.featured;
+    });
+
+    if (listingsToFeature.length === 0) {
+      alert('All selected listings are already featured.');
+      return;
+    }
+
+    setIsBulkActionLoading(true);
+    setBulkActionMessage(`Featuring ${listingsToFeature.length} listing(s)...`);
+
+    try {
+      const session = localStorage.getItem('supabase_session');
+      const sessionData = JSON.parse(session);
+      const token = sessionData.access_token;
+
+      for (const listingId of listingsToFeature) {
+        await fetch(`/api/admin/listings/${listingId}/featured`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ featured: true }),
+        });
+      }
+
+      setListings(prev =>
+        prev.map(l =>
+          listingsToFeature.includes(l.id) ? { ...l, featured: true } : l
+        )
+      );
+      setSelectedListings([]);
+    } catch (error) {
+      console.error('Bulk feature error:', error);
+      alert('Error featuring listings. Please try again.');
+    } finally {
+      setIsBulkActionLoading(false);
+      setBulkActionMessage('');
+    }
+  };
+
+  const handleBulkUnfeature = async () => {
+    if (selectedListings.length === 0) return;
+
+    const listingsToUnfeature = selectedListings.filter(id => {
+      const listing = listings.find(l => l.id === id);
+      return listing && listing.featured;
+    });
+
+    if (listingsToUnfeature.length === 0) {
+      alert('No featured listings selected to unfeature.');
+      return;
+    }
+
+    setIsBulkActionLoading(true);
+    setBulkActionMessage(`Unfeaturing ${listingsToUnfeature.length} listing(s)...`);
+
+    try {
+      const session = localStorage.getItem('supabase_session');
+      const sessionData = JSON.parse(session);
+      const token = sessionData.access_token;
+
+      for (const listingId of listingsToUnfeature) {
+        await fetch(`/api/admin/listings/${listingId}/featured`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ featured: false }),
+        });
+      }
+
+      setListings(prev =>
+        prev.map(l =>
+          listingsToUnfeature.includes(l.id) ? { ...l, featured: false } : l
+        )
+      );
+      setSelectedListings([]);
+    } catch (error) {
+      console.error('Bulk unfeature error:', error);
+      alert('Error unfeaturing listings. Please try again.');
+    } finally {
+      setIsBulkActionLoading(false);
+      setBulkActionMessage('');
+    }
+  };
+
   return (
     <>
       <Head>
@@ -360,7 +518,7 @@ export default function AdminDashboard() {
           {/* Listings Management */}
           <div className='bg-white rounded-lg border border-gray-200'>
             <div className='px-6 py-4 border-b border-gray-200'>
-              <div className='flex items-center justify-between'>
+              <div className='flex items-center justify-between mb-4'>
                 <h2 className='text-gray-900 text-lg font-semibold font-sans'>
                   Listings Management
                 </h2>
@@ -393,17 +551,52 @@ export default function AdminDashboard() {
                   </button>
                 </div>
               </div>
+
+              {/* Bulk Actions */}
+              <div className='flex items-center gap-3'>
+                <button
+                  onClick={handleSelectAll}
+                  disabled={isBulkActionLoading}
+                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                >
+                  <input
+                    type='checkbox'
+                    className='rounded border-gray-300'
+                    checked={selectedListings.length === currentListings.length && currentListings.length > 0}
+                    onChange={handleSelectAll}
+                    onClick={(e) => e.stopPropagation()}
+                    disabled={isBulkActionLoading}
+                  />
+                  <span>Select All ({selectedListings.length})</span>
+                </button>
+                <button
+                  onClick={handleBulkRemove}
+                  disabled={selectedListings.length === 0 || isBulkActionLoading}
+                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                >
+                  <Trash2 className='w-4 h-4' />
+                  <span>Remove</span>
+                </button>
+                <button
+                  onClick={handleBulkFeature}
+                  disabled={selectedListings.length === 0 || isBulkActionLoading}
+                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                >
+                  <Star className='w-4 h-4' />
+                  <span>Feature</span>
+                </button>
+                <button
+                  onClick={handleBulkUnfeature}
+                  disabled={selectedListings.length === 0 || isBulkActionLoading}
+                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                >
+                  <Star className='w-4 h-4 fill-gray-400' />
+                  <span>Unfeature</span>
+                </button>
+              </div>
             </div>
             <ListingsTable
-              listings={
-                showDeleted
-                  ? listings.filter((l) => l.status === 'deleted')
-                  : showFeatured
-                  ? listings.filter(
-                      (l) => l.featured === true && l.status !== 'deleted'
-                    )
-                  : listings.filter((l) => l.status !== 'deleted')
-              }
+              listings={currentListings}
               isLoading={isLoading}
               onEdit={handleEditListing}
               onDelete={handleDeleteListing}
@@ -413,15 +606,26 @@ export default function AdminDashboard() {
               onReject={handleReject}
               onRecover={handleRecoverListing}
               onToggleFeatured={handleToggleFeatured}
+              selectedListings={selectedListings}
+              onToggleSelect={handleToggleSelect}
             />
           </div>
 
           {/* Users Management */}
           <div className='bg-white rounded-lg border border-gray-200'>
             <div className='px-6 py-4 border-b border-gray-200'>
-              <h2 className='text-gray-900 text-lg font-semibold font-sans'>
-                Users Management
-              </h2>
+              <div className='flex items-center justify-between'>
+                <h2 className='text-gray-900 text-lg font-semibold font-sans'>
+                  Users Management
+                </h2>
+                <button
+                  onClick={() => router.push('/dashboard/users')}
+                  className='flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors'
+                >
+                  <Shield className='w-4 h-4' />
+                  <span>View All Users</span>
+                </button>
+              </div>
             </div>
             <UsersTable
               users={users}
@@ -429,6 +633,7 @@ export default function AdminDashboard() {
               onEdit={handleEditUser}
               onBlock={handleBlockUser}
               onView={handleViewUser}
+              hideCheckboxes={true}
             />
           </div>
 
@@ -505,12 +710,34 @@ export default function AdminDashboard() {
           }
           confirmText={userToBlock?.status === 'blocked' ? 'Unblock' : 'Block'}
           confirmButtonColor={
-            userToBlock?.status === 'blocked' 
-              ? 'bg-green-600 hover:bg-green-700' 
+            userToBlock?.status === 'blocked'
+              ? 'bg-green-600 hover:bg-green-700'
               : 'bg-red-600 hover:bg-red-700'
           }
           isLoading={isBlocking}
         />
+
+        {/* Bulk Action Loading Overlay */}
+        {isBulkActionLoading && (
+          <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50'>
+            <div className='bg-white rounded-xl p-8 shadow-2xl max-w-md w-full mx-4'>
+              <div className='flex flex-col items-center gap-4'>
+                <div className='w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin'></div>
+                <div className='text-center'>
+                  <h3 className='text-gray-900 text-lg font-semibold font-sans mb-2'>
+                    Processing...
+                  </h3>
+                  <p className='text-gray-600 text-base font-normal font-sans'>
+                    {bulkActionMessage}
+                  </p>
+                  <p className='text-gray-500 text-sm font-normal font-sans mt-2'>
+                    Please wait, do not close this page.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </AdminLayout>
     </>
   );

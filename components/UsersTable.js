@@ -1,6 +1,6 @@
 import { MoreHorizontal, Edit, Ban, CheckCircle, Eye } from 'lucide-react';
 
-export default function UsersTable({ users = [], isLoading = false, onEdit, onBlock, onView }) {
+export default function UsersTable({ users = [], isLoading = false, onEdit, onBlock, onView, hideCheckboxes = false }) {
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'active': return 'bg-green-100 text-green-700';
@@ -36,9 +36,11 @@ export default function UsersTable({ users = [], isLoading = false, onEdit, onBl
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="w-4 px-4 py-3">
-                <input type="checkbox" className="rounded border-gray-300" />
-              </th>
+              {!hideCheckboxes && (
+                <th className="w-4 px-4 py-3">
+                  <input type="checkbox" className="rounded border-gray-300" />
+                </th>
+              )}
               <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Name</th>
               <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Email</th>
               <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Phone</th>
@@ -52,7 +54,7 @@ export default function UsersTable({ users = [], isLoading = false, onEdit, onBl
           <tbody className="divide-y divide-gray-200">
             {users.length === 0 ? (
               <tr>
-                <td colSpan="9" className="px-6 py-12 text-center">
+                <td colSpan={hideCheckboxes ? "8" : "9"} className="px-6 py-12 text-center">
                   <div className="text-gray-500 text-base font-normal font-sans">
                     No users found
                   </div>
@@ -61,9 +63,11 @@ export default function UsersTable({ users = [], isLoading = false, onEdit, onBl
             ) : (
               users.map((user, index) => (
                 <tr key={user.id || index} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3">
-                    <input type="checkbox" className="rounded border-gray-300" />
-                  </td>
+                  {!hideCheckboxes && (
+                    <td className="px-4 py-3">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                    </td>
+                  )}
                   <td className="px-4 py-3 text-gray-700 text-sm font-normal font-sans leading-tight">
                     <div>
                       <div className="font-medium">{user.full_name || 'N/A'}</div>

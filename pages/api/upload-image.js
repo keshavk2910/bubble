@@ -25,12 +25,12 @@ export default requireAuth(async function handler(req, res) {
       });
     }
 
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-    if (!allowedTypes.includes(contentType)) {
+    // Validate file type - only allow specific formats (no Apple HEIC/HEIF)
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(contentType.toLowerCase())) {
       return res.status(400).json({
         error: 'Invalid file type',
-        details: 'Only JPEG, PNG, and GIF images are allowed'
+        details: 'Only JPG, PNG, WEBP, and GIF images are allowed. Apple HEIC/HEIF formats are not supported.'
       });
     }
 
