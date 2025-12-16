@@ -8,7 +8,6 @@ import {
   Send,
   Search,
   Phone,
-  MoreVertical,
   ArrowLeft,
   Clock,
   Check,
@@ -20,6 +19,7 @@ import {
   Paperclip,
   Smile,
   X,
+  Menu,
 } from 'lucide-react';
 import NotificationBell from '../../components/NotificationBell';
 import EmojiPicker from 'emoji-picker-react';
@@ -38,6 +38,7 @@ export default function Messages() {
   const [loadingConversationId, setLoadingConversationId] = useState(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const messagesEndRef = useRef(null);
   const realtimeChannelRef = useRef(null);
   const selectedConversationRef = useRef(null);
@@ -583,7 +584,7 @@ export default function Messages() {
   if (isLoading) {
     return (
       <div className='min-h-screen bg-gray-50 flex'>
-        <DashboardSidebar />
+        <DashboardSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <div className='flex-1 flex items-center justify-center'>
           <div className='w-8 h-8 border-2 border-green-600 border-t-transparent rounded-full animate-spin'></div>
         </div>
@@ -596,20 +597,30 @@ export default function Messages() {
         <title>Messages - Bins Buy Sell</title>
         <meta name='description' content='Connect with buyers and sellers' />
       </Head>
-      <DashboardSidebar />
+      <DashboardSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main Content Area - offset by sidebar width */}
-      <div className='flex-1 ml-60 overflow-hidden'>
+      <div className='flex-1 lg:ml-60 overflow-hidden'>
         {/* Dashboard Header */}
         <header className='sticky top-0 bg-white border-b border-gray-200 px-6 py-4 z-30'>
           <div className='flex items-center justify-between'>
-            <div>
-              <h1 className='text-gray-900 text-2xl font-semibold font-sans'>
-                Messages
-              </h1>
-              <p className='text-gray-500 text-base font-normal font-sans'>
-                Connect with buyers and sellers
-              </p>
+            <div className='flex items-center gap-4'>
+              {/* Hamburger Menu - Mobile Only */}
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className='lg:hidden w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-lg transition-colors'
+              >
+                <Menu className='w-6 h-6' />
+              </button>
+
+              <div>
+                <h1 className='text-gray-900 text-lg lg:text-2xl font-semibold font-sans'>
+                  Messages
+                </h1>
+                <p className='text-gray-500 text-sm lg:text-base font-normal font-sans hidden sm:block'>
+                  Connect with buyers and sellers
+                </p>
+              </div>
             </div>
             <div className='flex items-center gap-4'>
               {/* Notifications */}
@@ -668,28 +679,47 @@ export default function Messages() {
 
             {/* Conversations */}
             <div className='flex-1 overflow-y-auto'>
-              {conversations.length === 0 ? (
-                <div className='text-center py-12'>
-                  <MessageCircle className='w-12 h-12 text-gray-300 mx-auto mb-4' />
-                  <h3 className='text-gray-700 text-lg font-medium font-sans mb-2'>
-                    No conversations yet
-                  </h3>
-                  <p className='text-gray-500 text-sm font-normal font-sans'>
-                    Messages will appear here when buyers contact you about your
-                    listings.
-                  </p>
-                </div>
-              ) : (
-                conversations.map((conversation, conversationIndex) => (
-                  <div
-                    key={`conversation-${conversation.id}-${conversationIndex}`}
-                    onClick={() => setSelectedConversation(conversation)}
-                    className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                      selectedConversation?.id === conversation.id
-                        ? 'bg-green-50 border-green-200'
-                        : ''
-                    }`}
-                  >
+              {(() => {
+                // Filter conversations based on search term
+                const filteredConversations = conversations.filter((conversation) => {
+                  if (!searchTerm) return true;
+
+                  const searchLower = searchTerm.toLowerCase();
+                  const otherUserName = conversation.otherUser?.name?.toLowerCase() || '';
+                  const listingTitle = conversation.listing?.title?.toLowerCase() || '';
+                  const lastMessage = conversation.lastMessage?.content?.toLowerCase() || '';
+
+                  return (
+                    otherUserName.includes(searchLower) ||
+                    listingTitle.includes(searchLower) ||
+                    lastMessage.includes(searchLower)
+                  );
+                });
+
+                return filteredConversations.length === 0 ? (
+                  <div className='text-center py-12'>
+                    <MessageCircle className='w-12 h-12 text-gray-300 mx-auto mb-4' />
+                    <h3 className='text-gray-700 text-lg font-medium font-sans mb-2'>
+                      {searchTerm ? 'No conversations found' : 'No conversations yet'}
+                    </h3>
+                    <p className='text-gray-500 text-sm font-normal font-sans'>
+                      {searchTerm
+                        ? 'Try a different search term'
+                        : 'Messages will appear here when buyers contact you about your listings.'}
+                    </p>
+                  </div>
+                ) : (
+                  filteredConversations.map((conversation, conversationIndex) => {
+                    return (
+                      <div
+                        key={`conversation-${conversation.id}-${conversationIndex}`}
+                        onClick={() => setSelectedConversation(conversation)}
+                        className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
+                          selectedConversation?.id === conversation.id
+                            ? 'bg-green-50 border-green-200'
+                            : ''
+                        }`}
+                      >
                     <div className='flex items-start gap-3'>
                       {/* Avatar */}
                       <div className='w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden'>
@@ -755,8 +785,10 @@ export default function Messages() {
                       </div>
                     </div>
                   </div>
-                ))
-              )}
+                    );
+                  })
+                );
+              })()}
             </div>
           </div>
 
@@ -808,9 +840,6 @@ export default function Messages() {
                         Last seen{' '}
                         {formatTime(selectedConversation.otherUser.lastSeen)}
                       </span>
-                      <button className='p-2 text-gray-400 hover:text-gray-600'>
-                        <MoreVertical className='w-4 h-4' />
-                      </button>
                     </div>
                   </div>
                 </div>

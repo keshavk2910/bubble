@@ -517,47 +517,47 @@ export default function AdminDashboard() {
         <div className='space-y-6'>
           {/* Listings Management */}
           <div className='bg-white rounded-lg border border-gray-200'>
-            <div className='px-6 py-4 border-b border-gray-200'>
-              <div className='flex items-center justify-between mb-4'>
-                <h2 className='text-gray-900 text-lg font-semibold font-sans'>
+            <div className='px-4 lg:px-6 py-4 border-b border-gray-200'>
+              <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4'>
+                <h2 className='text-gray-900 text-base lg:text-lg font-semibold font-sans'>
                   Listings Management
                 </h2>
-                <div className='flex items-center gap-3'>
+                <div className='flex items-center gap-2 lg:gap-3'>
                   <button
                     onClick={() => setShowFeatured(!showFeatured)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex items-center gap-1 lg:gap-2 px-2 lg:px-4 py-2 rounded-lg text-xs lg:text-sm font-medium transition-colors ${
                       showFeatured
                         ? 'bg-yellow-100 text-yellow-700 border border-yellow-200'
                         : 'bg-gray-100 text-gray-700 border border-gray-200'
                     }`}
                   >
                     <Star
-                      className={`w-4 h-4 ${
+                      className={`w-3 lg:w-4 h-3 lg:h-4 ${
                         showFeatured ? 'fill-current' : ''
                       }`}
                     />
-                    {showFeatured ? 'Show All Listings' : 'Featured'}
+                    <span className="hidden sm:inline">{showFeatured ? 'Show All' : 'Featured'}</span>
                   </button>
                   <button
                     onClick={() => setShowDeleted(!showDeleted)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex items-center gap-1 lg:gap-2 px-2 lg:px-4 py-2 rounded-lg text-xs lg:text-sm font-medium transition-colors ${
                       showDeleted
                         ? 'bg-red-100 text-red-700 border border-red-200'
                         : 'bg-gray-100 text-gray-700 border border-gray-200'
                     }`}
                   >
-                    <Trash2 className='w-4 h-4' />
-                    {showDeleted ? 'Show All Listings' : 'Trash'}
+                    <Trash2 className='w-3 lg:w-4 h-3 lg:h-4' />
+                    <span className="hidden sm:inline">{showDeleted ? 'Show All' : 'Trash'}</span>
                   </button>
                 </div>
               </div>
 
               {/* Bulk Actions */}
-              <div className='flex items-center gap-3'>
+              <div className='flex flex-wrap items-center gap-2 lg:gap-3'>
                 <button
                   onClick={handleSelectAll}
                   disabled={isBulkActionLoading}
-                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-2 text-gray-600 text-xs lg:text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   <input
                     type='checkbox'
@@ -567,31 +567,33 @@ export default function AdminDashboard() {
                     onClick={(e) => e.stopPropagation()}
                     disabled={isBulkActionLoading}
                   />
-                  <span>Select All ({selectedListings.length})</span>
+                  <span className="hidden sm:inline">Select All</span>
+                  <span className="sm:hidden">All</span>
+                  <span>({selectedListings.length})</span>
                 </button>
                 <button
                   onClick={handleBulkRemove}
                   disabled={selectedListings.length === 0 || isBulkActionLoading}
-                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-2 text-gray-600 text-xs lg:text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
-                  <Trash2 className='w-4 h-4' />
-                  <span>Remove</span>
+                  <Trash2 className='w-3 lg:w-4 h-3 lg:h-4' />
+                  <span className="hidden sm:inline">Remove</span>
                 </button>
                 <button
                   onClick={handleBulkFeature}
                   disabled={selectedListings.length === 0 || isBulkActionLoading}
-                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-2 text-gray-600 text-xs lg:text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
-                  <Star className='w-4 h-4' />
-                  <span>Feature</span>
+                  <Star className='w-3 lg:w-4 h-3 lg:h-4' />
+                  <span className="hidden sm:inline">Feature</span>
                 </button>
                 <button
                   onClick={handleBulkUnfeature}
                   disabled={selectedListings.length === 0 || isBulkActionLoading}
-                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-2 text-gray-600 text-xs lg:text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
-                  <Star className='w-4 h-4 fill-gray-400' />
-                  <span>Unfeature</span>
+                  <Star className='w-3 lg:w-4 h-3 lg:h-4 fill-gray-400' />
+                  <span className="hidden sm:inline">Unfeature</span>
                 </button>
               </div>
             </div>
@@ -613,16 +615,16 @@ export default function AdminDashboard() {
 
           {/* Users Management */}
           <div className='bg-white rounded-lg border border-gray-200'>
-            <div className='px-6 py-4 border-b border-gray-200'>
-              <div className='flex items-center justify-between'>
-                <h2 className='text-gray-900 text-lg font-semibold font-sans'>
+            <div className='px-4 lg:px-6 py-4 border-b border-gray-200'>
+              <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0'>
+                <h2 className='text-gray-900 text-base lg:text-lg font-semibold font-sans'>
                   Users Management
                 </h2>
                 <button
                   onClick={() => router.push('/dashboard/users')}
-                  className='flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors'
+                  className='flex items-center gap-2 px-3 lg:px-4 py-2 bg-green-600 text-white rounded-lg text-xs lg:text-sm font-medium hover:bg-green-700 transition-colors'
                 >
-                  <Shield className='w-4 h-4' />
+                  <Shield className='w-3 lg:w-4 h-3 lg:h-4' />
                   <span>View All Users</span>
                 </button>
               </div>
@@ -639,14 +641,14 @@ export default function AdminDashboard() {
 
           {/* Reports Management */}
           <div className='bg-white rounded-lg border border-gray-200'>
-            <div className='px-6 py-4 border-b border-gray-200'>
-              <div className="flex items-center justify-between">
-                <h2 className='text-gray-900 text-lg font-semibold font-sans'>
+            <div className='px-4 lg:px-6 py-4 border-b border-gray-200'>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                <h2 className='text-gray-900 text-base lg:text-lg font-semibold font-sans'>
                   Content Reports
                 </h2>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Shield className="w-4 h-4 text-red-500" />
-                  <span>{reports.filter(r => r.status === 'pending').length} pending review</span>
+                <div className="flex items-center gap-2 text-xs lg:text-sm text-gray-500">
+                  <Shield className="w-3 lg:w-4 h-3 lg:h-4 text-red-500" />
+                  <span>{reports.filter(r => r.status === 'pending').length} pending</span>
                 </div>
               </div>
             </div>

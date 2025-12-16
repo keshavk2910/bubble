@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { Bell, MoreHorizontal, LogOut, User, Settings, ArrowLeft } from 'lucide-react';
+import { Bell, MoreHorizontal, LogOut, User, Settings, ArrowLeft, Menu } from 'lucide-react';
 import DashboardSidebar from './DashboardSidebar';
 import Link from 'next/link';
 import { useOptionalUserSession } from '../lib/useUserSession';
@@ -14,6 +14,7 @@ export default function DashboardLayout({
   showHeader = true,
 }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const dropdownRef = useRef(null);
   const router = useRouter();
   const { user, avatar, isAuthenticated } = useOptionalUserSession();
@@ -56,21 +57,31 @@ export default function DashboardLayout({
   return (
     <div className='min-h-screen bg-gray-50'>
       {/* Sidebar */}
-      <DashboardSidebar />
+      <DashboardSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main Content */}
-      <div className='ml-60 overflow-hidden'>
+      <div className='lg:ml-60 overflow-hidden'>
         {/* Header */}
         {showHeader && (
           <header className='sticky top-0 bg-white border-b border-gray-200 px-6 py-4 z-30'>
             <div className='flex items-center justify-between'>
-              <div>
-                <h1 className='text-gray-900 text-2xl font-semibold font-sans'>
-                  {title}
-                </h1>
-                <p className='text-gray-500 text-base font-normal font-sans'>
-                  {subtitle}
-                </p>
+              <div className='flex items-center gap-4'>
+                {/* Hamburger Menu - Mobile Only */}
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className='lg:hidden w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-lg transition-colors'
+                >
+                  <Menu className='w-6 h-6' />
+                </button>
+
+                <div>
+                  <h1 className='text-gray-900 text-lg lg:text-2xl font-semibold font-sans'>
+                    {title}
+                  </h1>
+                  <p className='text-gray-500 text-sm lg:text-base font-normal font-sans hidden sm:block'>
+                    {subtitle}
+                  </p>
+                </div>
               </div>
 
               <div className='flex items-center gap-4'>

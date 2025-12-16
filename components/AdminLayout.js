@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
-import { Search, Bell, Download, ArrowLeft } from 'lucide-react';
+import { Search, Bell, Download, ArrowLeft, Menu } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
 import UserInsights from './admin/UserInsights';
 import NewRegistrations from './admin/NewRegistrations';
@@ -22,6 +22,7 @@ export default function AdminLayout({
   const [analytics, setAnalytics] = useState({});
   const [adminStats, setAdminStats] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Load analytics data independently
   useEffect(() => {
@@ -66,38 +67,50 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Admin Sidebar */}
-      <AdminSidebar currentPage={currentPage} />
+      <AdminSidebar currentPage={currentPage} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main Content */}
-      <div className="flex-1 ml-60">
+      <div className="flex-1 lg:ml-60">
         {/* Header */}
-        <header className="sticky top-0 bg-white border-b border-gray-200 px-6 py-5 z-30">
-          <div className="flex items-center justify-between">
-            <h1 className="text-gray-700 text-2xl font-normal font-sans leading-loose">
-              {title}
-            </h1>
+        <header className="sticky top-0 bg-white border-b border-gray-200 px-4 lg:px-6 py-3 lg:py-5 z-30">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-0">
+            <div className="flex items-center gap-3 lg:gap-4">
+              {/* Hamburger Menu - Mobile Only */}
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className='lg:hidden w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0'
+              >
+                <Menu className='w-6 h-6' />
+              </button>
 
-            <div className="flex items-center gap-4">
+              <h1 className="text-gray-700 text-lg lg:text-2xl font-normal font-sans leading-tight lg:leading-loose">
+                {title}
+              </h1>
+            </div>
+
+            <div className="flex items-center gap-2 lg:gap-4">
               {/* Search */}
-              <div className="relative">
+              <div className="relative flex-1 lg:flex-initial">
                 <Search className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
                 <input
                   type="text"
                   placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
-                  className="w-80 pl-10 pr-4 py-2 bg-white rounded-md border border-gray-300 text-gray-400 text-base font-normal font-sans focus:outline-none focus:ring-2 focus:ring-green-600"
+                  className="w-full lg:w-64 xl:w-80 pl-10 pr-4 py-2 bg-white rounded-md border border-gray-300 text-gray-700 text-sm lg:text-base font-normal font-sans focus:outline-none focus:ring-2 focus:ring-green-600"
                 />
               </div>
 
               {/* Notifications */}
-              <NotificationBell />
+              <div className="flex-shrink-0">
+                <NotificationBell />
+              </div>
 
               {/* Export Button */}
               {onExport && (
                 <button
                   onClick={onExport}
-                  className="bg-green-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-green-700 transition-colors"
+                  className="hidden lg:flex bg-green-600 text-white px-4 py-2 rounded-md items-center gap-2 hover:bg-green-700 transition-colors"
                 >
                   <Download className="w-4 h-4" />
                   <span className="text-base font-normal font-sans">Export</span>
@@ -108,7 +121,7 @@ export default function AdminLayout({
         </header>
 
         {/* Main Content */}
-        <main className="p-6">
+        <main className="p-4 lg:p-6">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
               {/* Main Content Section */}

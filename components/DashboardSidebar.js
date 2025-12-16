@@ -9,11 +9,12 @@ import {
   LogOut,
   Plus,
   ArrowLeft,
+  X,
 } from 'lucide-react';
 import logoTest from './Images/logoTest.png';
 import Image from 'next/image';
 
-export default function DashboardSidebar() {
+export default function DashboardSidebar({ isOpen = true, onClose = () => {} }) {
   const router = useRouter();
 
   const navigation = [
@@ -66,10 +67,30 @@ export default function DashboardSidebar() {
   };
 
   return (
-    <div className='fixed left-0 top-0 w-60 h-screen bg-white border-r border-gray-200 flex flex-col z-40'>
-      {/* Dashboard Header */}
-      <div className='px-6 py-6 border-b border-gray-200'>
-        {/* Back to Site Button */}
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div
+          className='fixed inset-0 bg-black/50 z-30 lg:hidden'
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`fixed left-0 top-0 w-60 h-screen bg-white border-r border-gray-200 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
+        isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
+        {/* Close Button - Mobile Only */}
+        <button
+          onClick={onClose}
+          className='lg:hidden absolute top-4 right-4 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center hover:bg-green-700 transition-colors z-50 shadow-lg'
+        >
+          <X className='w-4 h-4 text-white' />
+        </button>
+
+        {/* Dashboard Header */}
+        <div className='px-6 py-6 border-b border-gray-200'>
+          {/* Back to Site Button */}
         <Link
           href='/'
           className='flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors group'
@@ -108,6 +129,7 @@ export default function DashboardSidebar() {
             <Link
               key={item.name}
               href={item.href}
+              onClick={onClose}
               className={`relative flex items-center gap-4 px-4 py-3 rounded-lg transition-colors ${
                 active
                   ? 'bg-green-50 text-green-600'
@@ -149,5 +171,6 @@ export default function DashboardSidebar() {
         </button>
       </div>
     </div>
+    </>
   );
 }

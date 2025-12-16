@@ -101,10 +101,10 @@ export default function Home() {
             <div className='grid grid-cols-1 lg:grid-cols-2 gap-12 items-center'>
               {/* Left Content */}
               <div className='space-y-8'>
-                <h1 className='text-gray-900 text-6xl font-bold font-sans leading-[59px]'>
+                <h1 className='text-gray-900 text-3xl sm:text-4xl lg:text-6xl font-bold font-sans leading-tight lg:leading-[59px]'>
                   Buy or Sell Trucks, Gear, or Your Whole Cleaning Biz
                 </h1>
-                <p className='text-gray-600 text-lg font-normal font-sans leading-7'>
+                <p className='text-gray-600 text-base lg:text-lg font-normal font-sans leading-7'>
                   A search-first marketplace for pressure washing and bin
                   cleaning businesses. Trucks, parts, or entire companies — all
                   in one place.

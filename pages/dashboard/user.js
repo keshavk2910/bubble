@@ -188,6 +188,14 @@ export default function UserDashboard() {
     if (highlight === 'listings') {
       setHighlightListings(true);
 
+      // Scroll to listings section
+      setTimeout(() => {
+        const listingsSection = document.getElementById('my-listings-section');
+        if (listingsSection) {
+          listingsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100); // Small delay to ensure DOM is ready
+
       // Remove highlight after 2 seconds
       const timer = setTimeout(() => {
         setHighlightListings(false);

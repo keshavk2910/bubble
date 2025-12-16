@@ -12,11 +12,12 @@ import {
   Settings,
   LogOut,
   ArrowLeft,
+  X,
 } from 'lucide-react';
 import { useOptionalUserSession } from '../lib/useUserSession';
 import LogoLight from './Images/logoLight.png';
 
-export default function AdminSidebar({ currentPage }) {
+export default function AdminSidebar({ currentPage, isOpen = true, onClose = () => {} }) {
   const router = useRouter();
   const { user: sessionUser, avatar: sessionAvatar } = useOptionalUserSession();
 
@@ -71,10 +72,30 @@ export default function AdminSidebar({ currentPage }) {
   };
 
   return (
-    <div className='fixed left-0 top-0 w-60 h-screen bg-green-600 flex flex-col z-40'>
-      {/* Logo */}
-      <div className='px-6 py-6 border-b border-green-500'>
-        {/* Back to Site Button */}
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div
+          className='fixed inset-0 bg-black/50 z-30 lg:hidden'
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`fixed left-0 top-0 w-60 h-screen bg-green-600 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
+        isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
+        {/* Close Button - Mobile Only */}
+        <button
+          onClick={onClose}
+          className='lg:hidden absolute top-4 right-4 w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors z-50 shadow-lg'
+        >
+          <X className='w-4 h-4 text-green-600' />
+        </button>
+
+        {/* Logo */}
+        <div className='px-6 py-6 border-b border-green-500'>
+          {/* Back to Site Button */}
         <Link
           href='/'
           className='flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-green-700 hover:bg-green-800 transition-colors group'
@@ -101,6 +122,7 @@ export default function AdminSidebar({ currentPage }) {
             <Link
               key={item.key}
               href={item.href}
+              onClick={onClose}
               className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors ${
                 isActive
                   ? 'bg-green-700 text-white'
@@ -149,5 +171,6 @@ export default function AdminSidebar({ currentPage }) {
         </button>
       </div>
     </div>
+    </>
   );
 }

@@ -474,47 +474,47 @@ export default function AdminListings() {
       >
         {/* Listings Management */}
         <div className='bg-white rounded-lg border border-gray-200'>
-          <div className='px-6 py-6'>
-            <div className='flex items-center justify-between mb-6'>
-              <div className='flex items-center gap-4'>
-                <h2 className='text-gray-700 text-lg font-normal font-sans leading-7'>
+          <div className='px-4 lg:px-6 py-4 lg:py-6'>
+            <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 lg:mb-6'>
+              <div className='flex items-center gap-2 lg:gap-4'>
+                <h2 className='text-gray-700 text-base lg:text-lg font-normal font-sans leading-7'>
                   Listings
                 </h2>
 
                 {/* Featured Filter Button */}
                 <button
                   onClick={() => setShowFeatured(!showFeatured)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded text-sm font-normal font-sans transition-colors ${
+                  className={`flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-1 lg:py-2 rounded text-xs lg:text-sm font-normal font-sans transition-colors ${
                     showFeatured
                       ? 'bg-yellow-100 text-yellow-700 border border-yellow-200'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
                   <Star
-                    className={`w-4 h-4 ${showFeatured ? 'fill-current' : ''}`}
+                    className={`w-3 lg:w-4 h-3 lg:h-4 ${showFeatured ? 'fill-current' : ''}`}
                   />
-                  {showFeatured ? 'All Listings' : 'Featured Only'}
+                  <span className="hidden sm:inline">{showFeatured ? 'All Listings' : 'Featured'}</span>
                 </button>
 
                 <button
                   onClick={() => setShowDeleted(!showDeleted)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded text-sm font-normal font-sans transition-colors ${
+                  className={`flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-1 lg:py-2 rounded text-xs lg:text-sm font-normal font-sans transition-colors ${
                     showDeleted
                       ? 'bg-red-100 text-red-700 border border-red-200'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  <Trash2 className={`w-4 h-4`} />
-                  {showDeleted ? 'All Listings' : 'Trash'}
+                  <Trash2 className={`w-3 lg:w-4 h-3 lg:h-4`} />
+                  <span className="hidden sm:inline">{showDeleted ? 'All Listings' : 'Trash'}</span>
                 </button>
               </div>
 
               {/* Bulk Actions */}
-              <div className='flex items-center gap-3'>
+              <div className='flex flex-wrap items-center gap-2 lg:gap-3'>
                 <button
                   onClick={handleSelectAll}
                   disabled={isBulkActionLoading}
-                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-2 text-gray-600 text-xs lg:text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   <input
                     type='checkbox'
@@ -524,32 +524,34 @@ export default function AdminListings() {
                     onClick={(e) => e.stopPropagation()}
                     disabled={isBulkActionLoading}
                   />
-                  <span>Select All ({selectedListings.length})</span>
+                  <span className="hidden sm:inline">Select All</span>
+                  <span className="sm:hidden">All</span>
+                  <span>({selectedListings.length})</span>
                 </button>
                 {/* Removed Edit button */}
                 <button
                   onClick={handleBulkRemove}
                   disabled={selectedListings.length === 0 || isBulkActionLoading}
-                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-2 text-gray-600 text-xs lg:text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
-                  <Trash2 className='w-4 h-4' />
-                  <span>Remove</span>
+                  <Trash2 className='w-3 lg:w-4 h-3 lg:h-4' />
+                  <span className="hidden sm:inline">Remove</span>
                 </button>
                 <button
                   onClick={handleBulkFeature}
                   disabled={selectedListings.length === 0 || isBulkActionLoading}
-                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-2 text-gray-600 text-xs lg:text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
-                  <Star className='w-4 h-4' />
-                  <span>Feature</span>
+                  <Star className='w-3 lg:w-4 h-3 lg:h-4' />
+                  <span className="hidden sm:inline">Feature</span>
                 </button>
                 <button
                   onClick={handleBulkUnfeature}
                   disabled={selectedListings.length === 0 || isBulkActionLoading}
-                  className='flex items-center gap-2 px-3 py-2 text-gray-600 text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-2 text-gray-600 text-xs lg:text-sm hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
-                  <Star className='w-4 h-4 fill-gray-400' />
-                  <span>Unfeature</span>
+                  <Star className='w-3 lg:w-4 h-3 lg:h-4 fill-gray-400' />
+                  <span className="hidden sm:inline">Unfeature</span>
                 </button>
                 {/* Tag button - commented out for now */}
                 {/* <button
