@@ -17,8 +17,6 @@ export default function SmsVerificationModal({
   ]);
   const [isVerifying, setIsVerifying] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [currentOTP, setCurrentOTP] = useState('');
-  const [isDevMode, setIsDevMode] = useState(false);
   const inputRefs = useRef([]);
 
   useEffect(() => {
@@ -69,10 +67,6 @@ export default function SmsVerificationModal({
 
       if (response.ok) {
         const data = await response.json();
-        if (data.dev_mode && data.otp) {
-          setCurrentOTP(data.otp);
-          setIsDevMode(true);
-        }
       }
     } catch (error) {
       console.error('Send OTP error:', error);
@@ -209,19 +203,6 @@ export default function SmsVerificationModal({
             <p className='text-gray-400 text-sm mt-1'>{phoneNumber}</p>
           )}
 
-          {/* Development Mode OTP Display */}
-          {isDevMode && currentOTP && (
-            <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4'>
-              <div className='flex items-center justify-center gap-2'>
-                <span className='text-blue-700 text-sm font-medium'>
-                  Dev Mode - Your code:
-                </span>
-                <span className='text-blue-900 text-lg font-mono font-bold tracking-wider'>
-                  {currentOTP}
-                </span>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* 6-Digit Input Fields */}
