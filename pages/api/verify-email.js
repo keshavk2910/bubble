@@ -52,8 +52,11 @@ const sendEmailVerificationOTP = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: 'Verification code sent to your email',
-        // Remove this in production - only for demo
-        otp: otp,
+        // Show OTP when flag is set
+        ...(process.env.SHOW_OTP_IN_DEV && {
+          otp: otp,
+          dev_mode: true,
+        }),
         expiresIn: 600, // 10 minutes
       });
     }
