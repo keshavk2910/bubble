@@ -37,13 +37,14 @@ export default function Register() {
     { value: 'IN', label: 'India', flag: '🇮🇳' },
   ];
 
-  // Check if dev mode is enabled
+  // Check if dev mode is enabled or testing param is present
   const isDevMode = process.env.NODE_ENV === 'development';
+  const isTestingMode = router.query.testing === 'true';
 
   // Combine countries based on mode
   const countries = [
     ...baseCountries,
-    ...(isDevMode ? devCountries : []),
+    ...(isDevMode || isTestingMode ? devCountries : []),
     { value: 'OTHER', label: 'Other', flag: '🌐' },
   ];
   const [formData, setFormData] = useState({
