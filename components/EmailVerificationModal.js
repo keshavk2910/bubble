@@ -28,7 +28,7 @@ export default function EmailVerificationModal({ isOpen, onClose, email, onVerif
 
       if (response.ok) {
         const data = await response.json();
-        setSentOTP(data.otp); // Store for demo purposes
+        setSentOTP(data.otp || ''); // Store only if provided by backend
         setStep('verify');
       } else {
         const errorData = await response.json();
@@ -187,7 +187,7 @@ export default function EmailVerificationModal({ isOpen, onClose, email, onVerif
                 </span>
               </div>
 
-              {/* Demo OTP Display */}
+              {/* Demo OTP Display - Only shown when SHOW_OTP_IN_DEV is enabled */}
               {sentOTP && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                   <div className="flex items-center justify-center gap-2">
