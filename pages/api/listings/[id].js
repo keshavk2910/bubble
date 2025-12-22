@@ -19,6 +19,7 @@ export default async function handler(req, res) {
         id,
         full_name,
         display_name,
+        avatar_url,
         email_verified,
         phone_verified,
         user_type,

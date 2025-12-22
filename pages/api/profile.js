@@ -16,6 +16,7 @@ const getProfile = async (req, res) => {
         phone,
         phone_verified,
         address,
+        avatar_url,
         user_type,
         role,
         status,
@@ -54,14 +55,23 @@ const updateProfile = async (req, res) => {
       country,
       zip_code,
       phone,
-      address
+      address,
+      avatar_url,
+      // Support frontend field names
+      realName,
+      displayName,
+      avatarUrl
     } = req.body;
 
     const updateData = {};
     
-    // Only update provided fields
+    // Only update provided fields (support both backend and frontend naming conventions)
     if (full_name !== undefined) updateData.full_name = full_name;
+    if (realName !== undefined) updateData.full_name = realName;
     if (display_name !== undefined) updateData.display_name = display_name;
+    if (displayName !== undefined) updateData.display_name = displayName;
+    if (avatar_url !== undefined) updateData.avatar_url = avatar_url;
+    if (avatarUrl !== undefined) updateData.avatar_url = avatarUrl;
     if (country !== undefined) updateData.country = country;
     if (zip_code !== undefined) updateData.zip_code = zip_code;
     if (address !== undefined) updateData.address = address;
@@ -102,7 +112,23 @@ const updateProfile = async (req, res) => {
       .from('user_profiles')
       .update(updateData)
       .eq('id', req.user.id)
-      .select()
+      .select(`
+        id,
+        full_name,
+        display_name,
+        email,
+        country,
+        zip_code,
+        phone,
+        phone_verified,
+        address,
+        avatar_url,
+        user_type,
+        role,
+        status,
+        registration_date,
+        updated_at
+      `)
       .single();
 
     if (error) {

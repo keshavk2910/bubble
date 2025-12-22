@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   ChevronLeft,
   ChevronRight,
@@ -643,16 +644,17 @@ export default function ListingDetail() {
                 </div>
 
                 {/* You Might Also Like */}
-                <div className='space-y-6'>
+                <div className='space-y-6 pb-8'>
                   <h2 className='text-gray-700 text-xl font-normal font-sans leading-7'>
                     You Might Also Like
                   </h2>
 
                   <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
                     {relatedListings.map((item) => (
-                      <div
+                      <Link
                         key={item.id}
-                        className='bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow'
+                        href={`/listing/${item.slug || item.id}`}
+                        className='bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow block'
                       >
                         <div className='relative'>
                           <Image
@@ -668,7 +670,7 @@ export default function ListingDetail() {
                         </div>
 
                         <div className='p-4'>
-                          <h3 className='text-gray-700 text-lg font-normal font-sans leading-7 mb-2'>
+                          <h3 className='text-gray-700 text-lg font-normal font-sans leading-7 mb-2 hover:text-green-600 transition-colors'>
                             {item.title}
                           </h3>
                           <p className='text-green-600 text-xl font-medium font-sans leading-7 mb-2'>
@@ -684,7 +686,7 @@ export default function ListingDetail() {
                             {item.description?.substring(0, 100)}...
                           </p>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -695,7 +697,7 @@ export default function ListingDetail() {
                 {/* Seller Card */}
                 <div className='bg-white rounded-xl border border-gray-200 p-6'>
                   <div className='flex items-center gap-3 mb-4'>
-                    <div className='w-12 h-12 bg-gray-300 rounded-full overflow-hidden flex items-center justify-center'>
+                    <div className='w-12 h-12 bg-gray-100 rounded-full overflow-hidden flex items-center justify-center'>
                       {listing.user?.avatar_url ? (
                         <Image
                           src={listing.user.avatar_url}
@@ -703,10 +705,15 @@ export default function ListingDetail() {
                           width={48}
                           height={48}
                           className='w-full h-full object-cover'
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
                         />
-                      ) : (
-                        <User className='w-6 h-6 text-gray-600' />
-                      )}
+                      ) : null}
+                      <div className={`w-full h-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center ${listing.user?.avatar_url ? 'hidden' : ''}`}>
+                        <User className='w-6 h-6 text-white' />
+                      </div>
                     </div>
                     <div>
                       <h3 className='text-gray-700 text-base font-normal font-sans leading-normal'>
