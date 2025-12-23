@@ -25,6 +25,12 @@ export default function AdminListings() {
   const [selectedListings, setSelectedListings] = useState([]);
   const [isBulkActionLoading, setIsBulkActionLoading] = useState(false);
   const [bulkActionMessage, setBulkActionMessage] = useState('');
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [totalListings, setTotalListings] = useState(0);
+  const [isTableLoading, setIsTableLoading] = useState(false);
 
   // Load real listings data from database
   useEffect(() => {
@@ -60,11 +66,22 @@ export default function AdminListings() {
 
         setUserProfile(userData.profile);
 
-        // Load listings with filters
+        // Load listings with filters and pagination
         const params = new URLSearchParams();
-        params.append('limit', '100');
+        params.append('limit', itemsPerPage.toString());
+        params.append('offset', ((currentPage - 1) * itemsPerPage).toString());
         params.append('include_deleted', 'true');
         if (searchTerm) params.append('search', searchTerm);
+        
+        // Add server-side filtering for showDeleted and showFeatured
+        if (showDeleted) {
+          params.append('deleted_only', 'true');
+        } else if (showFeatured) {
+          params.append('status', 'active');
+          params.append('featured_only', 'true');
+        } else if (statusFilter !== 'All') {
+          params.append('status', statusFilter);
+        }
         
         const listingsResponse = await fetch(
           `/api/admin/listings?${params}`,
@@ -79,6 +96,7 @@ export default function AdminListings() {
         if (listingsResponse.ok) {
           const listingsData = await listingsResponse.json();
           setListings(listingsData.listings);
+          setTotalListings(listingsData.pagination?.total || listingsData.listings.length);
         }
       } catch (error) {
         console.error('Admin listings loading error:', error);
@@ -120,10 +138,8 @@ export default function AdminListings() {
     },
   ];
 
-  const filteredListings =
-    statusFilter === 'All'
-      ? listings.filter((l) => l.status !== 'deleted')
-      : listings.filter((listing) => listing.status === statusFilter);
+  // Use server-filtered listings directly (no client-side filtering needed)
+  const filteredListings = listings;
 
   // Handler functions
   const handleEdit = (listing) => {
@@ -143,6 +159,19 @@ export default function AdminListings() {
 
   const handleView = (listing) => {
     window.open(`/listing/${listing.slug || listing.id}`, '_blank');
+  };
+
+  const handlePageChange = async (page) => {
+    setIsTableLoading(true);
+    setCurrentPage(page);
+    
+    // Scroll to top of table
+    setTimeout(() => {
+      document.querySelector('.listings-table')?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }, 100);
   };
 
   const handleStatusChange = async (listingId, newStatus) => {
@@ -244,7 +273,24 @@ export default function AdminListings() {
     };
 
     loadAdminData();
-  }, [router]);
+  }, [router, searchTerm, currentPage, itemsPerPage, showDeleted, showFeatured, statusFilter]);
+
+  // Turn off table loading when data finishes loading
+  useEffect(() => {
+    if (!isLoading) {
+      setIsTableLoading(false);
+    }
+  }, [isLoading]);
+
+  // Clear table loading when listings data changes
+  useEffect(() => {
+    setIsTableLoading(false);
+  }, [listings]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, showDeleted, showFeatured, statusFilter]);
 
   // Handler functions for ListingsTable
 
@@ -298,10 +344,10 @@ export default function AdminListings() {
 
   // Bulk Actions
   const handleSelectAll = () => {
-    if (selectedListings.length === filteredListings.length) {
+    if (selectedListings.length === listings.length) {
       setSelectedListings([]);
     } else {
-      setSelectedListings(filteredListings.map(l => l.id));
+      setSelectedListings(listings.map(l => l.id));
     }
   };
 
@@ -519,7 +565,7 @@ export default function AdminListings() {
                   <input
                     type='checkbox'
                     className='rounded border-gray-300'
-                    checked={selectedListings.length === filteredListings.length && filteredListings.length > 0}
+                    checked={selectedListings.length === listings.length && listings.length > 0}
                     onChange={handleSelectAll}
                     onClick={(e) => e.stopPropagation()}
                     disabled={isBulkActionLoading}
@@ -587,28 +633,26 @@ export default function AdminListings() {
           </div>
 
           {/* Listings Table */}
-          <ListingsTable
-            listings={
-              showDeleted
-                ? listings.filter((l) => l.status === 'deleted')
-                : showFeatured
-                ? listings.filter(
-                    (l) => l.featured === true && l.status !== 'deleted'
-                  )
-                : filteredListings
-            }
-            isLoading={isLoading}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onView={handleView}
-            onStatusChange={handleStatusChange}
-            onApprove={handleApprove}
-            onReject={handleReject}
-            onRecover={handleRecover}
-            onToggleFeatured={handleToggleFeatured}
-            selectedListings={selectedListings}
-            onToggleSelect={handleToggleSelect}
-          />
+          <div className="listings-table">
+            <ListingsTable
+              listings={listings}
+              isLoading={isTableLoading || isLoading}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onStatusChange={handleStatusChange}
+              onApprove={handleApprove}
+              onReject={handleReject}
+              onRecover={handleRecover}
+              onToggleFeatured={handleToggleFeatured}
+              selectedListings={selectedListings}
+              onToggleSelect={handleToggleSelect}
+              currentPage={currentPage}
+              totalPages={Math.ceil(totalListings / itemsPerPage)}
+              onPageChange={handlePageChange}
+              itemsPerPage={itemsPerPage}
+              totalItems={totalListings}
+            />
+          </div>
         </div>
 
         {/* Listing Edit Modal */}

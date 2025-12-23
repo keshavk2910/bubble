@@ -50,6 +50,27 @@ const getAllUsers = async (req, res) => {
       });
     }
 
+    // Get total count for pagination
+    let countQuery = supabaseAdmin
+      .from('user_profiles')
+      .select('*', { count: 'exact', head: true });
+
+    if (status && status !== 'all') {
+      countQuery = countQuery.eq('status', status);
+    }
+
+    if (user_type && user_type !== 'all') {
+      countQuery = countQuery.eq('user_type', user_type);
+    }
+
+    if (search && search.trim()) {
+      countQuery = countQuery.or(
+        `full_name.ilike.%${search}%,email.ilike.%${search}%,display_name.ilike.%${search}%`
+      );
+    }
+
+    const { count: totalCount, error: countError } = await countQuery;
+
     // Get listings count for each user separately
     const usersWithCounts = await Promise.all(
       users.map(async (user) => {
@@ -69,6 +90,12 @@ const getAllUsers = async (req, res) => {
     return res.status(200).json({
       success: true,
       users: usersWithCounts,
+      pagination: {
+        total: totalCount || 0,
+        page: Math.floor(parseInt(offset) / parseInt(limit)) + 1,
+        limit: parseInt(limit),
+        offset: parseInt(offset)
+      }
     });
   } catch (error) {
     console.error('Get admin users error:', error);

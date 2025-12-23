@@ -30,6 +30,11 @@ export default function ListingsTable({
   onToggleFeatured,
   selectedListings = [],
   onToggleSelect,
+  currentPage = 1,
+  totalPages = 1,
+  onPageChange,
+  itemsPerPage = 10,
+  totalItems = 0
 }) {
   const [deleteConfirm, setDeleteConfirm] = useState({
     show: false,
@@ -95,6 +100,16 @@ export default function ListingsTable({
     };
     return categoryMap[category] || category;
   };
+
+  // Debug pagination props
+  console.log('ListingsTable Pagination Debug:', {
+    totalPages,
+    currentPage,
+    totalItems,
+    itemsPerPage,
+    listingsCount: listings.length,
+    paginationVisible: totalPages > 1
+  });
 
   if (isLoading) {
     return (
@@ -333,15 +348,6 @@ export default function ListingsTable({
                           </button>
                         )
                       )}
-                      {onView && (
-                        <button
-                          onClick={() => onView(listing)}
-                          className='p-1 text-gray-400 hover:text-gray-600 transition-colors'
-                          title='View listing'
-                        >
-                          <Eye className='w-4 h-4' />
-                        </button>
-                      )}
                       <button className='p-1 text-gray-400 hover:text-gray-600 transition-colors'>
                         <MoreHorizontal className='w-4 h-4' />
                       </button>
@@ -355,28 +361,58 @@ export default function ListingsTable({
       </div>
 
       {/* Pagination */}
-      <div className='px-6 py-4 border-t border-gray-200 flex items-center justify-between'>
-        <p className='text-sm text-gray-500'>
-          Showing 1-{Math.min(8, listings.length)} of {listings.length} listings
-        </p>
-        <div className='flex items-center gap-2'>
-          <button className='px-3 py-1 text-sm text-gray-500 hover:bg-gray-50 rounded transition-colors'>
-            Previous
-          </button>
-          <button className='w-8 h-8 flex items-center justify-center rounded bg-green-600 text-white text-sm'>
-            1
-          </button>
-          <button className='w-8 h-8 flex items-center justify-center rounded text-gray-500 hover:bg-gray-50 text-sm transition-colors'>
-            2
-          </button>
-          <button className='w-8 h-8 flex items-center justify-center rounded text-gray-500 hover:bg-gray-50 text-sm transition-colors'>
-            3
-          </button>
-          <button className='px-3 py-1 text-sm text-gray-500 hover:bg-gray-50 rounded transition-colors'>
-            Next
-          </button>
+      {totalPages > 1 && (
+        <div className='px-6 py-4 border-t border-gray-200 flex items-center justify-between'>
+          <p className='text-sm text-gray-500'>
+            Showing {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}-{Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} listings
+          </p>
+          <div className='flex items-center gap-2'>
+            <button 
+              onClick={() => onPageChange && onPageChange(currentPage - 1)}
+              disabled={currentPage <= 1}
+              className='px-3 py-1 text-sm text-gray-500 hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              Previous
+            </button>
+            
+            {/* Page Numbers */}
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = currentPage - 2 + i;
+              }
+              
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => onPageChange && onPageChange(pageNum)}
+                  className={`w-8 h-8 flex items-center justify-center rounded text-sm transition-colors ${
+                    pageNum === currentPage
+                      ? 'bg-green-600 text-white'
+                      : 'text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+            
+            <button 
+              onClick={() => onPageChange && onPageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+              className='px-3 py-1 text-sm text-gray-500 hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              Next
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm.show && (

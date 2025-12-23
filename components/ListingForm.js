@@ -132,10 +132,32 @@ export default function ListingForm({
 
     // Validate file types - only allow specific image formats
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-    const invalidFiles = filesArray.filter(file => !allowedTypes.includes(file.type.toLowerCase()));
+    
+    // Debug log for file types
+    filesArray.forEach(file => {
+      console.log(`File: ${file.name}, Type: ${file.type}, Size: ${file.size}`);
+    });
+    
+    const invalidFiles = filesArray.filter(file => {
+      const fileType = file.type.toLowerCase();
+      const isAllowed = allowedTypes.includes(fileType);
+      
+      // Additional check for WebP files that might have different MIME types
+      const fileName = file.name.toLowerCase();
+      const isWebPByExtension = fileName.endsWith('.webp');
+      
+      if (!isAllowed && isWebPByExtension) {
+        // Allow WebP files even if MIME type is not properly detected
+        console.log(`WebP file detected by extension: ${file.name}`);
+        return false; // Don't filter out
+      }
+      
+      return !isAllowed;
+    });
 
     if (invalidFiles.length > 0) {
-      alert(`Unsupported file format detected. Please upload only JPG, PNG, WEBP, or GIF images.\n\nNote: Apple HEIC/HEIF formats are not supported. Please convert to JPG or PNG first.`);
+      const fileDetails = invalidFiles.map(f => `${f.name} (${f.type || 'unknown type'})`).join('\n');
+      alert(`Unsupported file format detected:\n\n${fileDetails}\n\nPlease upload only JPG, PNG, WEBP, or GIF images.\n\nNote: Apple HEIC/HEIF formats are not supported. Please convert to JPG or PNG first.`);
       return;
     }
 
@@ -149,7 +171,11 @@ export default function ListingForm({
       return;
     }
 
-    const filesToUpload = filesArray.filter(file => allowedTypes.includes(file.type.toLowerCase()));
+    const filesToUpload = filesArray.filter(file => {
+      const fileType = file.type.toLowerCase();
+      const fileName = file.name.toLowerCase();
+      return allowedTypes.includes(fileType) || fileName.endsWith('.webp');
+    });
 
     const newImageFiles = filesToUpload.map((file, index) => ({
       id: Date.now() + index,
@@ -305,7 +331,7 @@ export default function ListingForm({
             body: JSON.stringify({
               image: e.target.result,
               fileName: file.name,
-              contentType: file.type,
+              contentType: file.type || (file.name.toLowerCase().endsWith('.webp') ? 'image/webp' : 'image/jpeg'),
             }),
           });
 

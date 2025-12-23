@@ -1,6 +1,18 @@
-import { MoreHorizontal, Edit, Ban, CheckCircle, Eye } from 'lucide-react';
+import { MoreHorizontal, Edit, Ban, CheckCircle, Eye, Mail, Phone } from 'lucide-react';
 
-export default function UsersTable({ users = [], isLoading = false, onEdit, onBlock, onView, hideCheckboxes = false }) {
+export default function UsersTable({ 
+  users = [], 
+  isLoading = false, 
+  onEdit, 
+  onBlock, 
+  onView, 
+  hideCheckboxes = false,
+  currentPage = 1,
+  totalPages = 1,
+  onPageChange,
+  itemsPerPage = 10,
+  totalItems = 0
+}) {
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'active': return 'bg-green-100 text-green-700';
@@ -13,7 +25,11 @@ export default function UsersTable({ users = [], isLoading = false, onEdit, onBl
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     try {
-      return new Date(dateString).toLocaleDateString();
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
     } catch {
       return 'N/A';
     }
@@ -44,6 +60,7 @@ export default function UsersTable({ users = [], isLoading = false, onEdit, onBl
               <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Name</th>
               <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Email</th>
               <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Phone</th>
+              <th className="text-center px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Verification</th>
               <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Joined</th>
               <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Type</th>
               <th className="text-left px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">Status</th>
@@ -54,7 +71,7 @@ export default function UsersTable({ users = [], isLoading = false, onEdit, onBl
           <tbody className="divide-y divide-gray-200">
             {users.length === 0 ? (
               <tr>
-                <td colSpan={hideCheckboxes ? "8" : "9"} className="px-6 py-12 text-center">
+                <td colSpan={hideCheckboxes ? "9" : "10"} className="px-6 py-12 text-center">
                   <div className="text-gray-500 text-base font-normal font-sans">
                     No users found
                   </div>
@@ -77,18 +94,44 @@ export default function UsersTable({ users = [], isLoading = false, onEdit, onBl
                     </div>
                   </td>
                   <td className="px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">
-                    <div>
-                      <div>{user.email}</div>
-                      {user.email_verified === false && (
-                        <div className="text-xs text-red-500">Unverified</div>
-                      )}
-                    </div>
+                    {user.email}
                   </td>
                   <td className="px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">
                     {user.phone || 'N/A'}
                   </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center justify-center gap-2">
+                      {/* Email Verification Status */}
+                      <div className="relative group">
+                        <Mail 
+                          className={`w-4 h-4 ${
+                            user.email_verified === true 
+                              ? 'text-green-600' 
+                              : 'text-gray-400'
+                          }`}
+                        />
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                          Email {user.email_verified === true ? 'Verified' : 'Not Verified'}
+                        </div>
+                      </div>
+                      
+                      {/* Phone Verification Status */}
+                      <div className="relative group">
+                        <Phone 
+                          className={`w-4 h-4 ${
+                            user.phone_verified === true 
+                              ? 'text-green-600' 
+                              : 'text-gray-400'
+                          }`}
+                        />
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                          Phone {user.phone_verified === true ? 'Verified' : 'Not Verified'}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">
-                    {formatDate(user.created_at)}
+                    {formatDate(user.registration_date || user.created_at)}
                   </td>
                   <td className="px-4 py-3 text-gray-600 text-sm font-normal font-sans leading-tight">
                     <span className="capitalize">{user.user_type || 'customer'}</span>
@@ -113,6 +156,15 @@ export default function UsersTable({ users = [], isLoading = false, onEdit, onBl
                           <Edit className="w-4 h-4" />
                         </button>
                       )}
+                      {onView && (
+                        <button 
+                          onClick={() => onView(user)}
+                          className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                          title="View user details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      )}
                       {onBlock && (
                         <button 
                           onClick={() => onBlock(user)}
@@ -130,15 +182,6 @@ export default function UsersTable({ users = [], isLoading = false, onEdit, onBl
                           )}
                         </button>
                       )}
-                      {onView && (
-                        <button 
-                          onClick={() => onView(user)}
-                          className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                          title="View user"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      )}
                     </div>
                   </td>
                 </tr>
@@ -149,28 +192,58 @@ export default function UsersTable({ users = [], isLoading = false, onEdit, onBl
       </div>
 
       {/* Pagination */}
-      <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-        <p className="text-sm text-gray-500">
-          Showing 1-{Math.min(8, users.length)} of {users.length} users
-        </p>
-        <div className="flex items-center gap-2">
-          <button className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-50 rounded transition-colors">
-            Previous
-          </button>
-          <button className="w-8 h-8 flex items-center justify-center rounded bg-green-600 text-white text-sm">
-            1
-          </button>
-          <button className="w-8 h-8 flex items-center justify-center rounded text-gray-500 hover:bg-gray-50 text-sm transition-colors">
-            2
-          </button>
-          <button className="w-8 h-8 flex items-center justify-center rounded text-gray-500 hover:bg-gray-50 text-sm transition-colors">
-            3
-          </button>
-          <button className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-50 rounded transition-colors">
-            Next
-          </button>
+      {totalPages > 1 && (
+        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+          <p className="text-sm text-gray-500">
+            Showing {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}-{Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} users
+          </p>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => onPageChange && onPageChange(currentPage - 1)}
+              disabled={currentPage <= 1}
+              className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            
+            {/* Page Numbers */}
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = currentPage - 2 + i;
+              }
+              
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => onPageChange && onPageChange(pageNum)}
+                  className={`w-8 h-8 flex items-center justify-center rounded text-sm transition-colors ${
+                    pageNum === currentPage
+                      ? 'bg-green-600 text-white'
+                      : 'text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+            
+            <button 
+              onClick={() => onPageChange && onPageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+              className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

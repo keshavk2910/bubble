@@ -12,6 +12,7 @@ import {
 import AdminLayout from '../../components/AdminLayout';
 import UsersTable from '../../components/UsersTable';
 import UserEditModal from '../../components/UserEditModal';
+import UserDetailModal from '../../components/UserDetailModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 
 export default function AdminUsers() {
@@ -26,8 +27,16 @@ export default function AdminUsers() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showBlockModal, setShowBlockModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [userToView, setUserToView] = useState(null);
   const [userToBlock, setUserToBlock] = useState(null);
   const [isBlocking, setIsBlocking] = useState(false);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [isTableLoading, setIsTableLoading] = useState(false);
 
   // Load real users data from database
   useEffect(() => {
@@ -63,12 +72,13 @@ export default function AdminUsers() {
 
         setUserProfile(userData.profile);
 
-        // Load users with filters
+        // Load users with filters and pagination
         const params = new URLSearchParams();
         if (searchTerm) params.append('search', searchTerm);
         if (statusFilter !== 'all') params.append('status', statusFilter);
         if (userTypeFilter !== 'all') params.append('user_type', userTypeFilter);
-        params.append('limit', '100');
+        params.append('limit', itemsPerPage.toString());
+        params.append('offset', ((currentPage - 1) * itemsPerPage).toString());
 
         const usersResponse = await fetch(`/api/admin/users?${params}`, {
           headers: {
@@ -80,6 +90,7 @@ export default function AdminUsers() {
         if (usersResponse.ok) {
           const usersData = await usersResponse.json();
           setUsers(usersData.users);
+          setTotalUsers(usersData.pagination?.total || usersData.users.length);
         }
 
       } catch (error) {
@@ -91,7 +102,12 @@ export default function AdminUsers() {
     };
 
     loadUsersData();
-  }, [router, searchTerm, statusFilter, userTypeFilter]);
+  }, [router, searchTerm, statusFilter, userTypeFilter, currentPage, itemsPerPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, userTypeFilter]);
 
   // Handler functions for user management
   const handleEditUser = (user) => {
@@ -152,14 +168,39 @@ export default function AdminUsers() {
   };
 
   const handleViewUser = (user) => {
-    console.log('View user:', user);
-    // TODO: Implement user detail view
+    setUserToView(user);
+    setShowDetailModal(true);
   };
 
   const handleExport = () => {
     console.log('Exporting users...');
     // TODO: Implement user export
   };
+
+  const handlePageChange = (page) => {
+    setIsTableLoading(true);
+    setCurrentPage(page);
+    
+    // Scroll to top of table
+    setTimeout(() => {
+      document.querySelector('.users-table')?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }, 100);
+  };
+
+  // Turn off table loading when data finishes loading
+  useEffect(() => {
+    if (!isLoading) {
+      setIsTableLoading(false);
+    }
+  }, [isLoading]);
+
+  // Clear table loading when users data changes
+  useEffect(() => {
+    setIsTableLoading(false);
+  }, [users]);
 
   if (isLoading) {
     return (
@@ -235,13 +276,20 @@ export default function AdminUsers() {
             </div>
           </div>
           
-          <UsersTable 
-            users={users}
-            isLoading={false}
-            onEdit={handleEditUser}
-            onBlock={handleBlockUser}
-            onView={handleViewUser}
-          />
+          <div className="users-table">
+            <UsersTable 
+              users={users}
+              isLoading={isTableLoading || isLoading}
+              onEdit={handleEditUser}
+              onBlock={handleBlockUser}
+              onView={handleViewUser}
+              currentPage={currentPage}
+              totalPages={Math.ceil(totalUsers / itemsPerPage)}
+              onPageChange={handlePageChange}
+              itemsPerPage={itemsPerPage}
+              totalItems={totalUsers}
+            />
+          </div>
         </div>
 
         {/* User Edit Modal */}
@@ -253,6 +301,16 @@ export default function AdminUsers() {
           }}
           user={selectedUser}
           onUserUpdated={handleUserUpdated}
+        />
+
+        {/* User Detail Modal */}
+        <UserDetailModal
+          isOpen={showDetailModal}
+          onClose={() => {
+            setShowDetailModal(false);
+            setUserToView(null);
+          }}
+          user={userToView}
         />
 
         {/* Block/Unblock Confirmation Modal */}

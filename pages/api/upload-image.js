@@ -29,12 +29,22 @@ export default requireAuth(async function handler(req, res) {
 
     // Validate file type - only allow specific formats (no Apple HEIC/HEIF)
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-    if (!allowedTypes.includes(contentType.toLowerCase())) {
+    const fileExtension = fileName.toLowerCase().split('.').pop();
+    const isWebPByExtension = fileExtension === 'webp';
+    
+    // Allow WebP files even if content type is not properly detected
+    const isValidType = allowedTypes.includes(contentType.toLowerCase()) || 
+                       (isWebPByExtension && contentType.includes('image'));
+    
+    if (!isValidType) {
       return res.status(400).json({
         error: 'Invalid file type',
-        details: 'Only JPG, PNG, WEBP, and GIF images are allowed. Apple HEIC/HEIF formats are not supported.'
+        details: `Only JPG, PNG, WEBP, and GIF images are allowed. Received: ${contentType} for file: ${fileName}. Apple HEIC/HEIF formats are not supported.`
       });
     }
+    
+    // Correct content type for WebP files if needed
+    const correctedContentType = isWebPByExtension ? 'image/webp' : contentType;
 
     // Create unique filename with user ID folder structure
     const userId = req.user.id;
@@ -68,7 +78,7 @@ export default requireAuth(async function handler(req, res) {
     const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
       .from('listing-images')
       .upload(uniqueFileName, imageBuffer, {
-        contentType,
+        contentType: correctedContentType,
         cacheControl: '3600',
         upsert: false
       });
@@ -93,7 +103,7 @@ export default requireAuth(async function handler(req, res) {
         url: publicUrlData.publicUrl,
         fileName: uniqueFileName,
         size: imageBuffer.length,
-        contentType
+        contentType: correctedContentType
       }
     });
 

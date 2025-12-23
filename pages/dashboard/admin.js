@@ -38,6 +38,18 @@ export default function AdminDashboard() {
   const [selectedListings, setSelectedListings] = useState([]);
   const [isBulkActionLoading, setIsBulkActionLoading] = useState(false);
   const [bulkActionMessage, setBulkActionMessage] = useState('');
+  
+  // Pagination state for listings
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [totalListings, setTotalListings] = useState(0);
+  const [isTableLoading, setIsTableLoading] = useState(false);
+  
+  // Pagination state for users
+  const [usersCurrentPage, setUsersCurrentPage] = useState(1);
+  const [usersItemsPerPage] = useState(10);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [isUsersTableLoading, setIsUsersTableLoading] = useState(false);
 
   // Load admin data
   useEffect(() => {
@@ -87,13 +99,13 @@ export default function AdminDashboard() {
               'Content-Type': 'application/json',
             },
           }),
-          fetch(`/api/admin/listings?limit=50&include_deleted=true`, {
+          fetch(`/api/admin/listings?limit=${itemsPerPage}&offset=${(currentPage - 1) * itemsPerPage}${showDeleted ? '&include_deleted=true&deleted_only=true' : '&include_deleted=false'}${showFeatured ? '&featured_only=true' : ''}`, {
             headers: {
               Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json',
             },
           }),
-          fetch('/api/admin/users?limit=10', {
+          fetch(`/api/admin/users?limit=${usersItemsPerPage}&offset=${(usersCurrentPage - 1) * usersItemsPerPage}`, {
             headers: {
               Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json',
@@ -120,12 +132,34 @@ export default function AdminDashboard() {
 
         if (listingsResponse.ok) {
           const listingsData = await listingsResponse.json();
+          console.log('Admin Dashboard Listings Response:', {
+            currentPage,
+            itemsPerPage,
+            showDeleted,
+            showFeatured,
+            listingsCount: listingsData.listings.length,
+            totalFromPagination: listingsData.pagination?.total,
+            fullPaginationObject: listingsData.pagination,
+            apiUrl: `/api/admin/listings?limit=${itemsPerPage}&offset=${(currentPage - 1) * itemsPerPage}${showDeleted ? '&include_deleted=true&deleted_only=true' : '&include_deleted=false'}${showFeatured ? '&featured_only=true' : ''}`
+          });
           setListings(listingsData.listings);
+          
+          // Force use actual count if pagination total seems wrong
+          const apiTotal = listingsData.pagination?.total || 0;
+          const actualCount = listingsData.listings.length;
+          
+          if (currentPage === 1 && actualCount === itemsPerPage && apiTotal < actualCount) {
+            console.warn('API total count seems wrong, using estimated total');
+            setTotalListings(Math.max(apiTotal, actualCount * 2)); // Estimate at least 2 pages worth
+          } else {
+            setTotalListings(apiTotal || actualCount);
+          }
         }
 
         if (usersResponse.ok) {
           const usersData = await usersResponse.json();
           setUsers(usersData.users);
+          setTotalUsers(usersData.pagination?.total || usersData.users.length);
         }
 
         if (reportsResponse.ok) {
@@ -146,7 +180,30 @@ export default function AdminDashboard() {
     };
 
     loadAdminData();
-  }, [router]);
+  }, [router, currentPage, itemsPerPage, usersCurrentPage, usersItemsPerPage, showDeleted, showFeatured]);
+
+  // Turn off table loading when data finishes loading
+  useEffect(() => {
+    if (!isLoading) {
+      setIsTableLoading(false);
+      setIsUsersTableLoading(false);
+    }
+  }, [isLoading]);
+
+  // Clear listings table loading when listings data changes
+  useEffect(() => {
+    setIsTableLoading(false);
+  }, [listings]);
+
+  // Clear users table loading when users data changes
+  useEffect(() => {
+    setIsUsersTableLoading(false);
+  }, [users]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [showDeleted, showFeatured]);
 
   // Reload listings when deleted filter changes
   useEffect(() => {
@@ -343,18 +400,14 @@ export default function AdminDashboard() {
   //   // Handle export functionality
   // };
 
-  // Bulk Actions for Listings
-  const currentListings = showDeleted
-    ? listings.filter((l) => l.status === 'deleted')
-    : showFeatured
-    ? listings.filter((l) => l.featured === true && l.status !== 'deleted')
-    : listings.filter((l) => l.status !== 'deleted');
+  // Use server-filtered listings directly (no client-side filtering needed)
+  const currentListings = listings;
 
   const handleSelectAll = () => {
-    if (selectedListings.length === currentListings.length) {
+    if (selectedListings.length === listings.length) {
       setSelectedListings([]);
     } else {
-      setSelectedListings(currentListings.map(l => l.id));
+      setSelectedListings(listings.map(l => l.id));
     }
   };
 
@@ -364,6 +417,33 @@ export default function AdminDashboard() {
         ? prev.filter(id => id !== listingId)
         : [...prev, listingId]
     );
+  };
+
+  const handlePageChange = async (page) => {
+    setIsTableLoading(true);
+    setCurrentPage(page);
+    setSelectedListings([]); // Clear selections when changing pages
+    
+    // Scroll to top of table
+    setTimeout(() => {
+      document.querySelector('.listings-table')?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }, 100);
+  };
+
+  const handleUsersPageChange = async (page) => {
+    setIsUsersTableLoading(true);
+    setUsersCurrentPage(page);
+    
+    // Scroll to top of users table
+    setTimeout(() => {
+      document.querySelector('.users-table')?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }, 100);
   };
 
   const handleBulkRemove = async () => {
@@ -597,20 +677,26 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </div>
-            <ListingsTable
-              listings={currentListings}
-              isLoading={isLoading}
-              onEdit={handleEditListing}
-              onDelete={handleDeleteListing}
-              onView={handleViewListing}
-              onStatusChange={handleStatusChange}
-              onApprove={handleApprove}
-              onReject={handleReject}
-              onRecover={handleRecoverListing}
-              onToggleFeatured={handleToggleFeatured}
-              selectedListings={selectedListings}
-              onToggleSelect={handleToggleSelect}
-            />
+            <div className="listings-table">
+              <ListingsTable
+                listings={listings}
+                isLoading={isTableLoading || isLoading}
+                onEdit={handleEditListing}
+                onDelete={handleDeleteListing}
+                onStatusChange={handleStatusChange}
+                onApprove={handleApprove}
+                onReject={handleReject}
+                onRecover={handleRecoverListing}
+                onToggleFeatured={handleToggleFeatured}
+                selectedListings={selectedListings}
+                onToggleSelect={handleToggleSelect}
+                currentPage={currentPage}
+                totalPages={Math.ceil(totalListings / itemsPerPage)}
+                onPageChange={handlePageChange}
+                itemsPerPage={itemsPerPage}
+                totalItems={totalListings}
+              />
+            </div>
           </div>
 
           {/* Users Management */}
@@ -629,14 +715,21 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </div>
-            <UsersTable
-              users={users}
-              isLoading={isLoading}
-              onEdit={handleEditUser}
-              onBlock={handleBlockUser}
-              onView={handleViewUser}
-              hideCheckboxes={true}
-            />
+            <div className="users-table">
+              <UsersTable
+                users={users}
+                isLoading={isUsersTableLoading || isLoading}
+                onEdit={handleEditUser}
+                onBlock={handleBlockUser}
+                onView={handleViewUser}
+                hideCheckboxes={true}
+                currentPage={usersCurrentPage}
+                totalPages={Math.ceil(totalUsers / usersItemsPerPage)}
+                onPageChange={handleUsersPageChange}
+                itemsPerPage={usersItemsPerPage}
+                totalItems={totalUsers}
+              />
+            </div>
           </div>
 
           {/* Reports Management */}
