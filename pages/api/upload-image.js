@@ -49,7 +49,6 @@ export default requireAuth(async function handler(req, res) {
     // Create unique filename with user ID folder structure
     const userId = req.user.id;
     const timestamp = Date.now();
-    const fileExtension = fileName.split('.').pop();
     const uniqueFileName = `${userId}/${timestamp}-${fileName}`;
 
     // Convert base64 to buffer (assuming image is base64 encoded)
