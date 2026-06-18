@@ -27,7 +27,7 @@ export default async function handler(req, res) {
           is_main
         )
       `)
-      .eq('status', 'active')
+      .in('status', ['active', 'pending'])
       .eq('category', category)
       .limit(parseInt(limit));
 
