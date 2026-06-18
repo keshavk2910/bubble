@@ -355,7 +355,7 @@ export default function ListingDetail() {
   }
 
   // If listing is inactive and user is not the owner, show not found
-  if (listing.status !== 'active' && !isOwner) {
+  if (listing.status !== 'active' && listing.status !== 'pending' && !isOwner) {
     return (
       <div className='min-h-screen bg-white flex items-center justify-center'>
         <div className='text-center'>
