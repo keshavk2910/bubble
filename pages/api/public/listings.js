@@ -12,7 +12,7 @@ export default async function handler(req, res) {
       category, 
       priceRange, 
       location, 
-      condition, 
+      condition,
       sort = 'newest',
       page = 1,
       limit = 12 
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
           display_order
         )
       `)
-      .eq('status', 'active') // Only show active listings to public
+      .in('status', ['active', 'pending']) // Show active and pending listings to public
       .is('deleted_at', null); // Exclude deleted listings
 
     // Search functionality
